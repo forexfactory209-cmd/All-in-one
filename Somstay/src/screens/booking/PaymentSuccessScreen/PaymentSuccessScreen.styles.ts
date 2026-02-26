@@ -1,0 +1,160 @@
+import { StyleSheet } from 'react-native';
+import { colors, spacing, borderRadius, shadows } from '@/src/theme';
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    safeArea: {
+        flex: 1,
+    },
+    content: {
+        flexGrow: 1,
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.xl * 2,
+    },
+    successIconWrapper: {
+        marginBottom: spacing.xl,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    outerCircle: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'rgba(6, 166, 73, 0.05)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    innerCircle: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: 'rgba(6, 166, 73, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    title: {
+        fontSize: 26,
+        fontWeight: '700',
+        color: colors.dark,
+        textAlign: 'center',
+        marginBottom: spacing.md,
+    },
+    description: {
+        fontSize: 16,
+        color: colors.secondaryText,
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: spacing.xl * 1.5,
+        paddingHorizontal: spacing.md,
+    },
+    card: {
+        width: '100%',
+        backgroundColor: '#F7FCFE', // Very light blue surface for contrast
+        borderRadius: 20,
+        padding: spacing.lg,
+        borderWidth: 1,
+        borderColor: 'rgba(2, 136, 172, 0.05)',
+        marginBottom: spacing.xl,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.lg,
+    },
+    bookingIdContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconBox: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: 'rgba(2, 136, 172, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: spacing.md,
+    },
+    label: {
+        fontSize: 11,
+        color: '#9BA3A3',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+    },
+    bookingId: {
+        fontSize: 15,
+        color: colors.dark,
+        fontWeight: '700',
+        marginTop: 2,
+    },
+    amountContainer: {
+        alignItems: 'flex-end',
+    },
+    amount: {
+        fontSize: 18,
+        color: colors.primary,
+        fontWeight: '700',
+        marginTop: 2,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#E5E7EB',
+        width: '100%',
+        marginBottom: spacing.lg,
+    },
+    detailsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    detailsText: {
+        fontSize: 14,
+        color: colors.secondaryText,
+        marginLeft: spacing.sm,
+        fontWeight: '500',
+    },
+    footerContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.xl,
+    },
+    primaryButton: {
+        backgroundColor: colors.primary,
+        height: 58,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: spacing.md,
+        ...shadows.button,
+    },
+    primaryButtonText: {
+        color: colors.white,
+        fontSize: 16,
+        fontWeight: '600',
+        marginRight: spacing.sm,
+    },
+    secondaryActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    secondaryButton: {
+        flex: 0.48,
+        height: 54,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.gray200,
+        backgroundColor: colors.white,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    secondaryButtonText: {
+        fontSize: 14,
+        color: colors.dark,
+        fontWeight: '600',
+        marginLeft: spacing.sm,
+    },
+});
