@@ -1,0 +1,242 @@
+.notifications-list-industrial {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.notification-item {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background-color: var(--color-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid #F4F7F8;
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+}
+
+.notification-item.unread {
+    background-color: #F7FCFE;
+    border-left: 4px solid var(--color-primary);
+}
+
+/* Priority Indicator Ribbons */
+.notification-item.high::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, transparent 50%, rgba(254, 51, 53, 0.05) 50%);
+}
+
+.item-icon-wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    background-color: #F8FAFB;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.unread-dot-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    background-color: var(--color-error);
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.priority-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.high .priority-tag {
+    color: var(--color-error);
+    background-color: var(--color-error-light);
+}
+
+.medium .priority-tag {
+    color: var(--color-warning);
+    background-color: var(--color-warning-light);
+}
+
+.low .priority-tag {
+    color: var(--color-success);
+    background-color: var(--color-success-light);
+}
+
+.timestamp {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-secondary-text);
+}
+
+.notif-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-dark);
+    margin-bottom: 4px;
+}
+
+.notif-message {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5A5E5E;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.action-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.control-btns {
+    display: flex;
+    gap: 12px;
+}
+
+.control-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #F0F3F5;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.control-btn.check {
+    color: var(--color-success);
+}
+
+.control-btn.trash {
+    color: #CED4D6;
+}
+
+.control-btn:hover {
+    transform: scale(1.1);
+}
+
+.control-btn.check:hover {
+    background-color: var(--color-success-light);
+    border-color: var(--color-success);
+}
+
+.control-btn.trash:hover {
+    color: var(--color-error);
+    background-color: var(--color-error-light);
+    border-color: var(--color-error);
+}
+
+/* Loading State */
+.notifications-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px;
+    gap: 20px;
+    color: var(--color-secondary-text);
+}
+
+.industrial-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #EEF2F5;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Icon Colors */
+.icon-booking {
+    color: #0288AC;
+}
+
+.icon-payment {
+    color: #06A649;
+}
+
+.icon-property {
+    color: #FFB800;
+}
+
+.icon-review {
+    color: #6366F1;
+}
+
+.icon-dispute {
+    color: #FE3335;
+}
+
+@media (max-width: 768px) {
+    .notification-item {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .item-icon-wrapper {
+        align-self: flex-start;
+    }
+
+    .content-header {
+        margin-top: 8px;
+    }
+}

@@ -1,0 +1,197 @@
+/* =======================================
+   SHARED PAGE HEADER BANNER
+   Used across all admin panel pages
+   ======================================= */
+
+.page-header-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: linear-gradient(135deg, #0288ac 0%, #025f7e 100%);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: 0 8px 32px rgba(2, 136, 172, 0.22);
+    margin-bottom: 4px;
+}
+
+/* Left: icon + text */
+.phb-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.phb-back-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: 4px;
+    transition: transform 0.2s ease;
+}
+
+.phb-back-btn:hover {
+    transform: translateX(-4px);
+}
+
+.phb-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    backdrop-filter: blur(4px);
+}
+
+.phb-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+}
+
+.phb-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* Right: stats pill + actions */
+.phb-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+/* Stats pill */
+.phb-stats-pill {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 12px;
+    padding: 10px 20px;
+}
+
+.phb-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.phb-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.phb-stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.phb-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Action buttons placed in header */
+.phb-right .phb-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #0288ac;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.phb-right .phb-action-btn:hover {
+    background: #f0fafd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.phb-right .phb-action-btn.secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+}
+
+.phb-right .phb-action-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.phb-right .phb-action-btn.danger {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.phb-right .phb-action-btn.danger:hover {
+    background: #dc2626 !important;
+}
+
+.phb-right .phb-action-btn.success {
+    background: #10b981 !important;
+    color: #ffffff !important;
+}
+
+.phb-right .phb-action-btn.success:hover {
+    background: #059669 !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .page-header-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 22px;
+    }
+
+    .phb-right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .phb-title {
+        font-size: 20px;
+        white-space: normal;
+    }
+
+    .phb-subtitle {
+        white-space: normal;
+    }
+}

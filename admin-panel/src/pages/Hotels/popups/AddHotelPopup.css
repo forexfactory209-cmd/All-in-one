@@ -1,0 +1,415 @@
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(4, 37, 46, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.hotel-registration-modal {
+    background: white;
+    width: 850px;
+    max-width: 95%;
+    max-height: 90vh;
+    border-radius: 24px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 32px;
+}
+
+.modal-header-industrial {
+    padding: 32px;
+    border-bottom: 1px solid #F0F3F5;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.modal-header-industrial .h-left {
+    display: flex;
+    gap: 20px;
+}
+
+.h-info h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-dark);
+    margin-bottom: 4px;
+}
+
+.h-info p {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-secondary-text);
+}
+
+.close-x {
+    background: transparent;
+    border: none;
+    color: #CED4D6;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.close-x:hover {
+    color: var(--color-error);
+}
+
+.registration-form {
+    padding: 32px;
+}
+
+.form-grid-industrial {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-section label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--color-secondary-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.input-group-industrial {
+    background-color: #F8FAFB;
+    border: 1px solid #F0F3F5;
+    border-radius: 12px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 52px;
+    transition: var(--transition-fast);
+}
+
+.input-group-industrial:focus-within {
+    border-color: var(--color-primary);
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(2, 136, 172, 0.05);
+}
+
+.input-group-industrial svg {
+    color: #CED4D6;
+}
+
+.input-group-industrial input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.price-prefix-hotel {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.dual-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.hotel-image-preview {
+    margin-top: 16px;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 200px;
+    border: 1px solid #F0F3F5;
+}
+
+.hotel-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hotel-image-preview .remove-img {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: var(--color-error);
+}
+
+.dual-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Amenities Section */
+.amenities-container-hotel {
+    background: #F8FAFB;
+    border: 1px solid #F0F3F5;
+    border-radius: 20px;
+    padding: 24px;
+    margin-top: 10px;
+}
+
+.amenities-header-hotel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.amenities-header-hotel label {
+    margin-bottom: 0;
+}
+
+.add-amenity-input-hotel {
+    display: flex;
+    background: white;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid #EBEFF2;
+    width: 200px;
+}
+
+.add-amenity-input-hotel input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.add-amenity-input-hotel button {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.add-amenity-input-hotel button:hover {
+    transform: scale(1.05);
+}
+
+.amenities-grid-hotel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.amenity-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: white;
+    border: 1.5px solid #EBEFF2;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.amenity-pill span {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-secondary-text);
+}
+
+.amenity-pill .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    border: 2px solid #CED4D6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.amenity-pill.active {
+    border-color: var(--color-primary);
+    background: rgba(2, 136, 172, 0.03);
+}
+
+.amenity-pill.active span {
+    color: var(--color-primary);
+}
+
+.amenity-pill.active .check-box {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+textarea {
+    background-color: #F8FAFB;
+    border: 1px solid #F0F3F5;
+    border-radius: 12px;
+    padding: 16px;
+    height: 120px;
+    resize: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-dark);
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+textarea:focus {
+    border-color: var(--color-primary);
+    background-color: white;
+}
+
+.upload-zone-industrial {
+    border: 2px dashed #EEEFF1;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.upload-zone-industrial:hover {
+    border-color: var(--color-teal);
+    background-color: #FBFDFE;
+}
+
+.upload-zone-industrial svg {
+    color: var(--color-primary);
+}
+
+.z-info span {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-dark);
+}
+
+.z-info p {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-secondary-text);
+}
+
+.registration-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid #F0F3F5;
+}
+
+.cancel-reg-btn {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-secondary-text);
+    cursor: pointer;
+}
+
+.submit-reg-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.submit-reg-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(2, 63, 72, 0.2);
+}
+
+.spin {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .dual-column-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .amenities-header-hotel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .add-amenity-input-hotel {
+        width: 100%;
+    }
+}
+
+/* Owner Info Grid */
+.owner-grid-hotel {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .owner-grid-hotel {
+        grid-template-columns: 1fr;
+    }
+}

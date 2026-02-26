@@ -1,0 +1,392 @@
+/* =============================================
+   USERS / GUEST DIRECTORY PAGE — Premium CSS
+   ============================================= */
+
+.users-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Page Header ── */
+.gs-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #0288ac 0%, #025f7e 100%);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: 0 8px 32px rgba(2, 136, 172, 0.22);
+}
+
+.gs-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.gs-header-icon-wrap {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+
+.gs-page-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin: 0 0 4px 0;
+}
+
+.gs-page-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    margin: 0;
+}
+
+.gs-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.gs-stats-pill {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 10px 20px;
+}
+
+.gs-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+.gs-stat-count {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.gs-stat-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.gs-primary-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #0288ac;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.gs-primary-btn:hover {
+    background: #f0fafd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Tabs Row ── */
+.gs-tabs-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 2px solid #eef2f5;
+    padding-bottom: 0;
+}
+
+.gs-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #7a8c95;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+}
+
+.gs-tab:hover {
+    color: #0288ac;
+}
+
+.gs-tab.active {
+    color: #0288ac;
+    border-bottom-color: #0288ac;
+}
+
+.gs-tab-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 8px;
+    background: #eef2f5;
+    color: #7a8c95;
+}
+
+.gs-tab-badge.active-badge {
+    background: #0288ac;
+    color: #ffffff;
+}
+
+/* ── Search + Filter Bar ── */
+.gs-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.gs-search-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #e4eaed;
+    border-radius: 12px;
+    padding: 11px 18px;
+    flex: 1;
+    max-width: 520px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.gs-search-input:focus-within {
+    border-color: #0288ac;
+    box-shadow: 0 0 0 3px rgba(2, 136, 172, 0.1);
+}
+
+.gs-search-icon {
+    color: #aab5bb;
+    flex-shrink: 0;
+}
+
+.gs-search-input input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 13.5px;
+    color: #2c3e50;
+    width: 100%;
+}
+
+.gs-search-input input::placeholder {
+    color: #aab5bb;
+}
+
+.gs-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gs-outline-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e4eaed;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #4a6374;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.gs-outline-btn:hover {
+    border-color: #0288ac;
+    color: #0288ac;
+    background: #f0fafd;
+}
+
+/* ── Table Card ── */
+.gs-table-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(2, 136, 172, 0.05);
+    overflow: hidden;
+    padding: 0 0 16px 0;
+}
+
+.gs-table-footer {
+    display: flex;
+    align-items: center;
+    padding: 14px 28px 4px;
+    border-top: 1px solid #f0f4f6;
+    margin-top: 8px;
+}
+
+.gs-showing-info {
+    font-size: 13.5px;
+    color: #8fa3ac;
+    font-weight: 500;
+}
+
+.gs-showing-info strong {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+/* ── Dropdown & Tools ── */
+.dropdown-container {
+    position: relative;
+}
+
+.status-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #F0F3F5;
+    padding: 8px;
+    z-index: 100;
+    min-width: 160px;
+}
+
+.status-item {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-dark);
+    cursor: pointer;
+    text-align: left;
+}
+
+.status-item:hover {
+    background: #F4F7F8;
+    color: var(--color-primary);
+}
+
+.gs-outline-btn.icon-only {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Pagination ── */
+.gs-table-footer {
+    justify-content: space-between;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-num-btn,
+.page-nav-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8fa3ac;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-num-btn.active {
+    background-color: #0288ac;
+    color: #FFFFFF;
+}
+
+.page-num-btn:hover:not(.active) {
+    background-color: #f0fafd;
+    color: #0288ac;
+}
+
+.page-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ── Tabs overflow on small screens ── */
+@media (max-width: 1024px) {
+    .gs-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .gs-search-input {
+        max-width: none;
+    }
+
+    .gs-tabs-row {
+        overflow-x: auto;
+        gap: 0;
+    }
+
+    .gs-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .gs-header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

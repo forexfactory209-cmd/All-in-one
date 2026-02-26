@@ -1,0 +1,461 @@
+/* 
+  Payment Details Popup CSS
+  Following DESIGN_SYSTEM.md 
+*/
+
+/* 1. Modal Container */
+.payment-details-modal {
+    max-width: 500px !important;
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    /* borderRadius.large */
+    overflow: hidden;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05) !important;
+    /* cardShadow */
+    border: 1px solid #E5E7EB;
+    /* colors.border */
+}
+
+.tiny-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #0288AC;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.payment-details-modal.receipt-mode {
+    max-width: 950px !important;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Modal Header */
+.modal-header {
+    padding: 24px 24px 16px 24px !important;
+    /* spacing.lg horizontal */
+    border-bottom: 1px solid #E5E7EB;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.modal-header h2 {
+    font-size: 24px;
+    /* typography.H2 */
+    font-weight: 700;
+    color: #04252E;
+    /* colors.dark */
+    margin: 0;
+}
+
+.modal-header p {
+    font-size: 14px;
+    /* typography.bodySmall */
+    color: #5A5E5E;
+    /* colors.secondaryText */
+    margin: 4px 0 0 0;
+}
+
+/* Close & Action Buttons in Header */
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn-header,
+.close-btn {
+    background: #F3F4F6;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5A5E5E;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn-header:hover,
+.close-btn:hover {
+    background: #E5E7EB;
+    color: #04252E;
+}
+
+/* 3. Status Pill */
+.status-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #F3F4F6;
+    border-radius: 9999px;
+    /* borderRadius.full */
+    font-size: 12px;
+    /* typography.caption */
+    font-weight: 700;
+    color: #5A5E5E;
+    margin-bottom: 12px;
+    border: 1px solid #E5E7EB;
+    text-transform: uppercase;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot.success {
+    background-color: #06A649;
+}
+
+/* colors.success */
+.status-dot.pending {
+    background-color: #FFEA00;
+}
+
+/* colors.warning */
+.status-dot.failed {
+    background-color: #FE3335;
+}
+
+/* colors.error */
+
+/* 4. Transaction Summary Card */
+.txn-summary-card {
+    background: #0288AC;
+    /* colors.primary */
+    padding: 24px;
+    border-radius: 12px;
+    /* borderRadius.base */
+    color: white;
+    margin: 24px;
+    box-shadow: 0px 4px 12px rgba(2, 136, 172, 0.3);
+    /* floatingAction shadow color */
+}
+
+.txn-summary-card .label {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.amount-display {
+    font-size: 40px;
+    /* Aligned with typography.H1 (30px) but scaled for weight */
+    font-weight: 700;
+    margin: 8px 0;
+}
+
+.summary-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* 5. Modal Body & Sections */
+.modal-body {
+    padding: 0 24px 24px 24px !important;
+}
+
+.detail-section {
+    margin-bottom: 24px;
+}
+
+.section-label-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5A5E5E;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.info-box-premium h3 {
+    font-size: 20px;
+    /* typography.H3 */
+    font-weight: 700;
+    color: #04252E;
+    margin: 0;
+}
+
+.info-box-premium p {
+    font-size: 14px;
+    color: #5A5E5E;
+    margin-top: 4px;
+}
+
+/* Payment Method Styles */
+.method-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.method-badge {
+    font-weight: 700;
+    color: #0288AC;
+    font-size: 18px;
+}
+
+.type-label {
+    background: #F3F4F6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #5A5E5E;
+    font-weight: 600;
+}
+
+/* Asset Mini Card */
+.asset-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #F3F4F6;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+}
+
+.asset-icon {
+    width: 44px;
+    height: 44px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0288AC;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.asset-details h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #04252E;
+    margin: 0;
+}
+
+/* Log Timeline System */
+.log-timeline {
+    padding-left: 8px;
+}
+
+.log-entry {
+    position: relative;
+    padding-left: 24px;
+    padding-bottom: 20px;
+    border-left: 2px solid #E5E7EB;
+}
+
+.log-entry:last-child {
+    border-left: 2px solid transparent;
+}
+
+.log-dot {
+    position: absolute;
+    left: -6px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    background: #E5E7EB;
+    border-radius: 50%;
+}
+
+.log-entry.active .log-dot {
+    background: #0288AC;
+    box-shadow: 0 0 0 4px rgba(2, 136, 172, 0.1);
+}
+
+.log-time {
+    font-size: 12px;
+    color: #94A3B8;
+    font-weight: 600;
+}
+
+/* 6. Modal Footer */
+.modal-footer-dual {
+    padding: 16px 24px;
+    background: #F9FAFB;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.receipt-view-btn {
+    background: #0288AC;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    /* typography.button */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.receipt-view-btn:hover {
+    background: #04252E;
+    box-shadow: 0px 4px 12px rgba(2, 136, 172, 0.3);
+}
+
+/* --- RECEIPT VIEWER --- */
+.full-receipt-container {
+    background: #F3F4F6;
+    /* colors.surface for the holder */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.receipt-viewer-header {
+    background: #04252E;
+    /* colors.dark */
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.receipt-paper {
+    background: white;
+    width: 210mm;
+    margin: 32px auto;
+    padding: 60px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow-y: auto;
+}
+
+.receipt-top-branding {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 48px;
+    border-bottom: 2px solid #F3F4F6;
+    padding-bottom: 24px;
+}
+
+.logo-text .main {
+    font-size: 28px;
+    font-weight: 700;
+    color: #04252E;
+}
+
+.logo-text .sub {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0288AC;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.receipt-meta .label {
+    font-size: 12px;
+    color: #5A5E5E;
+    font-weight: 600;
+}
+
+.receipt-meta .value {
+    font-size: 14px;
+    color: #04252E;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 40px 0;
+}
+
+.receipt-table th {
+    text-align: left;
+    padding: 12px;
+    background: #F3F4F6;
+    font-size: 14px;
+    color: #5A5E5E;
+}
+
+.receipt-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.total-row .td-label {
+    font-weight: 700;
+    font-size: 18px;
+    color: #04252E;
+}
+
+.total-row .td-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0288AC;
+}
+
+.status-stamp {
+    font-size: 40px;
+    font-weight: 700;
+    border: 6px solid;
+    padding: 8px 32px;
+    border-radius: 8px;
+    opacity: 0.2;
+    transform: rotate(-12deg);
+    margin-top: 40px;
+    display: inline-block;
+}
+
+.status-stamp.success {
+    color: #06A649;
+}
+
+.status-stamp.pending {
+    color: #FFEA00;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .receipt-paper,
+    .receipt-paper * {
+        visibility: visible;
+    }
+
+    .receipt-paper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        box-shadow: none;
+    }
+}

@@ -1,0 +1,319 @@
+.payments-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+/* Method Nav - Design Clone */
+.payments-method-nav {
+    display: flex;
+    gap: 32px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #EEF2F5;
+    overflow-x: auto;
+    margin-bottom: var(--spacing-sm);
+}
+
+.method-tab {
+    padding: 12px 2px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-secondary-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.method-tab:hover {
+    color: var(--color-primary);
+}
+
+.method-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.tab-pill {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Metrics Grid */
+.payments-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.metric-card-simple {
+    background-color: var(--color-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-secondary-text);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.metric-val-group {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-dark);
+}
+
+.metric-change {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.metric-change.green {
+    color: var(--color-success);
+}
+
+.metric-change.blue {
+    color: var(--color-primary);
+}
+
+.metric-change.red {
+    color: var(--color-error);
+}
+
+.metric-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-icon-box.green {
+    background-color: var(--color-success-light);
+}
+
+.metric-icon-box.blue {
+    background-color: var(--color-teal-light);
+}
+
+.metric-icon-box.red {
+    background-color: #FFF1F1;
+}
+
+/* Filters Header Row */
+.payments-filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.search-box-standard {
+    flex: 1;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-background);
+    padding: 12px 20px;
+    border-radius: var(--radius-base);
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid rgba(2, 136, 172, 0.05);
+}
+
+.search-icon-muted {
+    color: #CED4D6;
+    margin-right: 15px;
+}
+
+.search-box-standard input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: var(--color-dark);
+}
+
+.filters-group-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.calendar-pill-standard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-background);
+    padding: 10px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid rgba(2, 136, 172, 0.1);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-dark);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.icon-action-btn {
+    width: 42px;
+    height: 42px;
+    background-color: var(--color-background);
+    border: 1px solid rgba(2, 136, 172, 0.1);
+    border-radius: 8px;
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dark);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.icon-action-btn:hover,
+.calendar-pill-standard:hover {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* Table Card */
+.payments-table-card {
+    background-color: var(--color-background);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    padding: var(--spacing-xl);
+}
+
+.card-top-info {
+    margin-bottom: var(--spacing-xl);
+}
+
+.card-top-info h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-dark);
+}
+
+.card-top-info p {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-secondary-text);
+    margin-top: 4px;
+}
+
+.table-pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid #F4F7F8;
+}
+
+.pagination-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-secondary-text);
+}
+
+.pagination-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-digit,
+.page-nav {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-secondary-text);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.page-digit.active {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+}
+
+.page-digit:hover:not(.active) {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.page-dots {
+    color: #CED4D6;
+    font-weight: 800;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@media (max-width: 1200px) {
+    .payments-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payments-filters-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box-standard {
+        max-width: none;
+    }
+
+    .filters-group-actions {
+        flex-wrap: wrap;
+    }
+
+    .payments-method-nav {
+        gap: 16px;
+    }
+}

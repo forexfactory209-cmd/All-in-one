@@ -1,0 +1,206 @@
+.sidebar {
+    width: 80px;
+    height: 100vh;
+    background-color: var(--color-teal);
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xl) 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    transition: width var(--transition-standard), box-shadow var(--transition-standard);
+    overflow: hidden;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar.expanded {
+    width: 260px;
+}
+
+.sidebar.expanded:not(.pinned) {
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar.pinned {
+    box-shadow: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    padding: 0 var(--spacing-lg);
+    cursor: pointer;
+    min-width: 260px;
+}
+
+.logo-icon {
+    width: 44px;
+    height: 44px;
+    background-color: #FFFFFF;
+    border-radius: var(--radius-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+    white-space: nowrap;
+}
+
+.pin-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    margin-left: auto;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pin-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+}
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-left: var(--spacing-sm);
+}
+
+.nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 14px var(--spacing-lg);
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    transition: var(--transition-standard);
+    font-weight: 600;
+    min-width: 260px;
+}
+
+.nav-item:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item .item-icon {
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nav-item .item-label {
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.sidebar.expanded .nav-item .item-label {
+    opacity: 1;
+}
+
+.nav-item.active {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    position: relative;
+}
+
+.sidebar.collapsed .nav-item.active {
+    border-radius: var(--radius-xl);
+    margin-right: 8px;
+}
+
+.sidebar.expanded .nav-item.active::before,
+.sidebar.expanded .nav-item.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+}
+
+.sidebar.expanded .nav-item.active::before {
+    top: -20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 5px 5px 0 5px var(--color-surface);
+}
+
+.sidebar.expanded .nav-item.active::after {
+    bottom: -20px;
+    border-top-right-radius: 20px;
+    box-shadow: 5px -5px 0 5px var(--color-surface);
+}
+
+.nav-footer {
+    margin-top: auto;
+    padding-bottom: var(--spacing-xl);
+}
+
+.user-profile {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 260px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.user-role {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
