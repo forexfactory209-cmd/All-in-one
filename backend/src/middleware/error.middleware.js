@@ -1,4 +1,4 @@
-const { sendError } = require('../utils/responseHelper');
+const { sendError } = require('../utils/response');
 
 /**
  * Global centralized error handling middleware

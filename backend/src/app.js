@@ -2,14 +2,23 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
 const rateLimit = require('express-rate-limit');
 const { globalErrorHandler, notFoundHandler } = require('./middleware/error.middleware');
 const { sendResponse } = require('./utils/response');
 
 const app = express();
 
-// 1. Security HTTP Headers
-app.use(helmet());
+// 1. Security HTTP Headers — allow images to be served and loaded cross-origin
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "img-src": ["'self'", "data:", "https:", "http:"],
+        },
+    },
+}));
 
 // 2. CORS
 app.use(cors());
@@ -21,17 +30,20 @@ if (process.env.NODE_ENV === 'development') {
 
 // 4. Rate Limiting
 const limiter = rateLimit({
-    max: 100, // max 100 requests per windowMs
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // Increased for development and admin usage
+    windowMs: 15 * 60 * 1000,
     message: 'Too many requests from this IP, please try again in 15 minutes!'
 });
 app.use('/api', limiter);
 
-// 5. Body Parser
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// 5. Body Parser - Increased limit to handle property/hotel data with many images
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// 6. Health Check Route
+// 6. Serve uploaded images as static files at /uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// 7. Health Check Route
 app.get('/api/health', (req, res) => {
     return sendResponse(res, 200, true, 'Backend Service is Healthy 🚀', {
         uptime: process.uptime(),
@@ -39,13 +51,22 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// 7. API Routes (To be loaded from modules)
-// app.use('/api/v1/auth', require('./modules/auth/authRoutes'));
+// 8. API Routes
+app.use('/api/v1/properties', require('./modules/properties/properties.routes'));
+app.use('/api/v1/hotels', require('./modules/hotels/hotels.routes'));
+app.use('/api/v1/rooms', require('./modules/rooms/rooms.routes'));
+app.use('/api/v1/upload', require('./modules/upload/upload.routes'));
+app.use('/api/v1/users', require('./modules/users/users.routes'));
+app.use('/api/v1/bookings', require('./modules/bookings/bookings.routes'));
+app.use('/api/v1/payments', require('./modules/payments/payments.routes'));
+app.use('/api/v1/disputes', require('./modules/disputes/disputes.routes'));
+app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
+app.use('/api/v1/settings', require('./modules/settings/settings.routes'));
 
-// 8. 404 Handler
+// 9. 404 Handler
 app.all('*', notFoundHandler);
 
-// 9. Global Error Handler
+// 10. Global Error Handler
 app.use(globalErrorHandler);
 
 module.exports = app;
