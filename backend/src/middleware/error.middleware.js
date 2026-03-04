@@ -1,14 +1,18 @@
 const { sendError } = require('../utils/response');
+const logger = require('../utils/logger');
 
 /**
  * Global centralized error handling middleware
  */
 const globalErrorHandler = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
+
+    // Log error with Winston
+    logger.error(`${err.statusCode} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`, {
+        stack: err.stack
+    });
 
     if (process.env.NODE_ENV === 'development') {
-        console.error('💥 ERROR:', err);
         return res.status(err.statusCode).json({
             success: false,
             message: err.message,
@@ -17,7 +21,7 @@ const globalErrorHandler = (err, req, res, next) => {
         });
     }
 
-    // Production build error response
+    // Standardized production error response
     return sendError(res, err.statusCode, err.message || 'Internal Server Error');
 };
 

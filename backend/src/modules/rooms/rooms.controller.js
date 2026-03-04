@@ -5,8 +5,9 @@ class RoomsController {
     async getRoomsByHotelId(req, res) {
         try {
             const { hotelId } = req.params;
-            const rooms = await roomsService.getRoomsByHotelId(hotelId);
-            return sendResponse(res, 200, true, 'Rooms retrieved successfully', rooms);
+            const { page = 1, limit = 10 } = req.query;
+            const result = await roomsService.getRoomsByHotelId(hotelId, parseInt(page), parseInt(limit));
+            return sendResponse(res, 200, true, 'Rooms retrieved successfully', result.rooms, null, result.pagination);
         } catch (error) {
             console.error('Error fetching rooms:', error);
             return sendError(res, 500, 'Internal Server Error');

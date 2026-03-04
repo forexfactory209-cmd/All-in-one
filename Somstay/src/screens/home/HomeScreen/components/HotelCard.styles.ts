@@ -1,129 +1,179 @@
-import { StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '@/src/theme';
+import { StyleSheet, Dimensions } from 'react-native';
+import { colors } from '@/src/theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Responsive 2-column layout
+const COLUMN_GAP = 12;
+const HORIZONTAL_PADDING = 14;
+export const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - COLUMN_GAP) / 2;
+const IMAGE_HEIGHT = CARD_WIDTH * 0.8; // Smaller image for longer info section
 
 export const styles = StyleSheet.create({
     container: {
-        width: 280,
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.12,
-        shadowRadius: 10,
-        elevation: 8,
+        width: CARD_WIDTH,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 18,
+        // iOS polished shadow — multiple-layer illusion using primary color tint
+        shadowColor: '#0288AC',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.18,
+        shadowRadius: 18,
+        // Android elevation
+        elevation: 10,
+        marginBottom: COLUMN_GAP,
         overflow: 'visible',
-        marginHorizontal: 8,
-        marginBottom: 24,
+    },
+    // Inner clip wrapper to keep image inside rounded corners
+    innerClip: {
+        borderRadius: 18,
+        overflow: 'hidden',
+        backgroundColor: '#FFFFFF',
     },
     image: {
         width: '100%',
-        height: 180,
+        height: IMAGE_HEIGHT,
         backgroundColor: colors.gray100,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
     },
+    // ── Overlay gradient strip at bottom of image ──────────────────────────────
+    imageOverlay: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: IMAGE_HEIGHT * 0.38,
+    },
+    // ── Top left badge ──────────────────────────────────────────────────────────
     featuredBadge: {
         position: 'absolute',
-        top: 12,
-        left: 12,
+        top: 10,
+        left: 10,
         backgroundColor: '#FFEA00',
-        paddingHorizontal: 10,
+        paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
-        zIndex: 1,
+        zIndex: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
     },
     featuredText: {
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: '800',
-        color: colors.dark,
-        letterSpacing: 0.5,
+        color: '#1A1A1A',
+        letterSpacing: 0.6,
     },
+    // ── Top right favourite button ───────────────────────────────────────────────
     favoriteButton: {
         position: 'absolute',
-        top: 12,
-        right: 12,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: 'rgba(255,255,255,0.95)',
+        top: 10,
+        right: 10,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(255,255,255,0.93)',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1,
+        zIndex: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.12,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 3,
     },
-    infoContainer: {
-        padding: 16,
-    },
-    titleRow: {
+    // ── Rating chip overlaid on image bottom ────────────────────────────────────
+    ratingOverlay: {
+        position: 'absolute',
+        bottom: 8,
+        right: 8,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 4,
+        backgroundColor: 'rgba(0,0,0,0.52)',
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: 20,
+        gap: 3,
+        zIndex: 2,
+    },
+    ratingOverlayText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#FFFFFF',
+    },
+    // ── Info body ────────────────────────────────────────────────────────────────
+    infoContainer: {
+        paddingHorizontal: 11,
+        paddingTop: 10,
+        paddingBottom: 12,
     },
     title: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 13,
+        fontWeight: '800',
         color: colors.text.primary,
-        lineHeight: 20,
+        marginBottom: 4,
+        lineHeight: 17,
     },
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    location: {
+        marginLeft: 3,
+        fontSize: 11,
+        color: colors.text.secondary,
+        flex: 1,
+        lineHeight: 14,
+    },
+    // ── Divider ─────────────────────────────────────────────────────────────────
+    divider: {
+        height: 1,
+        backgroundColor: colors.gray200,
+        marginBottom: 8,
+        marginHorizontal: 2,
+    },
+    // ── Price + badge row ────────────────────────────────────────────────────────
+    priceRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    priceWrap: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+    },
+    currency: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: colors.primary,
+        marginRight: 1,
+    },
+    price: {
+        fontSize: 17,
+        fontWeight: '900',
+        color: colors.primary,
+        letterSpacing: -0.3,
+    },
+    priceLabel: {
+        marginLeft: 2,
+        fontSize: 10,
+        color: colors.text.secondary,
+        fontWeight: '500',
+    },
+    // ── Verified badge (bottom right) ────────────────────────────────────────────
     verifiedBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#E6F8ED',
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 3,
-        borderRadius: 4,
-        gap: 4,
+        borderRadius: 5,
+        gap: 3,
     },
     verifiedText: {
         fontSize: 9,
         fontWeight: '800',
         color: '#06A649',
         letterSpacing: 0.3,
-    },
-    locationRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    location: {
-        marginLeft: 4,
-        fontSize: 13,
-        color: colors.text.secondary,
-        lineHeight: 16,
-    },
-    priceRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    priceContainer: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-    },
-    price: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.primary,
-    },
-    priceLabel: {
-        marginLeft: 2,
-        fontSize: 12,
-        color: colors.text.secondary,
-    },
-    ratingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    rating: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text.primary,
     },
 });

@@ -10,10 +10,11 @@ interface Category {
 }
 
 const CATEGORIES: Category[] = [
-    { id: 'vacation', name: 'Stays', icon: 'home-city' },
-    { id: 'real-estate', name: 'Whislist', icon: 'heart' },
-    { id: 'travel', name: 'Experience', icon: 'compass-outline' },
-    { id: 'map', name: 'MAP', icon: 'map' },
+    { id: 'all', name: 'All', icon: 'apps' },
+    { id: 'Hotel', name: 'Hotels', icon: 'office-building' },
+    { id: 'Apartment', name: 'Apartments', icon: 'home-variant' },
+    { id: 'Villa', name: 'Villas', icon: 'home-modern' },
+    { id: 'Cabin', name: 'Cabins', icon: 'home-outline' },
 ];
 
 interface CategoryListProps {

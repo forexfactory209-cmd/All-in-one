@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const propertiesController = require('./properties.controller');
+const validate = require('../../middleware/validate.middleware');
+const { propertySchema } = require('../../utils/validation.schemas');
 
-// Public or Protected routes - for now focused on admin panel functionality
 router.get('/', propertiesController.getAllProperties);
 router.get('/:id', propertiesController.getPropertyById);
-router.post('/', propertiesController.createProperty);
-router.put('/:id', propertiesController.updateProperty);
+router.post('/', validate(propertySchema), propertiesController.createProperty);
+router.put('/:id', validate(propertySchema), propertiesController.updateProperty);
 router.delete('/:id', propertiesController.deleteProperty);
 
 module.exports = router;

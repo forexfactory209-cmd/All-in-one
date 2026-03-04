@@ -1,9 +1,17 @@
 const pool = require('../../config/database');
 
 class PropertiesRepository {
-    async findAll() {
-        const [rows] = await pool.execute('SELECT * FROM properties ORDER BY created_at DESC');
+    async findAll(limit = 10, offset = 0) {
+        const [rows] = await pool.execute(
+            'SELECT * FROM properties ORDER BY created_at DESC LIMIT ? OFFSET ?',
+            [limit.toString(), offset.toString()]
+        );
         return rows;
+    }
+
+    async countAll() {
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM properties');
+        return rows[0].count;
     }
 
     async findById(id) {

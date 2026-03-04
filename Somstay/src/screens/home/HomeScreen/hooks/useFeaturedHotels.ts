@@ -1,69 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PropertyResponse } from '@/src/services/property/propertyService.types';
+import PropertyService from '@/src/services/property/propertyService';
 
 interface UseFeaturedHotelsReturn {
     hotels: PropertyResponse[];
     loading: boolean;
+    loadingMore: boolean;
     error: string | null;
+    hasMore: boolean;
+    total: number;
     refetch: () => Promise<void>;
+    loadMore: () => void;
 }
 
-const MOCK_HOTELS: PropertyResponse[] = [
-    {
-        id: 'h1',
-        title: 'SomView Grand Hotel',
-        city: 'Karaan District',
-        country: 'Mogadishu',
-        price_per_night: 200,
-        average_rating: 4.8,
-        photos: [{ photo_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80' }],
-    } as PropertyResponse,
-    {
-        id: 'h2',
-        title: 'Hargeisa Heights Hotel',
-        city: 'Downtown',
-        country: 'Hargeisa',
-        price_per_night: 130,
-        average_rating: 4.6,
-        photos: [{ photo_url: 'https://images.unsplash.com/photo-1551882547-ff43c637f6d4?auto=format&fit=crop&w=800&q=80' }],
-    } as PropertyResponse,
-    {
-        id: 'h3',
-        title: 'Lido Beach Hotel & Resort',
-        city: 'Beachfront',
-        country: 'Mogadishu',
-        price_per_night: 250,
-        average_rating: 4.9,
-        photos: [{ photo_url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80' }],
-    } as PropertyResponse,
-];
+const PAGE_SIZE = 10;
 
-export const useFeaturedHotels = (): UseFeaturedHotelsReturn => {
+export const useFeaturedHotels = (filters = {}): UseFeaturedHotelsReturn => {
     const [hotels, setHotels] = useState<PropertyResponse[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const isFetchingRef = useRef(false);
 
-    const fetchFeaturedHotels = async () => {
+    const fetchPage = useCallback(async (pageNum: number, isNewSearch = false) => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
+
         try {
-            setLoading(true);
-            setError(null);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setHotels(MOCK_HOTELS);
+            const response = await PropertyService.getHotels(pageNum, PAGE_SIZE, filters);
+            const newHotels = response.data;
+            const pagination = response.pagination;
+
+            setHotels(prev => (isNewSearch ? newHotels : [...prev, ...newHotels]));
+            setTotal(pagination?.total || 0);
+            setHasMore(pageNum < (pagination?.totalPages || 1));
+            setPage(pageNum + 1);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch hotels');
         } finally {
-            setLoading(false);
+            isFetchingRef.current = false;
         }
-    };
+    }, [filters]);
+
+    const fetchFeaturedHotels = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        await fetchPage(1, true);
+        setLoading(false);
+    }, [fetchPage]);
+
+    const loadMore = useCallback(() => {
+        if (!hasMore || isFetchingRef.current) return;
+        setLoadingMore(true);
+        fetchPage(page).finally(() => setLoadingMore(false));
+    }, [hasMore, page, fetchPage]);
 
     useEffect(() => {
         fetchFeaturedHotels();
-    }, []);
+    }, [filters]);
 
     return {
         hotels,
         loading,
+        loadingMore,
         error,
+        hasMore,
+        total,
         refetch: fetchFeaturedHotels,
+        loadMore,
     };
 };

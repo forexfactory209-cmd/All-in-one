@@ -7,6 +7,16 @@ export const styles = StyleSheet.create({
         marginTop: -12,
 
     },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    loadingContainer: {
+        height: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     title: {
         fontSize: 20,
         fontWeight: '700',
@@ -24,13 +34,13 @@ export const styles = StyleSheet.create({
 
     },
     locationImage: {
-        width: 80,
-        height: 80,
+        width: 76,
+        height: 76,
         borderRadius: 40,
         backgroundColor: colors.gray100,
         marginBottom: 8,
-        borderWidth: 5,
-        borderColor: '#000000',
+        borderWidth: 2,
+        borderColor: colors.white,
     },
     locationName: {
         fontSize: 12,

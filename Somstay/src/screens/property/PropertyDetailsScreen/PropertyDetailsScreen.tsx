@@ -1,61 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, StatusBar, Dimensions, FlatList, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StatusBar, Dimensions, FlatList, NativeSyntheticEvent, NativeScrollEvent, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './styles/PropertyDetailsScreen.styles';
 import { colors, spacing } from '@/src/theme';
+import { useHotelDetails } from './hooks/useHotelDetails';
+import { useWishlist } from '../../home/HomeScreen/hooks/useWishlist';
 
 export const PropertyDetailsScreen: React.FC = () => {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { id } = useLocalSearchParams();
-    const [isFavorite, setIsFavorite] = useState(false);
 
-    // This would normally come from a hook using the ID
-    const property = {
-        title: 'Modern Oceanview Villa',
-        location: 'Batalale, Berbera',
-        rating: 4.9,
-        reviews: 128,
-        featured: true,
-        guests: 6,
-        bedrooms: 3,
-        bathrooms: 2,
-        price: 120,
-        description: 'Experience the ultimate luxury stay in this stunning beachfront property located at the heart of Lido Beach. This architecturally designed villa offers breathtaking views and premium amenities for a perfect getaway.',
-        amenities: [
-            { id: '1', name: 'Free WiFi', icon: 'wifi' },
-            { id: '2', name: 'Air Conditioning', icon: 'snowflake-variant' },
-            { id: '3', name: 'Full Kitchen', icon: 'stove' },
-            { id: '4', name: 'Free Parking', icon: 'car' },
-            { id: '5', name: '24/7 Security', icon: 'shield-check' },
-            { id: '6', name: 'Private Pool', icon: 'pool' },
-        ],
-        images: [
-            'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-        ],
-        reviews_preview: [
-            {
-                id: 'r1',
-                name: 'Sara M.',
-                date: 'October 2023',
-                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80',
-                text: 'Absolutely breathtaking views. The villa was spotless and the staff was extremely helpful. Felt very safe and relaxed.',
-            },
-            {
-                id: 'r2',
-                name: 'Mohamed B.',
-                date: 'September 2023',
-                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
-                text: 'Best place to stay in Mogadishu. Ahmed is an incredible host. The pool is the highlight!',
-            }
-        ]
-    };
+    const { hotel, loading, error } = useHotelDetails(id as string);
+    const { wishlistedIds, toggleWishlist } = useWishlist();
+
+    const isFavorite = id ? wishlistedIds.has(id.toString()) : false;
 
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const { width: screenWidth } = Dimensions.get('window');
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
+    if (!hotel) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text>Property not found</Text>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Text style={{ color: colors.primary, marginTop: 10 }}>Go Back</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    const images = hotel.images && hotel.images.length > 0 ? hotel.images : [hotel.main_image];
 
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const contentOffset = event.nativeEvent.contentOffset.x;
@@ -71,7 +56,7 @@ export const PropertyDetailsScreen: React.FC = () => {
                 {/* Image Slider Section */}
                 <View style={styles.imageSliderContainer}>
                     <FlatList
-                        data={property.images}
+                        data={images}
                         horizontal
                         pagingEnabled
                         showsHorizontalScrollIndicator={false}
@@ -79,7 +64,11 @@ export const PropertyDetailsScreen: React.FC = () => {
                         scrollEventThrottle={16}
                         keyExtractor={(item) => item}
                         renderItem={({ item }) => (
-                            <Image source={{ uri: item }} style={{ width: screenWidth, height: 300 }} resizeMode="cover" />
+                            <Image
+                                source={{ uri: item.startsWith('http') ? item : `http://206.183.129.220:5000/uploads/${item}` }}
+                                style={{ width: screenWidth, height: 300 }}
+                                resizeMode="cover"
+                            />
                         )}
                     />
 
@@ -89,7 +78,7 @@ export const PropertyDetailsScreen: React.FC = () => {
                             <Ionicons name="arrow-back" size={24} color={colors.dark} />
                         </TouchableOpacity>
                         <View style={styles.headerRight}>
-                            <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)} style={styles.iconButton}>
+                            <TouchableOpacity onPress={() => id && toggleWishlist(id as string)} style={styles.iconButton}>
                                 <Ionicons
                                     name={isFavorite ? "heart" : "heart-outline"}
                                     size={24}
@@ -102,7 +91,7 @@ export const PropertyDetailsScreen: React.FC = () => {
                         </View>
                     </View>
 
-                    {property.featured && (
+                    {hotel.status === 'Featured' && (
                         <View style={styles.featuredBadge}>
                             <Text style={styles.featuredText}>FEATURED</Text>
                         </View>
@@ -110,7 +99,7 @@ export const PropertyDetailsScreen: React.FC = () => {
 
                     {/* Pagination Dots */}
                     <View style={styles.pagination}>
-                        {property.images.map((_, index) => (
+                        {images.map((_: any, index: number) => (
                             <View
                                 key={index}
                                 style={[
@@ -125,7 +114,7 @@ export const PropertyDetailsScreen: React.FC = () => {
                 {/* Main Info */}
                 <View style={styles.content}>
                     <View style={styles.titleRow}>
-                        <Text style={styles.title}>{property.title}</Text>
+                        <Text style={styles.title}>{hotel.name}</Text>
                         <View style={styles.verifiedBadge}>
                             <Ionicons name="checkmark-circle" size={16} color="#06A649" />
                             <Text style={styles.verifiedText}>VERIFIED</Text>
@@ -134,52 +123,58 @@ export const PropertyDetailsScreen: React.FC = () => {
 
                     <View style={styles.locationRow}>
                         <Ionicons name="location-sharp" size={16} color={colors.primary} />
-                        <Text style={styles.locationText}>{property.location}</Text>
+                        <Text style={styles.locationText}>{hotel.location}</Text>
                         <View style={styles.ratingRow}>
                             <Ionicons name="star" size={16} color="#FFD700" />
-                            <Text style={styles.ratingText}>{property.rating}</Text>
-                            <Text style={styles.reviewsCount}>({property.reviews} reviews)</Text>
-                        </View>
-                    </View>
-
-                    {/* Stats Row */}
-                    <View style={styles.statsRow}>
-                        <View style={styles.statItem}>
-                            <Ionicons name="people-outline" size={24} color="#999" />
-                            <Text style={styles.statValue}>{property.guests} Guests</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <Ionicons name="bed-outline" size={24} color="#999" />
-                            <Text style={styles.statValue}>{property.bedrooms} Bedrooms</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <MaterialCommunityIcons name="shower-head" size={24} color="#999" />
-                            <Text style={styles.statValue}>{property.bathrooms} Bathrooms</Text>
+                            <Text style={styles.ratingText}>{hotel.rating || '4.5'}</Text>
+                            <Text style={styles.reviewsCount}>({hotel.reviews} reviews)</Text>
                         </View>
                     </View>
 
                     {/* About Section */}
-                    <Text style={styles.sectionTitle}>About this villa</Text>
+                    <Text style={styles.sectionTitle}>About this hotel</Text>
                     <Text style={styles.description} numberOfLines={3}>
-                        {property.description}
+                        {hotel.description || 'No description available for this property.'}
                     </Text>
                     <TouchableOpacity>
                         <Text style={styles.readMore}>Read more <Ionicons name="chevron-down" size={14} /></Text>
                     </TouchableOpacity>
 
+                    {/* Rooms Section - New */}
+                    {hotel.rooms && hotel.rooms.length > 0 && (
+                        <>
+                            <Text style={styles.sectionTitle}>Available Rooms</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                                {hotel.rooms.map((room: any) => (
+                                    <View key={room.id} style={{ width: 200, marginRight: 15, backgroundColor: '#f9f9f9', borderRadius: 12, padding: 10 }}>
+                                        <Image
+                                            source={{ uri: room.image_url?.startsWith('http') ? room.image_url : `http://206.183.129.220:5000/uploads/${room.image_url}` }}
+                                            style={{ width: '100%', height: 120, borderRadius: 8 }}
+                                        />
+                                        <Text style={{ fontWeight: 'bold', marginTop: 8 }}>{room.type} Room</Text>
+                                        <Text style={{ color: colors.primary, fontWeight: '700' }}>${room.price}/night</Text>
+                                        <Text style={{ fontSize: 12, color: '#666' }}>{room.beds} Beds • Max {room.max_guests} Guests</Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </>
+                    )}
+
                     {/* Amenities Section */}
                     <Text style={styles.sectionTitle}>What this place offers</Text>
                     <View style={styles.amenitiesGrid}>
-                        {property.amenities.map((item) => (
+                        {(hotel.amenities || []).map((item: any) => (
                             <View key={item.id} style={styles.amenityItem}>
-                                <MaterialCommunityIcons name={item.icon as any} size={24} color="#555" />
+                                <MaterialCommunityIcons name={(item.icon || 'star-outline') as any} size={24} color="#555" />
                                 <Text style={styles.amenityText}>{item.name}</Text>
                             </View>
                         ))}
                     </View>
-                    <TouchableOpacity style={styles.showAllButton}>
-                        <Text style={styles.showAllText}>Show all 24 amenities</Text>
-                    </TouchableOpacity>
+                    {hotel.amenities && hotel.amenities.length > 6 && (
+                        <TouchableOpacity style={styles.showAllButton}>
+                            <Text style={styles.showAllText}>Show all {hotel.amenities.length} amenities</Text>
+                        </TouchableOpacity>
+                    )}
 
                     {/* Sponsored Section */}
                     <TouchableOpacity style={styles.sponsoredCard}>
@@ -198,7 +193,7 @@ export const PropertyDetailsScreen: React.FC = () => {
                     <Text style={styles.sectionTitle}>Location</Text>
                     <View style={styles.mapContainer}>
                         <Image
-                            source={{ uri: 'https://api.mapbox.com/styles/v1/mapbox/light-v10/static/45.3182,2.0469,12/800x400?access_token=YOUR_TOKEN' }}
+                            source={{ uri: `https://api.mapbox.com/styles/v1/mapbox/light-v10/static/${hotel.longitude || 45.3182},${hotel.latitude || 2.0469},12/800x400?access_token=YOUR_TOKEN` }}
                             style={styles.mapImage}
                         />
                     </View>
@@ -210,18 +205,18 @@ export const PropertyDetailsScreen: React.FC = () => {
                     {/* Reviews Section */}
                     <Text style={styles.sectionTitle}>Reviews</Text>
                     <View style={styles.reviewsHeader}>
-                        <Text style={styles.overallRating}>{property.rating}</Text>
+                        <Text style={styles.overallRating}>{hotel.rating || '4.5'}</Text>
                         <View style={styles.ratingSummary}>
                             <View style={styles.starsRow}>
-                                {[1, 2, 3, 4, 5].map((i) => (
+                                {[1, 2, 3, 4, 5].map((i: number) => (
                                     <Ionicons key={i} name="star" size={14} color="#FFD700" />
                                 ))}
                             </View>
-                            <Text style={styles.totalReviews}>128 TOTAL REVIEWS</Text>
+                            <Text style={styles.totalReviews}>{(hotel.reviews_preview?.length || 0) * 10} TOTAL REVIEWS</Text>
                         </View>
                     </View>
 
-                    {property.reviews_preview.map((review) => (
+                    {(hotel.reviews_preview || []).map((review: any) => (
                         <View key={review.id} style={styles.reviewItem}>
                             <View style={styles.reviewerRow}>
                                 <Image source={{ uri: review.avatar }} style={styles.reviewerAvatar} />
@@ -244,7 +239,7 @@ export const PropertyDetailsScreen: React.FC = () => {
             <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md), height: 80 + insets.bottom }]}>
                 <View style={styles.priceBox}>
                     <View style={styles.bottomPriceRow}>
-                        <Text style={styles.bottomPrice}>${property.price}</Text>
+                        <Text style={styles.bottomPrice}>${hotel.base_price || hotel.price}</Text>
                         <Text style={styles.bottomPriceLabel}> / night</Text>
                     </View>
                     <TouchableOpacity>

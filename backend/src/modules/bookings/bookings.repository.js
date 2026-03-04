@@ -1,7 +1,7 @@
 const pool = require('../../config/database');
 
 class BookingsRepository {
-    async findAll() {
+    async findAll(limit = 10, offset = 0) {
         const [rows] = await pool.execute(`
             SELECT b.*, u.full_name as guest_name, u.phone as guest_phone,
             CASE 
@@ -20,8 +20,14 @@ class BookingsRepository {
             LEFT JOIN hotels h ON r.hotel_id = h.id
             LEFT JOIN payments pay ON pay.booking_id = b.id
             ORDER BY b.created_at DESC
-        `);
+            LIMIT ? OFFSET ?
+        `, [limit.toString(), offset.toString()]);
         return rows;
+    }
+
+    async countAll() {
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM bookings');
+        return rows[0].count;
     }
 
     async create(bookingData) {

@@ -1,9 +1,60 @@
 const pool = require('../../config/database');
 
 class HotelsRepository {
-    async findAll() {
-        const [rows] = await pool.execute('SELECT * FROM hotels ORDER BY created_at DESC');
+    async findAll(limit = 10, offset = 0, filters = {}) {
+        let query = 'SELECT * FROM hotels WHERE 1=1';
+        const queryParams = [];
+
+        if (filters.city) {
+            query += ' AND location = ?';
+            queryParams.push(filters.city);
+        }
+        if (filters.type) {
+            query += ' AND type = ?';
+            queryParams.push(filters.type);
+        }
+        if (filters.minPrice) {
+            query += ' AND base_price >= ?';
+            queryParams.push(parseFloat(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+            query += ' AND base_price <= ?';
+            queryParams.push(parseFloat(filters.maxPrice));
+        }
+        if (filters.verifiedOnly) {
+            query += ' AND status = "Active"'; // Or a specific verified column if added
+        }
+
+        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        queryParams.push(limit.toString(), offset.toString());
+
+        const [rows] = await pool.execute(query, queryParams);
         return rows;
+    }
+
+    async countAll(filters = {}) {
+        let query = 'SELECT COUNT(*) as count FROM hotels WHERE 1=1';
+        const queryParams = [];
+
+        if (filters.city) {
+            query += ' AND location = ?';
+            queryParams.push(filters.city);
+        }
+        if (filters.type) {
+            query += ' AND type = ?';
+            queryParams.push(filters.type);
+        }
+        if (filters.minPrice) {
+            query += ' AND base_price >= ?';
+            queryParams.push(parseFloat(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+            query += ' AND base_price <= ?';
+            queryParams.push(parseFloat(filters.maxPrice));
+        }
+
+        const [rows] = await pool.execute(query, queryParams);
+        return rows[0].count;
     }
 
     async findById(id) {
@@ -125,6 +176,13 @@ class HotelsRepository {
         for (const imageUrl of images) {
             await pool.execute('INSERT INTO property_images (hotel_id, image_url) VALUES (?, ?)', [hotelId, imageUrl]);
         }
+    }
+
+    async findUniqueLocations() {
+        const [rows] = await pool.execute(
+            'SELECT DISTINCT location as name, main_image as image FROM hotels WHERE location IS NOT NULL AND location != ""'
+        );
+        return rows;
     }
 }
 

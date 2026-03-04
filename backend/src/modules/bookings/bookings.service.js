@@ -2,8 +2,20 @@ const bookingsRepository = require('./bookings.repository');
 const paymentsService = require('../payments/payments.service');
 
 class BookingsService {
-    async getAllBookings() {
-        return await bookingsRepository.findAll();
+    async getAllBookings(page = 1, limit = 10) {
+        const offset = (page - 1) * limit;
+        const bookings = await bookingsRepository.findAll(limit, offset);
+        const total = await bookingsRepository.countAll();
+
+        return {
+            bookings,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     }
 
     async createBooking(bookingData) {

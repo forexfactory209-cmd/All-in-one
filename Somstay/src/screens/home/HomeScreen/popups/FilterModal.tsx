@@ -21,27 +21,26 @@ interface FilterModalProps {
 
 const DESTINATIONS = [
     'Hargeisa',
-    'Berbera',
     'Borama',
-    'Sheikh',
+    'Burao',
+    'Berbera',
     'Gabiley',
-    'Burco',
-    'Las Anod',
+    'Sheikh',
     'Erigavo',
+    'Las Anod',
 ];
 
 const PROPERTY_TYPES = [
     'All',
-    'Vacation Rental',
+    'Hotel',
     'Apartment',
-    'House',
-    'Land',
-    'Broker',
-    'Travel Service',
+    'Villa',
+    'Cabin',
+    'Loft',
 ];
 
 const RATINGS = ['5', '4+', '3+'];
-const MAX_PRICE = 2000;
+const MAX_PRICE = 200;
 
 export const FilterModal: React.FC<FilterModalProps> = ({
     visible,
@@ -50,7 +49,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
     const [selectedDestination, setSelectedDestination] = useState('Hargeisa');
     const [selectedPropertyType, setSelectedPropertyType] = useState('All');
-    const [priceRange, setPriceRange] = useState([0, 2000]);
+    const [priceRange, setPriceRange] = useState([0, 200]);
     const [isVerifiedOnly, setIsVerifiedOnly] = useState(true);
     const [minRating, setMinRating] = useState('4+');
     const [sliderWidth, setSliderWidth] = useState(0);
@@ -61,7 +60,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     const handleReset = () => {
         setSelectedDestination('Hargeisa');
         setSelectedPropertyType('All');
-        setPriceRange([0, 2000]);
+        setPriceRange([0, 200]);
         setIsVerifiedOnly(true);
         setMinRating('4+');
     };
@@ -81,7 +80,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     const getPriceFromPos = (pos: number) => {
         if (sliderWidth === 0) return 0;
         const ratio = Math.min(Math.max(pos / sliderWidth, 0), 1);
-        return Math.round((ratio * MAX_PRICE) / 50) * 50; // Snap to 50
+        const price = Math.round(ratio * MAX_PRICE);
+
+        // Snap to steps: 1-20-60-100-200
+        if (price <= 20) return price <= 10 ? 1 : 20;
+        if (price <= 60) return 60;
+        if (price <= 100) return 100;
+        return 200;
     };
 
     const minThumbPanResponder = useMemo(() => PanResponder.create({
@@ -255,11 +260,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                                     />
                                 </View>
                                 <View style={styles.sliderLabels}>
-                                    <Text style={styles.sliderLabelText}>$0</Text>
-                                    <Text style={styles.sliderLabelText}>$500</Text>
-                                    <Text style={styles.sliderLabelText}>$1,000</Text>
-                                    <Text style={styles.sliderLabelText}>$1,500</Text>
-                                    <Text style={styles.sliderLabelText}>$2,000+</Text>
+                                    <Text style={styles.sliderLabelText}>$1</Text>
+                                    <Text style={styles.sliderLabelText}>$20</Text>
+                                    <Text style={styles.sliderLabelText}>$60</Text>
+                                    <Text style={styles.sliderLabelText}>$100</Text>
+                                    <Text style={styles.sliderLabelText}>$200</Text>
                                 </View>
                             </View>
                         </View>

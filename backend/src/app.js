@@ -4,6 +4,9 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const responseTime = require('response-time');
+const logger = require('./utils/logger');
 const { globalErrorHandler, notFoundHandler } = require('./middleware/error.middleware');
 const { sendResponse } = require('./utils/response');
 
@@ -23,16 +26,26 @@ app.use(helmet({
 // 2. CORS
 app.use(cors());
 
-// 3. Development Logging
+// 3. Compression
+app.use(compression());
+
+// 4. Development Logging
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
-// 4. Rate Limiting
+// 5. Response Time Tracking & Logging
+app.use(responseTime((req, res, time) => {
+    logger.info(`${req.method} ${req.originalUrl} - ${time.toFixed(2)}ms`);
+}));
+
+// 6. Rate Limiting
 const limiter = rateLimit({
-    max: 1000, // Increased for development and admin usage
+    max: 100, // 100 requests per 15 minutes
     windowMs: 15 * 60 * 1000,
-    message: 'Too many requests from this IP, please try again in 15 minutes!'
+    message: 'Too many requests from this IP, please try again in 15 minutes!',
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use('/api', limiter);
 
@@ -45,10 +58,14 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // 7. Health Check Route
 app.get('/api/health', (req, res) => {
-    return sendResponse(res, 200, true, 'Backend Service is Healthy 🚀', {
+    const healthData = {
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV
-    });
+        environment: process.env.NODE_ENV,
+        memoryUsage: process.memoryUsage(),
+        timestamp: new Date().toISOString()
+    };
+
+    return sendResponse(res, 200, true, 'Backend Service is Healthy 🚀', healthData);
 });
 
 // 8. API Routes
@@ -62,6 +79,7 @@ app.use('/api/v1/payments', require('./modules/payments/payments.routes'));
 app.use('/api/v1/disputes', require('./modules/disputes/disputes.routes'));
 app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
 app.use('/api/v1/settings', require('./modules/settings/settings.routes'));
+app.use('/api/v1/wishlist', require('./modules/wishlist/wishlist.routes'));
 
 // 9. 404 Handler
 app.all('*', notFoundHandler);

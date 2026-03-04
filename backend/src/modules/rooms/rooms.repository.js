@@ -1,13 +1,21 @@
 const pool = require('../../config/database');
 
 class RoomsRepository {
-    async findAllByHotelId(hotelId) {
-        const [rows] = await pool.execute('SELECT * FROM rooms WHERE hotel_id = ? ORDER BY room_number ASC', [hotelId]);
+    async findAllByHotelId(hotelId, limit = 10, offset = 0) {
+        const [rows] = await pool.execute(
+            'SELECT * FROM rooms WHERE hotel_id = ? ORDER BY room_number ASC LIMIT ? OFFSET ?',
+            [hotelId, limit.toString(), offset.toString()]
+        );
         const rooms = await Promise.all(rows.map(async (room) => {
             room.images = await this.findImagesByRoomId(room.id);
             return room;
         }));
         return rooms;
+    }
+
+    async countByHotelId(hotelId) {
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM rooms WHERE hotel_id = ?', [hotelId]);
+        return rows[0].count;
     }
 
     async findById(id) {
