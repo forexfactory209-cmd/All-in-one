@@ -1,35 +1,46 @@
 require('dotenv').config();
 const app = require('./app');
+const { initDatabase } = require('./config/database');
+
+const PORT = process.env.NODE_ENV || 5000;
 
 /**
- * Start Express Server
+ * Boot sequence:
+ *  1. Open SSH tunnel to VPS
+ *  2. Connect MySQL pool through the tunnel
+ *  3. Start Express server
  */
-const PORT = process.env.PORT || 5000;
+async function startServer() {
+    try {
+        // Step 1 & 2: SSH tunnel + MySQL pool
+        await initDatabase();
 
-const server = app.listen(PORT, () => {
-    console.log(`
-🚀 Server is running on port: ${PORT}
-🌍 Environment: ${process.env.NODE_ENV}
-🛠️ Health Check: http://localhost:${PORT}/api/health
-    `);
-});
+        // Step 3: Start Express
+        const server = app.listen(process.env.PORT || 5000, () => {
+            console.log(`
+🚀 Server is running on port : ${process.env.PORT || 5000}
+🌍 Environment               : ${process.env.NODE_ENV}
+🛠️  Health Check              : http://localhost:${process.env.PORT || 5000}/api/health
+            `);
+        });
 
-/**
- * Handle Unhandled Promise Rejections
- */
-process.on('unhandledRejection', (err) => {
-    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-    server.close(() => {
+        // Handle graceful shutdown
+        process.on('unhandledRejection', (err) => {
+            console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+            console.log(err.name, err.message);
+            server.close(() => process.exit(1));
+        });
+
+        process.on('uncaughtException', (err) => {
+            console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+            console.log(err.name, err.message);
+            process.exit(1);
+        });
+
+    } catch (err) {
+        console.error('💥 Failed to start server:', err.message);
         process.exit(1);
-    });
-});
+    }
+}
 
-/**
- * Handle Uncaught Exceptions
- */
-process.on('uncaughtException', (err) => {
-    console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-    process.exit(1);
-});
+startServer();
