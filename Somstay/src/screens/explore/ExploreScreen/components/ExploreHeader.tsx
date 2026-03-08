@@ -4,7 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { colors, spacing, typography } from '@/src/theme';
 
-export const ExploreHeader: React.FC = () => {
+interface ExploreHeaderProps {
+    onMapPress?: () => void;
+}
+
+export const ExploreHeader: React.FC<ExploreHeaderProps> = ({ onMapPress }) => {
     const router = useRouter();
 
     return (
@@ -15,9 +19,11 @@ export const ExploreHeader: React.FC = () => {
 
             <Text style={styles.title}>Explore</Text>
 
-            <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="share-outline" size={24} color={colors.dark} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={onMapPress} style={[styles.iconButton, { backgroundColor: colors.primary + '10', borderRadius: 12 }]}>
+                    <Ionicons name="map-outline" size={24} color={colors.primary} />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };

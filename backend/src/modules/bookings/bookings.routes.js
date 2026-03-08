@@ -6,7 +6,11 @@ const { bookingSchema } = require('../../utils/validation.schemas');
 
 router.get('/', (req, res) => bookingsController.getAll(req, res));
 router.post('/', validate(bookingSchema), (req, res) => bookingsController.create(req, res));
+
+// Specific named routes before parameterised ones
+router.get('/my-bookings', (req, res) => bookingsController.getMyBookings(req, res));
 router.get('/user/:userId', (req, res) => bookingsController.getMyBookings(req, res));
+
 router.get('/:id', (req, res) => bookingsController.getDetails(req, res));
 router.put('/:id', validate(bookingSchema.partial()), (req, res) => bookingsController.update(req, res));
 router.put('/:id/status', (req, res) => bookingsController.updateStatus(req, res));

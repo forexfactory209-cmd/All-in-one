@@ -25,8 +25,11 @@ class BookingsController {
 
     async getMyBookings(req, res) {
         try {
-            // userId would normally come from JWT
-            const userId = req.params.userId;
+            // userId can come from URL param (/user/:userId) or query string (/my-bookings?userId=1)
+            const userId = req.params.userId || req.query.userId;
+            if (!userId) {
+                return sendError(res, 400, 'userId is required');
+            }
             const bookings = await bookingsService.getUserBookings(userId);
             return sendResponse(res, 200, true, 'Bookings retrieved successfully', bookings);
         } catch (error) {

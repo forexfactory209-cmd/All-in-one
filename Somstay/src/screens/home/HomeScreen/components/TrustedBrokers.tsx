@@ -56,7 +56,7 @@ export const TrustedBrokers: React.FC<TrustedBrokersProps> = ({
                         <Text style={styles.brokerName}>{broker.name}</Text>
                         <View style={styles.ratingRow}>
                             <Icon name="star" size={14} color="#FFD700" />
-                            <Text style={styles.rating}>{broker.rating.toFixed(1)}</Text>
+                            <Text style={styles.rating}>{Number(broker.rating || 4.5).toFixed(1)}</Text>
                         </View>
                     </TouchableOpacity>
                 ))}

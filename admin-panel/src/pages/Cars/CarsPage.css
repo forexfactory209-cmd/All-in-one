@@ -1,0 +1,294 @@
+.cars-page-container, .tours-page-container {
+    padding: 24px;
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.car-form-modal, .tour-form-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.car-form-content, .tour-form-content {
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    width: 800px;
+    max-height: 90vh;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+}
+
+.car-form-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 22px;
+    color: #0F172A;
+    font-weight: 700;
+}
+
+.form-section-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-item label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.car-form-content form, .tour-form-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.car-form-content input, .car-form-content select,
+.tour-form-content input, .tour-form-content select {
+    padding: 10px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.form-actions button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+}
+
+.form-actions button[type="submit"] {
+    background: #0288AC;
+    color: white;
+}
+
+.cars-table, .tours-table {
+    width: 100%;
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.cars-table th, .cars-table td, 
+.tours-table th, .tours-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.cars-table th, .tours-table th {
+    background-color: #F8FAFC;
+    font-weight: 600;
+    color: #475569;
+}
+
+.cars-table button, .tours-table button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+
+.extended-modal {
+    width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.extended-form-body {
+    overflow-y: auto;
+    padding-right: 10px;
+    /* Custom scrollbar for webkit */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 4px;
+    }
+}
+.form-group-row {
+    display: flex;
+    gap: 12px;
+}
+.form-group-row > * {
+    flex: 1;
+}
+.full-width-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.full-width-input:focus {
+    border-color: #0288AC;
+    box-shadow: 0 0 0 3px rgba(2, 136, 172, 0.1);
+}
+
+.description-textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.6;
+    background: #F8FAFC;
+    padding: 15px;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 15px;
+    width: 100%;
+}
+.full-width-item {
+    width: 100% !important;
+}
+.field-hint {
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 4px;
+    font-style: italic;
+}
+.form-image-uploader {
+    margin-top: 10px;
+    background: #FAFAFA;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px dashed #CBD5E1;
+}
+.form-image-uploader label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1E293B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expanded-details-drawer {
+    margin-top: -15px;
+    margin-bottom: 20px;
+    background: #FFFFFF;
+    padding: 24px;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid #E2E8F0;
+    border-top: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.drawer-section h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.description-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #334155;
+    background: #F8FAFC;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #0288AC;
+}
+
+.images-gallery {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.gallery-thumbnail {
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.gallery-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+.gallery-thumbnail img {
+    width: 140px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #F1F5F9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.banner-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #0288AC;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.no-images-text {
+    color: #64748B;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* Premium Table Improvements */
+.cars-table tr.active-row {
+    background-color: #F0F9FF;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.active { background: #DCFCE7; color: #15803d; }
+.status-badge.rented { background: #FEF9C3; color: #a16207; }
+.status-badge.maintenance { background: #FEE2E2; color: #b91c1c; }
+.status-badge.inactive { background: #F1F5F9; color: #475569; }

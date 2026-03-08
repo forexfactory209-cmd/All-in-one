@@ -49,25 +49,25 @@ class ReportsRepository {
     }
 
     async getSystemStats() {
-        const queries = {
-            total_revenue: "SELECT SUM(amount) as total FROM payments WHERE status = 'Success'",
-            total_bookings: "SELECT COUNT(*) as total FROM bookings",
-            active_properties: "SELECT COUNT(*) as total FROM properties WHERE status = 'available' OR status = 'Active'",
-            pending_payments: "SELECT COUNT(*) as total FROM payments WHERE status = 'Pending'",
-            growth_revenue: `
-                SELECT 
-                    (SELECT SUM(amount) FROM payments WHERE status = 'Success' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as current_month,
-                    (SELECT SUM(amount) FROM payments WHERE status = 'Success' AND created_at BETWEEN DATE_SUB(NOW(), INTERVAL 60 DAY) AND DATE_SUB(NOW(), INTERVAL 30 DAY)) as prev_month
-            `
+        const sql = `
+            SELECT 
+                (SELECT SUM(amount) FROM payments WHERE status = 'Success') as total_revenue,
+                (SELECT COUNT(*) FROM bookings) as total_bookings,
+                (SELECT COUNT(*) FROM properties WHERE status IN ('available', 'Active') AND deleted_at IS NULL) as active_properties,
+                (SELECT COUNT(*) FROM payments WHERE status = 'Pending') as pending_payments,
+                (SELECT SUM(amount) FROM payments WHERE status = 'Success' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as growth_current,
+                (SELECT SUM(amount) FROM payments WHERE status = 'Success' AND created_at BETWEEN DATE_SUB(NOW(), INTERVAL 60 DAY) AND DATE_SUB(NOW(), INTERVAL 30 DAY)) as growth_prev
+        `;
+
+        const [rows] = await pool.query(sql);
+        const res = rows[0];
+        return {
+            total_revenue: { total: res.total_revenue || 0 },
+            total_bookings: { total: res.total_bookings || 0 },
+            active_properties: { total: res.active_properties || 0 },
+            pending_payments: { total: res.pending_payments || 0 },
+            growth_revenue: { current_month: res.growth_current || 0, prev_month: res.growth_prev || 0 }
         };
-
-        const results = {};
-        for (const [key, sql] of Object.entries(queries)) {
-            const [rows] = await pool.query(sql);
-            results[key] = rows[0];
-        }
-
-        return results;
     }
 
     async getHighValueBookings(limit = 5) {
@@ -221,13 +221,15 @@ class ReportsRepository {
             WHERE b.created_at BETWEEN ${prevIntervalSql}
         `;
 
-        const [[current]] = await pool.query(currentQ);
+        const [currentRows] = await pool.query(currentQ);
+        const current = currentRows[0] || { bookings: 0, revenue: 0, payments_collected: 0 };
+        
         let prev = { bookings: 0, revenue: 0, payments_collected: 0 };
         try {
             const [rows] = await pool.query(prevQ);
             if (rows && rows.length > 0) prev = rows[0];
         } catch (e) {
-            console.error("Error in prev comparison query:", e);
+            console.error("Error in prev comparison query:", e.message);
         }
 
         return { current, prev };

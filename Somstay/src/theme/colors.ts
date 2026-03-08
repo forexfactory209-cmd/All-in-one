@@ -19,20 +19,21 @@ export const colors = {
     info: '#0288AC',    // Using Primary for info
 
     // Neutral Colors
-    dark: '#04252E',      // Usage: Main text, Header background
-    secondaryText: '#5A5E5E', // Usage: Subtitles, Metadata
-    background: '#FFFFFF',    // Usage: Default screen background
+    dark: '#000000',      // Maximum contrast for main text
+    secondaryText: '#333333', // Deep gray for secondary text
+    background: '#F3F4F6',    // Slightly darker gray background to make white cards pop
     white: '#FFFFFF',
 
     // Grays (for borders, dividers) - Derived from Secondary Text or Dark
-    gray100: '#F3F4F6',
-    gray200: '#E5E7EB',
-    gray300: '#D1D5DB',
+    gray50: '#F9FAFB',
+    gray100: '#E5E7EB', // Darker for cards to pop
+    gray200: '#D1D5DB',
+    gray300: '#9CA3AF',
 
     // Component Specific
     text: {
-        primary: '#04252E',   // Dark
-        secondary: '#5A5E5E', // Secondary Text
+        primary: '#000000',
+        secondary: '#333333',
         inverse: '#FFFFFF',
         error: '#FE3335',
         success: '#06A649',

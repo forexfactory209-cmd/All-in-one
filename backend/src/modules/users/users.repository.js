@@ -1,24 +1,29 @@
 const pool = require('../../config/database');
 
 class UsersRepository {
-    async findAll() {
+    async findAll(limit = 10, offset = 0) {
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
         const [rows] = await pool.execute(`
             SELECT u.id, u.full_name, u.email, u.phone, u.role, u.status, u.city, u.district, u.address, u.national_id, u.created_at, u.updated_at,
-            (SELECT COUNT(*) FROM bookings b WHERE b.user_id = u.id) as booking_count,
-            (SELECT MAX(created_at) FROM bookings b WHERE b.user_id = u.id) as last_booking
+            (SELECT COUNT(*) FROM bookings b WHERE b.user_id = u.id AND b.deleted_at IS NULL) as booking_count,
+            (SELECT MAX(created_at) FROM bookings b WHERE b.user_id = u.id AND b.deleted_at IS NULL) as last_booking
             FROM users u
+            WHERE u.deleted_at IS NULL
             ORDER BY u.created_at DESC
-        `);
+            LIMIT ? OFFSET ?
+        `, [safeLimit.toString(), safeOffset.toString()]);
         return rows;
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT id, full_name, email, phone, role, gender, dob, city, district, address, national_id, status, created_at FROM users WHERE id = ?', [id]);
+        const [rows] = await pool.execute('SELECT id, full_name, email, phone, role, gender, dob, city, district, address, national_id, status, created_at FROM users WHERE id = ? AND deleted_at IS NULL', [id]);
         return rows[0] || null;
     }
 
     async findByEmail(email) {
-        const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+        const [rows] = await pool.execute('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL', [email]);
         return rows[0] || null;
     }
 
@@ -87,12 +92,12 @@ class UsersRepository {
         const fields = Object.keys(updateFields).map(key => `${key} = ?`).join(', ');
         const values = [...Object.values(updateFields), id];
 
-        const [result] = await pool.execute(`UPDATE users SET ${fields} WHERE id = ?`, values);
+        const [result] = await pool.execute(`UPDATE users SET ${fields} WHERE id = ? AND deleted_at IS NULL`, values);
         return result.affectedRows > 0;
     }
 
     async delete(id) {
-        const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+        const [result] = await pool.execute('UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 }

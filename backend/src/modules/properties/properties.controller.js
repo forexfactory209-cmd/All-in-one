@@ -4,8 +4,8 @@ const { sendResponse, sendError } = require('../../utils/response');
 class PropertiesController {
     async getAllProperties(req, res) {
         try {
-            const { page = 1, limit = 10 } = req.query;
-            const result = await propertiesService.getAllProperties(parseInt(page), parseInt(limit));
+            const { page = 1, limit = 10, ...filters } = req.query;
+            const result = await propertiesService.getAllProperties(parseInt(page), parseInt(limit), filters);
             return sendResponse(res, 200, true, 'Properties retrieved successfully', result.properties, null, result.pagination);
         } catch (error) {
             console.error('Error fetching properties:', error);

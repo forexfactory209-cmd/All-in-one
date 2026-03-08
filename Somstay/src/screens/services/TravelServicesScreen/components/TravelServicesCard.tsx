@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, shadows } from '@/src/theme';
 
@@ -14,6 +15,7 @@ export interface TravelService {
     image: string;
     badge: string;
     features: string[];
+    type?: 'car' | 'tour' | 'airport' | 'intercity';
 }
 
 interface TravelServicesCardProps {
@@ -21,8 +23,26 @@ interface TravelServicesCardProps {
 }
 
 export const TravelServicesCard: React.FC<TravelServicesCardProps> = ({ service }) => {
+    const router = useRouter();
+
+    const handlePress = () => {
+        if (service.type === 'car' || service.type === 'airport' || service.type === 'intercity') {
+             router.push({ pathname: '/car/[id]', params: { id: service.id } } as any);
+        } else if (service.type === 'tour') {
+            console.log('Tours not implemented yet');
+        } else {
+            // Re-fallback just in case
+            const isCarStr = service.badge.toLowerCase() + service.title.toLowerCase();
+            if (isCarStr.includes('car') || isCarStr.includes('automatic') || isCarStr.includes('manual')) {
+                router.push({ pathname: '/car/[id]', params: { id: service.id } } as any);
+            } else {
+                console.log('Tours not implemented yet');
+            }
+        }
+    };
+
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} activeOpacity={0.9} onPress={handlePress}>
             <View style={styles.imageContainer}>
                 <Image source={{ uri: service.image }} style={styles.image} />
                 <View style={styles.badge}>
@@ -59,12 +79,12 @@ export const TravelServicesCard: React.FC<TravelServicesCardProps> = ({ service 
                         ))}
                     </View>
 
-                    <TouchableOpacity style={styles.bookButton}>
+                    <TouchableOpacity style={styles.bookButton} onPress={handlePress}>
                         <Text style={styles.bookButtonText}>Book Now</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

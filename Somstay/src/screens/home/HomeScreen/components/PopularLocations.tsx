@@ -1,13 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
-import { styles } from './PopularLocations.styles';
-import { colors } from '@/src/theme';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { styles } from '@/src/screens/home/HomeScreen/components/PopularLocations.styles';
+import { Location } from '../hooks/usePopularLocations';
 
-interface Location {
-    id: string;
-    name: string;
-    image: string;
-}
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 interface PopularLocationsProps {
     locations: Location[];
@@ -18,17 +14,19 @@ interface PopularLocationsProps {
 export const PopularLocations: React.FC<PopularLocationsProps> = ({
     locations,
     loading,
-    onLocationPress,
+    onLocationPress
 }) => {
+    const { t } = useApp();
+    const theme = useTheme();
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Popular Locations</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('popular_locations')}</Text>
             </View>
 
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color={colors.primary} />
+                    <ActivityIndicator size="small" color="#0288AC" />
                 </View>
             ) : (
                 <ScrollView
@@ -36,18 +34,20 @@ export const PopularLocations: React.FC<PopularLocationsProps> = ({
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}
                 >
-                    {locations.map((location) => (
+                    {locations.map((loc) => (
                         <TouchableOpacity
-                            key={location.id}
-                            style={styles.locationItem}
-                            onPress={() => onLocationPress(location.name)}
+                            key={loc.id}
+                            style={styles.locationCard}
+                            onPress={() => onLocationPress(loc.name)}
+                            activeOpacity={0.8}
                         >
-                            <Image
-                                source={{ uri: location.image }}
-                                style={styles.locationImage}
-                                resizeMode="cover"
-                            />
-                            <Text style={styles.locationName}>{location.name}</Text>
+                            <View style={styles.imageContainer}>
+                                <Image
+                                    source={{ uri: loc.image || 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=150&q=80' }}
+                                    style={styles.image}
+                                />
+                            </View>
+                            <Text style={[styles.locationName, { color: theme.text }]}>{loc.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>

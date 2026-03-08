@@ -3,10 +3,23 @@
  * Centralized API endpoint constants
  */
 
+import Constants from 'expo-constants';
+
+// Get the host machine's IP address dynamically in development
+const getHostUrl = () => {
+    const hostUri = Constants.expoConfig?.hostUri;
+    if (!hostUri) return 'localhost';
+
+    // hostUri usually looks like "192.168.1.106:19000"
+    const host = hostUri.split(':')[0];
+    console.log('getHostUrl:', host);
+    return host;
+};
+
 // Base URL - Update this with your actual API URL
 export const API_BASE_URL = __DEV__
-    ? 'http://localhost:3000/api'  // Development
-    : 'https://api.vacationrental.com/api';  // Production
+    ? `http://${getHostUrl()}:5000/api/v1`  // Development - points to host machine
+    : 'https://api.vacationrental.com/api/v1';  // Production
 
 // API Timeout
 export const API_TIMEOUT = 30000; // 30 seconds
@@ -107,4 +120,15 @@ export const ADMIN_ENDPOINTS = {
     REJECT_PROPERTY: (id: string) => `/admin/properties/${id}/reject`,
     SUSPEND_USER: (id: string) => `/admin/users/${id}/suspend`,
     ANALYTICS: '/admin/analytics',
+};
+
+// Service Endpoints
+export const SERVICE_ENDPOINTS = {
+    CARS: '/cars',
+    CAR_DETAILS: (id: string) => `/cars/${id}`,
+    CAR_BOOKINGS: '/car-bookings',
+    MY_CAR_BOOKINGS: '/car-bookings/my-bookings',
+    CHECK_CAR_AVAILABILITY: '/car-bookings/check-availability',
+    TOURS: '/tours',
+    TOUR_DETAILS: (id: string) => `/tours/${id}`,
 };

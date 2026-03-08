@@ -6,7 +6,9 @@ class WishlistController {
         try {
             // TODO: Extract userId from auth middleware (req.user.id)
             const userId = req.user?.id || req.query.userId;
-            if (!userId) return sendError(res, 400, 'User ID is required');
+            if (!userId) {
+                return sendResponse(res, 200, true, 'User not authenticated', []);
+            }
 
             const wishlist = await wishlistService.getUserWishlist(userId);
             return sendResponse(res, 200, true, 'Wishlist fetched successfully', wishlist);

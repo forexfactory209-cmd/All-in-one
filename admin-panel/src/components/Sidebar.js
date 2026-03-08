@@ -15,7 +15,10 @@ import {
     ChevronLeft,
     Menu,
     LogOut,
-    BarChart3
+    BarChart3,
+    Car,
+    Map,
+    Calendar
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -30,6 +33,9 @@ const Sidebar = ({ isPinned, setIsPinned }) => {
         { icon: <UsersIcon size={22} />, label: 'Guests', path: '/users' },
         { icon: <CreditCard size={22} />, label: 'Payments', path: '/payments' },
         { icon: <ShieldAlert size={22} />, label: 'Disputes', path: '/disputes' },
+        { icon: <Car size={22} />, label: 'Rental Cars', path: '/services/cars' },
+        { icon: <Calendar size={22} />, label: 'Car Reservations', path: '/services/car-bookings' },
+        { icon: <Map size={22} />, label: 'City Tours', path: '/services/tours' },
         { icon: <BarChart3 size={22} />, label: 'Analytics', path: '/analytics' },
         { icon: <FileText size={22} />, label: 'Reports', path: '/reports' },
         { icon: <Bell size={22} />, label: 'Notifications', path: '/notifications' },

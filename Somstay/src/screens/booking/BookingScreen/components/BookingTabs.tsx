@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, spacing } from '@/src/theme';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 const { width } = Dimensions.get('window');
 
@@ -10,13 +11,16 @@ interface BookingTabsProps {
 }
 
 export const BookingTabs: React.FC<BookingTabsProps> = ({ activeTab, onTabChange }) => {
+    const { t } = useApp();
+    const theme = useTheme();
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
             <TouchableOpacity
                 style={styles.tab}
                 onPress={() => onTabChange('upcoming')}
             >
-                <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>Upcoming</Text>
+                <Text style={[styles.tabText, { color: theme.textSecondary }, activeTab === 'upcoming' && styles.activeTabText]}>{t('upcoming')}</Text>
                 {activeTab === 'upcoming' && <View style={styles.activeUnderline} />}
             </TouchableOpacity>
 
@@ -24,7 +28,7 @@ export const BookingTabs: React.FC<BookingTabsProps> = ({ activeTab, onTabChange
                 style={styles.tab}
                 onPress={() => onTabChange('past')}
             >
-                <Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>Past</Text>
+                <Text style={[styles.tabText, { color: theme.textSecondary }, activeTab === 'past' && styles.activeTabText]}>{t('completed')}</Text>
                 {activeTab === 'past' && <View style={styles.activeUnderline} />}
             </TouchableOpacity>
         </View>

@@ -1,41 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import BookingService from '@/src/services/booking/bookingService';
 import { Booking } from '../components/BookingCard';
+import { useFocusEffect } from 'expo-router';
 
-const MOCK_BOOKINGS: Booking[] = [
-    {
-        id: '1',
-        title: 'Modern Oceanview Villa',
-        dateRange: 'Oct 12 - Oct 15, 2023',
-        status: 'PENDING',
-        image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: '2',
-        title: 'City Center Suite',
-        dateRange: 'Nov 02 - Nov 05, 2023',
-        status: 'CONFIRMED',
-        image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: '3',
-        title: 'Lido Beach Luxury Villa',
-        dateRange: 'Aug 20 - Aug 25, 2023',
-        status: 'COMPLETED',
-        image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-    },
+// Fallback images
+const FALLBACK_IMAGES = [
+    'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'
 ];
 
 export const useBookings = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setBookings(MOCK_BOOKINGS);
-            setLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, []);
+    const fetchBookings = async () => {
+        try {
+            // Using user_id=1 as default placeholder
+            const response = await BookingService.getMyBookings('1');
 
-    return { bookings, loading };
+            if (response && response.success && response.data) {
+                const formatted = response.data.map((item: any) => {
+                    const checkInDate = new Date(item.check_in).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const checkOutDate = new Date(item.check_out).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    return {
+                        id: item.id.toString(),
+                        title: item.title || item.entity_name || `${item.entity_type} Booking`,
+                        dateRange: `${checkInDate} - ${checkOutDate}`,
+                        status: (item.status && ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].includes(item.status.toUpperCase()))
+                            ? item.status.toUpperCase() as any
+                            : 'PENDING',
+                        image: FALLBACK_IMAGES[item.id % FALLBACK_IMAGES.length],
+                    };
+                });
+                setBookings(formatted);
+            }
+        } catch (error) {
+            console.error("Failed to fetch bookings:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            setLoading(true);
+            fetchBookings();
+        }, [])
+    );
+
+    return { bookings, loading, refresh: fetchBookings };
 };

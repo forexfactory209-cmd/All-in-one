@@ -366,4 +366,15 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+    },
+    seeAllText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.primary,
+    },
 });

@@ -1,28 +1,31 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StatusBar, Text, RefreshControl } from 'react-native';
+import { View, ScrollView, StatusBar, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
 // Screen-specific components
-import { SearchBar } from './components/SearchBar';
-import { FeaturedHotels } from './components/FeaturedHotels';
-import { CategoryList } from './components/CategoryList';
-import { PopularLocations } from './components/PopularLocations';
+import { SearchBar } from '@/src/screens/home/HomeScreen/components/SearchBar';
+import { FeaturedHotels } from '@/src/screens/home/HomeScreen/components/FeaturedHotels';
+import { CategoryList } from '@/src/screens/home/HomeScreen/components/CategoryList';
+import { PopularLocations } from '@/src/screens/home/HomeScreen/components/PopularLocations';
 
 // Screen-specific hooks
-import { useFeaturedHotels } from './hooks/useFeaturedHotels';
+import { useRecentRooms } from './hooks/useRecentRooms';
 import { usePopularLocations } from './hooks/usePopularLocations';
 import { useWishlist } from './hooks/useWishlist';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 // Screen-specific popups
-import { FilterModal } from './popups/FilterModal';
+import { FilterModal } from '@/src/screens/home/HomeScreen/popups/FilterModal';
 
 // Styles
 import { styles } from './styles';
 import { colors } from '@/src/theme';
 
 export const HomeScreen: React.FC = () => {
+    const { t, settings } = useApp();
+    const theme = useTheme();
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
@@ -31,13 +34,13 @@ export const HomeScreen: React.FC = () => {
     const [filters, setFilters] = useState<any>({});
 
     const {
-        hotels: featuredHotels,
-        loading: hotelsLoading,
+        rooms: featuredRooms,
+        loading: roomsLoading,
         loadingMore,
         hasMore,
         loadMore,
-        refetch: refetchHotels,
-    } = useFeaturedHotels(filters);
+        refetch: refetchRooms,
+    } = useRecentRooms(filters);
 
     const {
         locations,
@@ -56,27 +59,35 @@ export const HomeScreen: React.FC = () => {
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         await Promise.all([
-            refetchHotels(),
+            refetchRooms(),
             refetchLocations(),
             refetchWishlist()
         ]);
         setRefreshing(false);
-    }, [refetchHotels, refetchLocations, refetchWishlist]);
+    }, [refetchRooms, refetchLocations, refetchWishlist]);
+
+    const [activeCategory, setActiveCategory] = useState('stay');
 
     const handleCategoryPress = (categoryId: string) => {
-        if (categoryId === 'all') {
-            setFilters((prev: any) => {
-                const next = { ...prev };
-                delete next.type;
-                return next;
-            });
-        } else {
-            setFilters((prev: any) => ({ ...prev, type: categoryId }));
+        setActiveCategory(categoryId);
+        if (categoryId === 'stay') {
+            setFilters({}); // Reset all filters
+        } else if (categoryId === 'wishlist') {
+            // Stay on home but filter featured hotels to only show wishlisted
+            setFilters((prev: any) => ({ ...prev, wishlistOnly: true }));
+        } else if (categoryId === 'services') {
+            router.push('/travel-services');
+        } else if (categoryId === 'map') {
+            router.push('/map');
         }
     };
 
     const handleLocationPress = (locationName: string) => {
-        setFilters((prev: any) => ({ ...prev, city: locationName }));
+        // As requested: render him screen that filter only that city
+        router.push({
+            pathname: '/search-results',
+            params: { city: locationName }
+        });
     };
 
     const handleFilterApply = (appliedFilters: any) => {
@@ -93,7 +104,7 @@ export const HomeScreen: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
             {/* Header Gradient */}
@@ -105,7 +116,7 @@ export const HomeScreen: React.FC = () => {
             >
                 <Text style={styles.appTitle}>SOMSTAY</Text>
                 <Text style={styles.locationSubtitle}>
-                    Find Your Perfect Stay In <Text style={styles.locationHighlight}>Somaliland</Text>
+                    {t('find_your_perfect_stay')} <Text style={styles.locationHighlight}>Somaliland</Text>
                 </Text>
 
                 <SearchBar
@@ -121,7 +132,7 @@ export const HomeScreen: React.FC = () => {
 
             {/* Main scrollable content */}
             <ScrollView
-                style={styles.scrollView}
+                style={[styles.scrollView, { backgroundColor: theme.background }]}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 // Smooth deceleration on iOS
@@ -137,7 +148,7 @@ export const HomeScreen: React.FC = () => {
             >
                 {/* 1. Category List */}
                 <View style={styles.section}>
-                    <CategoryList onCategoryPress={handleCategoryPress} />
+                    <CategoryList onCategoryPress={handleCategoryPress} activeCategory={activeCategory} />
                 </View>
 
                 {/* 2. Popular Locations (moved above hotels) */}
@@ -149,16 +160,20 @@ export const HomeScreen: React.FC = () => {
                     />
                 </View>
 
-                {/* 3. Featured Hotels — 2-column vertical grid with lazy loading */}
+                {/* 3. Featured Rooms — 2-column vertical grid with lazy loading */}
                 <View style={styles.section}>
                     <FeaturedHotels
-                        hotels={featuredHotels}
-                        loading={hotelsLoading}
+                        hotels={
+                            filters.wishlistOnly
+                                ? (featuredRooms as any).filter((room: any) => wishlistedIds.has(room.id))
+                                : featuredRooms as any
+                        }
+                        loading={roomsLoading}
                         loadingMore={loadingMore}
-                        hasMore={hasMore}
+                        hasMore={filters.wishlistOnly ? false : hasMore}
                         wishlistedIds={wishlistedIds}
                         onHotelPress={(id: string) =>
-                            router.push({ pathname: '/property/[id]', params: { id } })
+                            router.push({ pathname: '/property/[id]', params: { id, type: 'room' } })
                         }
                         onLoadMore={loadMore}
                         onToggleWishlist={toggleWishlist}

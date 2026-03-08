@@ -3,12 +3,13 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { colors } from '@/src/theme';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 export interface Booking {
     id: string;
     title: string;
     dateRange: string;
-    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED';
+    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
     image: string;
 }
 
@@ -18,6 +19,9 @@ interface BookingCardProps {
 
 export const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     const router = useRouter();
+    const { t, settings } = useApp();
+    const theme = useTheme();
+
     const getStatusStyle = () => {
         switch (booking.status) {
             case 'PENDING': return { bg: '#FFF9E5', text: '#FFB800' };
@@ -29,18 +33,31 @@ export const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
 
     const statusStyle = getStatusStyle();
 
+    const translatedStatus = () => {
+        if (settings.language === 'so') {
+            switch(booking.status) {
+                case 'PENDING': return 'HAKAD';
+                case 'CONFIRMED': return 'LA XAQIIJIYAY';
+                case 'COMPLETED': return 'DHAMMAAD';
+                case 'CANCELLED': return 'LAAQAY';
+                default: return booking.status;
+            }
+        }
+        return booking.status;
+    };
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Image source={{ uri: booking.image }} style={styles.image} resizeMode="cover" />
 
             <View style={styles.content}>
                 <View style={styles.topRow}>
                     <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-                        <Text style={[styles.statusText, { color: statusStyle.text }]}>{booking.status}</Text>
+                        <Text style={[styles.statusText, { color: statusStyle.text }]}>{translatedStatus()}</Text>
                     </View>
                 </View>
 
-                <Text style={styles.title} numberOfLines={1}>{booking.title}</Text>
+                <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>{booking.title}</Text>
 
                 <View style={styles.dateRow}>
                     <Ionicons name="calendar-outline" size={14} color="#999" />
@@ -48,12 +65,12 @@ export const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                 </View>
 
                 <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => router.push('/receipt')}
+                    style={[styles.button, { backgroundColor: theme.primary + '15' }]}
+                    onPress={() => router.push({ pathname: '/receipt', params: { bookingId: booking.id } })}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.buttonText}>
-                        {booking.status === 'COMPLETED' ? 'Rebook Villa' : 'View Details'}
+                    <Text style={[styles.buttonText, { color: theme.primary }]}>
+                        {booking.status === 'COMPLETED' ? t('rebook_villa') || 'Rebook Villa' : t('view_details') || 'View Details'}
                     </Text>
                 </TouchableOpacity>
             </View>

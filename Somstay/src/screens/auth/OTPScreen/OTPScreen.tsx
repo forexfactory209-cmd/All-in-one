@@ -28,7 +28,7 @@ export const OTPScreen: React.FC = () => {
     };
 
     const handleVerify = () => {
-        router.push('/complete-profile');
+        router.replace('/complete-profile');
     };
 
     return (

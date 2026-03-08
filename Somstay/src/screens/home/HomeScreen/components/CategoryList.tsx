@@ -1,42 +1,54 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { styles } from './CategoryList.styles';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { styles } from '@/src/screens/home/HomeScreen/components/CategoryList.styles';
+import { colors } from '@/src/theme';
 
-interface Category {
-    id: string;
-    name: string;
-    icon: string;
-}
-
-const CATEGORIES: Category[] = [
-    { id: 'all', name: 'All', icon: 'apps' },
-    { id: 'Hotel', name: 'Hotels', icon: 'office-building' },
-    { id: 'Apartment', name: 'Apartments', icon: 'home-variant' },
-    { id: 'Villa', name: 'Villas', icon: 'home-modern' },
-    { id: 'Cabin', name: 'Cabins', icon: 'home-outline' },
-];
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 interface CategoryListProps {
-    onCategoryPress: (category: string) => void;
+    onCategoryPress: (categoryId: string) => void;
+    activeCategory?: string;
 }
 
-export const CategoryList: React.FC<CategoryListProps> = ({
-    onCategoryPress,
-}) => {
+export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryPress, activeCategory = 'stay' }) => {
+    const { t } = useApp();
+    const theme = useTheme();
+
+    const categories = [
+        { id: 'stay', name: t('home'), icon: 'bed-outline', type: 'ionicon' },
+        { id: 'wishlist', name: t('my_favorites'), icon: 'heart-outline', type: 'ionicon' },
+        { id: 'services', name: 'Services', icon: 'apps-outline', type: 'ionicon' },
+        { id: 'map', name: 'Map', icon: 'map-outline', type: 'ionicon' },
+    ];
+
     return (
         <View style={styles.container}>
-            <View style={styles.scrollContent}>
-                {CATEGORIES.map((category) => (
+            <View style={styles.listContainer}>
+                {categories.map((item) => (
                     <TouchableOpacity
-                        key={category.id}
+                        key={item.id}
                         style={styles.categoryItem}
-                        onPress={() => onCategoryPress(category.id)}
+                        onPress={() => onCategoryPress(item.id)}
+                        activeOpacity={0.7}
                     >
-                        <View style={styles.iconContainer}>
-                            <Icon name={category.icon as any} size={32} color="#FFFFFF" />
+                        <View style={[
+                            styles.iconContainer,
+                            activeCategory === item.id && styles.activeIconContainer
+                        ]}>
+                            <Ionicons
+                                name={item.icon as any}
+                                size={28}
+                                color={activeCategory === item.id ? colors.white : colors.primary}
+                            />
                         </View>
-                        <Text style={styles.categoryName}>{category.name}</Text>
+                        <Text style={[
+                            styles.categoryName,
+                            { color: theme.textSecondary },
+                            activeCategory === item.id && styles.activeCategoryName
+                        ]}>
+                            {item.name}
+                        </Text>
                     </TouchableOpacity>
                 ))}
             </View>

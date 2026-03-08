@@ -2,14 +2,14 @@ const propertiesRepository = require('./properties.repository');
 const cache = require('../../utils/cache');
 
 class PropertiesService {
-    async getAllProperties(page = 1, limit = 10) {
-        const cacheKey = `properties:list:p${page}:l${limit}`;
+    async getAllProperties(page = 1, limit = 10, filters = {}) {
+        const cacheKey = `properties:list:p${page}:l${limit}:f${JSON.stringify(filters)}`;
         const cachedData = await cache.get(cacheKey);
         if (cachedData) return cachedData;
 
         const offset = (page - 1) * limit;
-        const properties = await propertiesRepository.findAll(limit, offset);
-        const total = await propertiesRepository.countAll();
+        const properties = await propertiesRepository.findAll(limit, offset, filters);
+        const total = await propertiesRepository.countAll(filters);
 
         // Enrich each property with its amenities and images
         const enrichedProperties = await Promise.all(properties.map(async (property) => {

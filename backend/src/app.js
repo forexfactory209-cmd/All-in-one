@@ -41,9 +41,9 @@ app.use(responseTime((req, res, time) => {
 
 // 6. Rate Limiting
 const limiter = rateLimit({
-    max: 100, // 100 requests per 15 minutes
-    windowMs: 15 * 60 * 1000,
-    message: 'Too many requests from this IP, please try again in 15 minutes!',
+    max: 1000, // 1000 requests per 1 minute during development
+    windowMs: 1 * 60 * 1000,
+    message: 'Too many requests from this IP, please try again in a minute!',
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -80,6 +80,9 @@ app.use('/api/v1/disputes', require('./modules/disputes/disputes.routes'));
 app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
 app.use('/api/v1/settings', require('./modules/settings/settings.routes'));
 app.use('/api/v1/wishlist', require('./modules/wishlist/wishlist.routes'));
+app.use('/api/v1/cars', require('./modules/cars/cars.routes'));
+app.use('/api/v1/car-bookings', require('./modules/car_bookings/car_bookings.routes'));
+app.use('/api/v1/tours', require('./modules/tours/tours.routes'));
 
 // 9. 404 Handler
 app.all('*', notFoundHandler);

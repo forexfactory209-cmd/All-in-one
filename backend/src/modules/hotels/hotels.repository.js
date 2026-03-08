@@ -2,55 +2,84 @@ const pool = require('../../config/database');
 
 class HotelsRepository {
     async findAll(limit = 10, offset = 0, filters = {}) {
-        let query = 'SELECT * FROM hotels WHERE 1=1';
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
+        let query = 'SELECT h.* FROM hotels h WHERE h.deleted_at IS NULL';
         const queryParams = [];
 
-        if (filters.city) {
-            query += ' AND location = ?';
-            queryParams.push(filters.city);
-        }
-        if (filters.type) {
-            query += ' AND type = ?';
-            queryParams.push(filters.type);
-        }
-        if (filters.minPrice) {
-            query += ' AND base_price >= ?';
-            queryParams.push(parseFloat(filters.minPrice));
-        }
-        if (filters.maxPrice) {
-            query += ' AND base_price <= ?';
-            queryParams.push(parseFloat(filters.maxPrice));
-        }
-        if (filters.verifiedOnly) {
-            query += ' AND status = "Active"'; // Or a specific verified column if added
+        if (filters.city && filters.city !== '' && filters.city !== 'All') {
+            query += ' AND (h.location = ? OR h.location LIKE ?)';
+            queryParams.push(filters.city, `%${filters.city}%`);
         }
 
-        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-        queryParams.push(limit.toString(), offset.toString());
+        if (filters.type && filters.type !== '' && filters.type !== 'All') {
+            const typeFilter = filters.type.replace(' Hotel', '');
+            query += ' AND h.type LIKE ?';
+            queryParams.push(`%${typeFilter}%`);
+        } else if (filters.propertyType && filters.propertyType !== '' && filters.propertyType !== 'All') {
+            const typeFilter = filters.propertyType.replace(' Hotel', '');
+            query += ' AND h.type LIKE ?';
+            queryParams.push(`%${typeFilter}%`);
+        }
 
-        const [rows] = await pool.execute(query, queryParams);
+        const minP = filters.minPrice || (filters.priceRange && filters.priceRange[0]);
+        if (minP !== undefined && minP !== null) {
+            query += ' AND h.base_price >= ?';
+            queryParams.push(parseFloat(minP));
+        }
+
+        const maxP = filters.maxPrice || (filters.priceRange && filters.priceRange[1]);
+        if (maxP !== undefined && maxP !== null) {
+            query += ' AND h.base_price <= ?';
+            queryParams.push(parseFloat(maxP));
+        }
+
+        if (filters.verifiedOnly === 'true' || filters.verifiedOnly === true) {
+            query += ' AND h.status = "Active"';
+        }
+
+        let orderBy = 'h.created_at DESC';
+        if (filters.sort === 'price_low') orderBy = 'h.base_price ASC';
+        else if (filters.sort === 'price_high') orderBy = 'h.base_price DESC';
+        else if (filters.sort === 'top_rated') orderBy = 'h.rating DESC';
+
+        query += ` ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
+        queryParams.push(safeLimit, safeOffset);
+
+        const [rows] = await pool.execute(query, queryParams.map(v => v.toString()));
         return rows;
     }
 
     async countAll(filters = {}) {
-        let query = 'SELECT COUNT(*) as count FROM hotels WHERE 1=1';
+        let query = 'SELECT COUNT(*) as count FROM hotels WHERE deleted_at IS NULL';
         const queryParams = [];
 
-        if (filters.city) {
-            query += ' AND location = ?';
-            queryParams.push(filters.city);
+        if (filters.city || filters.destination) {
+            const dest = filters.city || filters.destination;
+            if (dest && dest !== '') {
+                query += ' AND location = ?';
+                queryParams.push(dest);
+            }
         }
-        if (filters.type) {
-            query += ' AND type = ?';
-            queryParams.push(filters.type);
+        if (filters.type || filters.propertyType) {
+            const raw = (filters.type || filters.propertyType);
+            if (raw && raw !== 'All') {
+                const typeFilter = raw.replace(' Hotel', '');
+                query += ' AND type LIKE ?';
+                queryParams.push(`%${typeFilter}%`);
+            }
         }
-        if (filters.minPrice) {
+        if (filters.minPrice || (filters.priceRange && filters.priceRange[0])) {
             query += ' AND base_price >= ?';
-            queryParams.push(parseFloat(filters.minPrice));
+            queryParams.push(parseFloat(filters.minPrice || filters.priceRange[0]));
         }
-        if (filters.maxPrice) {
+        if (filters.maxPrice || (filters.priceRange && filters.priceRange[1])) {
             query += ' AND base_price <= ?';
-            queryParams.push(parseFloat(filters.maxPrice));
+            queryParams.push(parseFloat(filters.maxPrice || filters.priceRange[1]));
+        }
+        if (filters.verifiedOnly === 'true' || filters.verifiedOnly === true) {
+            query += ' AND status = "Active"';
         }
 
         const [rows] = await pool.execute(query, queryParams);
@@ -58,17 +87,14 @@ class HotelsRepository {
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT * FROM hotels WHERE id = ?', [id]);
-        if (!rows[0]) return null;
-
-        const hotel = rows[0];
-        hotel.images = await this.findImagesByHotelId(id);
-        return hotel;
+        const [rows] = await pool.execute('SELECT * FROM hotels WHERE id = ? AND deleted_at IS NULL', [id]);
+        return rows[0] || null;
     }
 
     async create(hotelData) {
         const name = hotelData.name;
         const description = hotelData.description || null;
+        const type = hotelData.type || 'Hotel';
         const location = hotelData.location || null;
         const address = hotelData.address || null;
         const latitude = hotelData.latitude ? parseFloat(hotelData.latitude) : null;
@@ -83,11 +109,11 @@ class HotelsRepository {
         const owner_phone = hotelData.owner_phone || hotelData.ownerPhone || null;
         const owner_email = hotelData.owner_email || hotelData.ownerEmail || null;
 
-        console.log('Final mapping for Hotel Repository create:', { owner_name, owner_phone, owner_email });
+        console.log('Final mapping for Hotel Repository create:', { owner_name, owner_phone, owner_email, type });
 
         const [result] = await pool.execute(
-            'INSERT INTO hotels (name, description, location, address, latitude, longitude, total_rooms, available_rooms, base_price, status, main_image, rating, owner_name, owner_phone, owner_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, description, location, address, latitude, longitude, total_rooms, available_rooms, base_price, status, main_image, rating, owner_name, owner_phone, owner_email]
+            'INSERT INTO hotels (name, description, type, location, address, latitude, longitude, total_rooms, available_rooms, base_price, status, main_image, rating, owner_name, owner_phone, owner_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, type, location, address, latitude, longitude, total_rooms, available_rooms, base_price, status, main_image, rating, owner_name, owner_phone, owner_email]
         );
         console.log('✅ Hotel Created in DB:', result.insertId);
         return result.insertId;
@@ -98,6 +124,7 @@ class HotelsRepository {
 
         if (hotelData.name !== undefined) updateFields.name = hotelData.name;
         if (hotelData.description !== undefined) updateFields.description = hotelData.description;
+        if (hotelData.type !== undefined) updateFields.type = hotelData.type;
         if (hotelData.location !== undefined) updateFields.location = hotelData.location;
         if (hotelData.address !== undefined) updateFields.address = hotelData.address;
         if (hotelData.total_rooms !== undefined) updateFields.total_rooms = parseInt(hotelData.total_rooms);
@@ -127,7 +154,7 @@ class HotelsRepository {
     }
 
     async delete(id) {
-        const [result] = await pool.execute('DELETE FROM hotels WHERE id = ?', [id]);
+        const [result] = await pool.execute('UPDATE hotels SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 
@@ -180,9 +207,41 @@ class HotelsRepository {
 
     async findUniqueLocations() {
         const [rows] = await pool.execute(
-            'SELECT DISTINCT location as name, main_image as image FROM hotels WHERE location IS NOT NULL AND location != ""'
+            'SELECT DISTINCT location FROM hotels WHERE location IS NOT NULL AND status = "Active" AND deleted_at IS NULL'
         );
         return rows;
+    }
+
+    async findAmenitiesByHotelIds(hotelIds) {
+        if (!hotelIds || hotelIds.length === 0) return {};
+        const placeholders = hotelIds.map(() => '?').join(',');
+        const [rows] = await pool.execute(
+            `SELECT ha.hotel_id, a.* FROM amenities a JOIN hotel_amenities ha ON a.id = ha.amenity_id WHERE ha.hotel_id IN (${placeholders})`,
+            hotelIds
+        );
+
+        const map = {};
+        rows.forEach(row => {
+            if (!map[row.hotel_id]) map[row.hotel_id] = [];
+            map[row.hotel_id].push(row);
+        });
+        return map;
+    }
+
+    async findImagesByHotelIds(hotelIds) {
+        if (!hotelIds || hotelIds.length === 0) return {};
+        const placeholders = hotelIds.map(() => '?').join(',');
+        const [rows] = await pool.execute(
+            `SELECT hotel_id, image_url FROM property_images WHERE hotel_id IN (${placeholders})`,
+            hotelIds
+        );
+
+        const map = {};
+        rows.forEach(row => {
+            if (!map[row.hotel_id]) map[row.hotel_id] = [];
+            map[row.hotel_id].push(row.image_url);
+        });
+        return map;
     }
 }
 

@@ -3,56 +3,73 @@ const pool = require('../../config/database');
 class WishlistRepository {
     async findByUserId(userId) {
         // Returns both hotels and properties in the wishlist
-        const query = `
-            SELECT w.*, 
-                   CASE 
-                     WHEN w.entity_type = 'Hotel' THEN h.name 
-                     WHEN w.entity_type = 'Property' THEN p.name 
-                   END as name,
-                   CASE 
-                     WHEN w.entity_type = 'Hotel' THEN h.location 
-                     WHEN w.entity_type = 'Property' THEN p.location 
-                   END as location,
-                   CASE 
-                     WHEN w.entity_type = 'Hotel' THEN h.main_image 
-                     WHEN w.entity_type = 'Property' THEN p.main_image 
-                   END as image,
-                   CASE 
-                     WHEN w.entity_type = 'Hotel' THEN h.base_price 
-                     WHEN w.entity_type = 'Property' THEN p.price_per_night 
-                   END as price
-            FROM wishlist w
-            LEFT JOIN hotels h ON w.entity_type = 'Hotel' AND w.entity_id = h.id
-            LEFT JOIN properties p ON w.entity_type = 'Property' AND w.entity_id = p.id
-            WHERE w.user_id = ?
-            ORDER BY w.created_at DESC
-        `;
-        const [rows] = await pool.execute(query, [userId]);
-        return rows;
+        try {
+            const [wishlistRows] = await pool.execute(
+                'SELECT * FROM wishlist WHERE user_id = ? ORDER BY created_at DESC',
+                [userId]
+            );
+
+            if (wishlistRows.length === 0) return [];
+
+            const hotelIds = wishlistRows.filter(w => w.entity_type === 'Hotel').map(w => w.entity_id);
+            const propertyIds = wishlistRows.filter(w => w.entity_type === 'Property' || w.entity_type === 'Room').map(w => w.entity_id);
+            // Wait, previous code only handled 'Hotel' and 'Property'
+
+            const hotelsMap = {};
+            if (hotelIds.length > 0) {
+                const placeholders = hotelIds.map(() => '?').join(',');
+                const [hotels] = await pool.execute(
+                    `SELECT id, name, location, main_image, base_price FROM hotels WHERE id IN (${placeholders})`, 
+                    hotelIds
+                );
+                hotels.forEach(h => hotelsMap[h.id] = h);
+            }
+
+            const propertiesMap = {};
+            if (propertyIds.length > 0) {
+                const placeholders = propertyIds.map(() => '?').join(',');
+                const [properties] = await pool.execute(
+                    `SELECT id, name, location, main_image, price_per_night FROM properties WHERE id IN (${placeholders})`, 
+                    propertyIds
+                );
+                properties.forEach(p => propertiesMap[p.id] = p);
+            }
+
+            return wishlistRows.map(w => {
+                const entityDetails = w.entity_type === 'Hotel' ? hotelsMap[w.entity_id] : propertiesMap[w.entity_id];
+                if (!entityDetails) return w; // fallback if entity deleted
+                return {
+                    ...w,
+                    name: entityDetails.name,
+                    location: entityDetails.location,
+                    image: entityDetails.main_image,
+                    price: w.entity_type === 'Hotel' ? entityDetails.base_price : entityDetails.price_per_night
+                };
+            });
+        } catch (error) {
+            if (error.code === 'ER_NO_SUCH_TABLE') {
+                console.warn('⚠️ Wishlist table does not exist yet.');
+                return [];
+            }
+            throw error;
+        }
     }
 
-    async add(userId, entityType, entityId) {
-        const [result] = await pool.execute(
-            'INSERT IGNORE INTO wishlist (user_id, entity_type, entity_id) VALUES (?, ?, ?)',
-            [userId, entityType, entityId]
-        );
-        return result.affectedRows > 0;
-    }
-
-    async remove(userId, entityType, entityId) {
-        const [result] = await pool.execute(
+    async toggle(userId, entityType, entityId) {
+        const [deleteResult] = await pool.execute(
             'DELETE FROM wishlist WHERE user_id = ? AND entity_type = ? AND entity_id = ?',
             [userId, entityType, entityId]
         );
-        return result.affectedRows > 0;
-    }
+        
+        if (deleteResult.affectedRows > 0) {
+            return false; // Removed
+        }
 
-    async checkExists(userId, entityType, entityId) {
-        const [rows] = await pool.execute(
-            'SELECT id FROM wishlist WHERE user_id = ? AND entity_type = ? AND entity_id = ?',
+        await pool.execute(
+            'INSERT IGNORE INTO wishlist (user_id, entity_type, entity_id) VALUES (?, ?, ?)',
             [userId, entityType, entityId]
         );
-        return rows.length > 0;
+        return true; // Added
     }
 }
 

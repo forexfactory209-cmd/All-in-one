@@ -2,6 +2,9 @@ const pool = require('../../config/database');
 
 class BookingsRepository {
     async findAll(limit = 10, offset = 0) {
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
         const [rows] = await pool.execute(`
             SELECT b.*, u.full_name as guest_name, u.phone as guest_phone,
             CASE 
@@ -19,14 +22,18 @@ class BookingsRepository {
             LEFT JOIN rooms r ON b.entity_type = 'Room' AND b.entity_id = r.id
             LEFT JOIN hotels h ON r.hotel_id = h.id
             LEFT JOIN payments pay ON pay.booking_id = b.id
+            WHERE b.deleted_at IS NULL 
+            AND u.deleted_at IS NULL
+            AND (p.id IS NULL OR p.deleted_at IS NULL)
+            AND (r.id IS NULL OR (r.deleted_at IS NULL AND h.deleted_at IS NULL))
             ORDER BY b.created_at DESC
             LIMIT ? OFFSET ?
-        `, [limit.toString(), offset.toString()]);
+        `, [safeLimit.toString(), safeOffset.toString()]);
         return rows;
     }
 
     async countAll() {
-        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM bookings');
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM bookings WHERE deleted_at IS NULL');
         return rows[0].count;
     }
 
@@ -38,11 +45,38 @@ class BookingsRepository {
         if (payment_status && payment_status.toUpperCase() === 'PAID') normalizedPaymentStatus = 'Paid';
         if (payment_status && payment_status.toUpperCase() === 'REFUNDED') normalizedPaymentStatus = 'Refunded';
 
-        const [result] = await pool.execute(
-            'INSERT INTO bookings (user_id, entity_type, entity_id, check_in, check_out, total_price, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [user_id, entity_type, entity_id, check_in, check_out, total_price, status || 'Pending', normalizedPaymentStatus]
-        );
-        return result.insertId;
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // 1. Check Availability (with lock to prevent double bookings)
+            const [overlapping] = await connection.execute(`
+                SELECT id FROM bookings 
+                WHERE entity_type = ? AND entity_id = ? 
+                AND status != 'Cancelled' 
+                AND deleted_at IS NULL
+                AND check_in < ? AND check_out > ?
+                FOR UPDATE
+            `, [entity_type, entity_id, check_out, check_in]);
+
+            if (overlapping.length > 0) {
+                throw new Error('These dates are no longer available.');
+            }
+
+            // 2. Insert Booking
+            const [result] = await connection.execute(
+                'INSERT INTO bookings (user_id, entity_type, entity_id, check_in, check_out, total_price, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [user_id, entity_type, entity_id, check_in, check_out, total_price, status || 'Pending', normalizedPaymentStatus]
+            );
+
+            await connection.commit();
+            return result.insertId;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 
     async findByUserId(userId) {
@@ -61,7 +95,7 @@ class BookingsRepository {
             LEFT JOIN properties p ON b.entity_type = 'Property' AND b.entity_id = p.id
             LEFT JOIN rooms r ON b.entity_type = 'Room' AND b.entity_id = r.id
             LEFT JOIN hotels h ON r.hotel_id = h.id
-            WHERE b.user_id = ?
+            WHERE b.user_id = ? AND b.deleted_at IS NULL
             ORDER BY b.created_at DESC
         `, [userId]);
         return rows;
@@ -93,7 +127,7 @@ class BookingsRepository {
             LEFT JOIN rooms r ON b.entity_type = 'Room' AND b.entity_id = r.id
             LEFT JOIN hotels h ON r.hotel_id = h.id
             LEFT JOIN payments pay ON pay.booking_id = b.id
-            WHERE b.id = ?
+            WHERE b.id = ? AND b.deleted_at IS NULL
         `, [id]);
         return rows[0] || null;
     }
@@ -117,7 +151,7 @@ class BookingsRepository {
         if (updateFields.length === 0) return false;
 
         values.push(id);
-        const [result] = await pool.execute(`UPDATE bookings SET ${updateFields.join(', ')} WHERE id = ?`, values);
+        const [result] = await pool.execute(`UPDATE bookings SET ${updateFields.join(', ')} WHERE id = ? AND deleted_at IS NULL`, values);
         return result.affectedRows > 0;
     }
 
@@ -140,12 +174,12 @@ class BookingsRepository {
         const fields = Object.keys(updateFields).map(key => `${key} = ?`).join(', ');
         const values = [...Object.values(updateFields), id];
 
-        const [result] = await pool.execute(`UPDATE bookings SET ${fields} WHERE id = ?`, values);
+        const [result] = await pool.execute(`UPDATE bookings SET ${fields} WHERE id = ? AND deleted_at IS NULL`, values);
         return result.affectedRows > 0;
     }
 
     async delete(id) {
-        const [result] = await pool.execute('DELETE FROM bookings WHERE id = ?', [id]);
+        const [result] = await pool.execute('UPDATE bookings SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 }

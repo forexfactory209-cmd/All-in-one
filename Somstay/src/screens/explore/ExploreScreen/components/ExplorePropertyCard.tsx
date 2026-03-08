@@ -78,7 +78,7 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
                     <Text style={styles.title} numberOfLines={1}>{property.title}</Text>
                     <View style={styles.ratingContainer}>
                         <Ionicons name="star" size={14} color="#FFD700" />
-                        <Text style={styles.ratingText}>{property.rating.toFixed(1)}</Text>
+                        <Text style={styles.ratingText}>{Number(property.rating || 4.5).toFixed(1)}</Text>
                     </View>
                 </View>
 

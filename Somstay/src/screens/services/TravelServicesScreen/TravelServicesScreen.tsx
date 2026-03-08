@@ -20,7 +20,7 @@ export const TravelServicesScreen: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState('1');
     const [filterVisible, setFilterVisible] = useState(false);
     const [appliedFilters, setAppliedFilters] = useState<any>(null);
-    const { services, loading } = useTravelServices(appliedFilters);
+    const { services, loading } = useTravelServices(selectedCategory, appliedFilters);
 
     const renderHeader = () => (
         <View style={styles.headerContainer}>
@@ -37,7 +37,7 @@ export const TravelServicesScreen: React.FC = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar barStyle="dark-content" />
             <TravelServicesHeader />
 

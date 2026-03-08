@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, FlatList, ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/src/theme';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 // Components
 import { BookingHeader } from './components/BookingHeader';
@@ -12,6 +13,9 @@ import { BookingCard } from './components/BookingCard';
 import { useBookings } from './hooks/useBookings';
 
 export const BookingScreen: React.FC = () => {
+    const { settings } = useApp();
+    const theme = useTheme();
+
     const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
     const { bookings, loading } = useBookings();
 
@@ -19,13 +23,13 @@ export const BookingScreen: React.FC = () => {
         if (activeTab === 'upcoming') {
             return booking.status === 'PENDING' || booking.status === 'CONFIRMED';
         } else {
-            return booking.status === 'COMPLETED';
+            return booking.status === 'COMPLETED' || booking.status === 'CANCELLED';
         }
     });
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <StatusBar barStyle="dark-content" />
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
+            <StatusBar barStyle={settings.darkMode ? 'light-content' : 'dark-content'} />
             <BookingHeader />
             <BookingTabs activeTab={activeTab} onTabChange={setActiveTab} />
 

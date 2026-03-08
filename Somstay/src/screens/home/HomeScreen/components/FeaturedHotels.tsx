@@ -6,6 +6,7 @@ import {
 import { PropertyResponse } from '@/src/services/property/propertyService.types';
 import { HotelCard } from './HotelCard';
 import { styles } from './FeaturedHotels.styles';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 interface FeaturedHotelsProps {
     hotels: PropertyResponse[];
@@ -65,6 +66,9 @@ export const FeaturedHotels: React.FC<FeaturedHotelsProps> = ({
     onLoadMore,
     onToggleWishlist,
 }) => {
+    const { t } = useApp();
+    const theme = useTheme();
+
     const renderItem = useCallback(
         ({ item }: ListRenderItemInfo<PropertyResponse>) => (
             <HotelCard
@@ -89,9 +93,9 @@ export const FeaturedHotels: React.FC<FeaturedHotelsProps> = ({
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>Featured Hotels</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('featured_hotels')}</Text>
                 <TouchableOpacity>
-                    <Text style={styles.seeAll}>See all</Text>
+                    <Text style={styles.seeAll}>{t('see_all')}</Text>
                 </TouchableOpacity>
             </View>
 

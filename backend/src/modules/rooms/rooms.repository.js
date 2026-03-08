@@ -1,25 +1,122 @@
 const pool = require('../../config/database');
 
 class RoomsRepository {
-    async findAllByHotelId(hotelId, limit = 10, offset = 0) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM rooms WHERE hotel_id = ? ORDER BY room_number ASC LIMIT ? OFFSET ?',
-            [hotelId, limit.toString(), offset.toString()]
-        );
-        const rooms = await Promise.all(rows.map(async (room) => {
-            room.images = await this.findImagesByRoomId(room.id);
-            return room;
+    async findAll(limit = 10, offset = 0, filters = {}) {
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
+        let query = `
+            SELECT r.*, h.name as hotel_name, h.location as hotel_location, h.main_image as hotel_image,
+                   (SELECT GROUP_CONCAT(image_url) FROM property_images WHERE room_id = r.id) as images_list
+            FROM rooms r 
+            JOIN hotels h ON r.hotel_id = h.id 
+            WHERE r.deleted_at IS NULL AND h.deleted_at IS NULL
+        `;
+        const queryParams = [];
+
+        if (filters.wishlistOnly === 'true' || filters.wishlistOnly === true) {
+            const userId = filters.userId || 1;
+            query += ' AND r.id IN (SELECT entity_id FROM wishlist WHERE user_id = ? AND (entity_type = "Room" OR entity_type = "Property"))';
+            queryParams.push(userId);
+        }
+
+        if (filters.city && filters.city !== '' && filters.city !== 'All') {
+            query += ' AND (h.location = ? OR h.location LIKE ?)';
+            queryParams.push(filters.city, `%${filters.city}%`);
+        }
+
+        if (filters.minPrice) {
+            query += ' AND r.price >= ?';
+            queryParams.push(parseFloat(filters.minPrice));
+        }
+
+        if (filters.maxPrice) {
+            query += ' AND r.price <= ?';
+            queryParams.push(parseFloat(filters.maxPrice));
+        }
+
+        query += ` ORDER BY r.created_at DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`;
+        
+        const [rows] = await pool.query(query, queryParams);
+
+        return rows.map(room => ({
+            ...room,
+            images: room.images_list ? room.images_list.split(',') : []
         }));
-        return rooms;
+    }
+
+    async countAll(filters = {}) {
+        let query = `
+            SELECT COUNT(*) as count 
+            FROM rooms r
+            JOIN hotels h ON r.hotel_id = h.id
+            WHERE r.deleted_at IS NULL AND h.deleted_at IS NULL
+        `;
+        const queryParams = [];
+
+        if (filters.wishlistOnly === 'true' || filters.wishlistOnly === true) {
+            const userId = filters.userId || 1;
+            const [wRows] = await pool.execute('SELECT entity_id FROM wishlist WHERE user_id = ? AND (entity_type = "Room" OR entity_type = "Property")', [userId]);
+            if (wRows.length === 0) return 0;
+            const wIds = wRows.map(w => w.entity_id);
+            const ph = wIds.map(() => '?').join(',');
+            query += ` AND r.id IN (${ph})`;
+            queryParams.push(...wIds);
+        }
+
+        if (filters.city && filters.city !== '' && filters.city !== 'All') {
+            query += ' AND (h.location = ? OR h.location LIKE ?)';
+            queryParams.push(filters.city, `%${filters.city}%`);
+        }
+
+        const [rows] = await pool.execute(query, queryParams);
+        return rows[0].count;
+    }
+
+    async findAllByHotelId(hotelId, limit = 10, offset = 0) {
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
+        const [rows] = await pool.query(
+            `SELECT * FROM rooms WHERE hotel_id = ? AND deleted_at IS NULL ORDER BY room_number ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+            [hotelId]
+        );
+
+        if (rows.length > 0) {
+            const roomIds = rows.map(r => r.id);
+            const allImages = await this.findImagesByRoomIds(roomIds);
+
+            rows.forEach(room => {
+                room.images = allImages[room.id] || [];
+            });
+        }
+
+        return rows;
+    }
+
+    async findImagesByRoomIds(roomIds) {
+        if (!roomIds || roomIds.length === 0) return {};
+        const placeholders = roomIds.map(() => '?').join(',');
+        const [rows] = await pool.execute(
+            `SELECT room_id, image_url FROM property_images WHERE room_id IN (${placeholders})`,
+            roomIds
+        );
+
+        const map = {};
+        rows.forEach(row => {
+            if (!map[row.room_id]) map[row.room_id] = [];
+            map[row.room_id].push(row.image_url);
+        });
+        return map;
     }
 
     async countByHotelId(hotelId) {
-        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM rooms WHERE hotel_id = ?', [hotelId]);
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM rooms WHERE hotel_id = ? AND deleted_at IS NULL', [hotelId]);
         return rows[0].count;
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [id]);
+        const [rows] = await pool.execute('SELECT * FROM rooms WHERE id = ? AND deleted_at IS NULL', [id]);
         if (!rows[0]) return null;
 
         const room = rows[0];
@@ -72,7 +169,7 @@ class RoomsRepository {
     }
 
     async delete(id) {
-        const [result] = await pool.execute('DELETE FROM rooms WHERE id = ?', [id]);
+        const [result] = await pool.execute('UPDATE rooms SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 

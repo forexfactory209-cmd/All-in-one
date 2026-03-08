@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { styles } from './SearchBar.styles';
+import { useApp } from '@/src/context/AppContext';
 
 interface SearchBarProps {
     value: string;
@@ -22,6 +23,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onFilterPress,
     onSearchBarPress,
 }) => {
+    const { t } = useApp();
     return (
         <View style={styles.container}>
             {/* Search Input Container */}
@@ -33,7 +35,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 >
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search cities in Somaliland..."
+                        placeholder={t('search_cities')}
                         placeholderTextColor="#999"
                         value={value}
                         editable={false}

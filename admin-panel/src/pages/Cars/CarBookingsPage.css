@@ -1,0 +1,333 @@
+.car-bookings-container {
+    padding: 24px;
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.search-bar-container {
+    margin-top: 20px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #E2E8F0;
+}
+
+.search-icon {
+    color: #94A3B8;
+    margin-right: 12px;
+}
+
+.search-bar-container input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+}
+
+.loading-state {
+    padding: 40px;
+    text-align: center;
+    color: #64748B;
+}
+
+.cars-table {
+    width: 100%;
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.cars-table th, .cars-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.cars-table th {
+    background-color: #F8FAFC;
+    font-weight: 600;
+    color: #475569;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vehicle-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-thumbnail {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.bold-text {
+    font-weight: 600;
+    color: #1E293B;
+    margin: 0;
+}
+
+.sub-text {
+    color: #64748B;
+    font-size: 13px;
+    margin: 4px 0 0 0;
+}
+
+.status-select, .payment-status-select {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none; /* remove default arrow */
+}
+
+/* Status Colors */
+.status-select.pending { background: #FEF3C7; color: #D97706; border-color: #FDE68A; }
+.status-select.confirmed { background: #DBEAFE; color: #2563EB; border-color: #BFDBFE; }
+.status-select.active { background: #DCFCE7; color: #16A34A; border-color: #BBF7D0; }
+.status-select.completed { background: #F1F5F9; color: #475569; border-color: #E2E8F0; }
+.status-select.cancelled { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+
+.payment-status-select.unpaid { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+.payment-status-select.paid { background: #DCFCE7; color: #16A34A; border-color: #BBF7D0; }
+.payment-status-select.refunded { background: #F3F4F6; color: #6B7280; border-color: #E5E7EB; }
+
+.view-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #F1F5F9;
+    color: #475569;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    background: #E2E8F0;
+    color: #1E293B;
+}
+
+.booking-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.booking-modal-content.premium-modal {
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    width: 650px;
+    max-width: 95vw;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+    position: relative;
+    border: 1px solid #F1F5F9;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #F8FAFC;
+    padding-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #0F172A;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.modal-subtitle {
+    margin: 4px 0 0 0;
+    color: #64748B;
+    font-size: 14px;
+}
+
+.status-badge-large {
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.status-badge-large.pending { background: #FEF3C7; color: #D97706; }
+.status-badge-large.confirmed { background: #DBEAFE; color: #1D4ED8; }
+.status-badge-large.active { background: #DCFCE7; color: #15803D; }
+.status-badge-large.completed { background: #F1F5F9; color: #475569; }
+.status-badge-large.cancelled { background: #FEE2E2; color: #B91C1C; }
+
+.detail-section {
+    background: #F8FAFC;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.detail-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 13px;
+    color: #0288AC;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.vehicle-info-horizontal {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.modal-car-image {
+    width: 140px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 3px solid white;
+}
+
+.vehicle-texts h5 {
+    margin: 0;
+    font-size: 18px;
+    color: #1E293B;
+}
+
+.vehicle-texts p {
+    margin: 5px 0;
+    color: #64748B;
+    font-size: 14px;
+}
+
+.vehicle-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.vehicle-stats span {
+    font-size: 13px;
+    color: #475569;
+}
+
+.premium-card {
+    background: white !important;
+    border: 1px solid #F1F5F9 !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #F8FAFC;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span {
+    color: #94A3B8;
+    font-size: 13px;
+}
+
+.detail-row strong {
+    color: #334155;
+    font-size: 14px;
+}
+
+.payment-summary-card {
+    background: #0288AC;
+    border: none !important;
+    color: white;
+}
+
+.payment-summary-card h4 {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.payment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.payment-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.payment-item label {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.payment-item .price {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.payment-pill {
+    align-self: flex-start;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.payment-pill.unpaid { background: #FECACA; color: #B91C1C; }
+.payment-pill.paid { background: #BBF7D0; color: #166534; }
+.payment-pill.refunded { background: #E2E8F0; color: #475569; }
+
+.close-modal-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    background: #F8FAFC;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: #F1F5F9;
+    color: #1E293B;
+}

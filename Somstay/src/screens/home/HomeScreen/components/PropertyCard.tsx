@@ -58,7 +58,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                     </View>
                     <View style={styles.ratingContainer}>
                         <Icon name="star" size={16} color="#FFD700" />
-                        <Text style={styles.rating}>{property.average_rating?.toFixed(1) || '4.9'}</Text>
+                        <Text style={styles.rating}>{(property.average_rating ? Number(property.average_rating) : 4.9).toFixed(1)}</Text>
                     </View>
                 </View>
             </View>

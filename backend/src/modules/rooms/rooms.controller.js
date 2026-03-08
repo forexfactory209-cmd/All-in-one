@@ -2,6 +2,31 @@ const roomsService = require('./rooms.service');
 const { sendResponse, sendError } = require('../../utils/response');
 
 class RoomsController {
+    async getAllRooms(req, res) {
+        try {
+            const { page = 1, limit = 10, ...filters } = req.query;
+            const result = await roomsService.getAllRooms(parseInt(page), parseInt(limit), filters);
+            return sendResponse(res, 200, true, 'Rooms retrieved successfully', result.rooms, null, result.pagination);
+        } catch (error) {
+            console.error('Error fetching all rooms:', error);
+            return sendError(res, 500, 'Internal Server Error');
+        }
+    }
+
+    async getRoomById(req, res) {
+        try {
+            const { id } = req.params;
+            const room = await roomsService.getRoomById(id);
+            if (!room) {
+                return sendError(res, 404, 'Room not found');
+            }
+            return sendResponse(res, 200, true, 'Room retrieved successfully', room);
+        } catch (error) {
+            console.error('Error fetching room by id:', error);
+            return sendError(res, 500, 'Internal Server Error');
+        }
+    }
+
     async getRoomsByHotelId(req, res) {
         try {
             const { hotelId } = req.params;

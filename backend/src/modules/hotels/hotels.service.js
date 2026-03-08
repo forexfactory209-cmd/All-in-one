@@ -3,8 +3,31 @@ const roomsRepository = require('../rooms/rooms.repository');
 const cache = require('../../utils/cache');
 
 class HotelsService {
+    mapHotel(hotel) {
+        if (!hotel) return null;
+
+        // Optimized mapping for production performance
+        return {
+            ...hotel,
+            id: hotel.id.toString(),
+            title: hotel.name,
+            price_per_night: parseFloat(hotel.base_price) || 0,
+            average_rating: parseFloat(hotel.rating) || 4.5,
+            city: hotel.location || 'Hargeisa',
+            country: 'Somalia',
+            photos: [
+                ...(hotel.main_image ? [{ id: 'main', photo_url: hotel.main_image }] : []),
+                ...(hotel.images ? hotel.images.map((url, i) => ({ id: `img-${i}`, photo_url: url })) : [])
+            ],
+            isVerified: hotel.status === 'Active',
+            isFeatured: hotel.rating >= 4.0,
+            type: hotel.type || 'Hotel' 
+        };
+    }
+
     async getAllHotels(page = 1, limit = 10, filters = {}) {
-        const cacheKey = `hotels:list:p${page}:l${limit}:f${JSON.stringify(filters)}`;
+        // Bumped version to v4 to refresh all hotel cache keys with correct types
+        const cacheKey = `hotels:v4:list:p${page}:l${limit}:f${JSON.stringify(filters)}`;
         const cachedData = await cache.get(cacheKey);
         if (cachedData) return cachedData;
 
@@ -12,15 +35,22 @@ class HotelsService {
         const hotels = await hotelsRepository.findAll(limit, offset, filters);
         const total = await hotelsRepository.countAll(filters);
 
-        // Enrich each hotel with its amenities and images for the list view
-        const enrichedHotels = await Promise.all(hotels.map(async (hotel) => {
-            hotel.amenities = await hotelsRepository.findAmenitiesByHotelId(hotel.id);
-            hotel.images = await hotelsRepository.findImagesByHotelId(hotel.id);
-            return hotel;
-        }));
+        if (hotels.length > 0) {
+            const hotelIds = hotels.map(h => h.id);
+            const allAmenities = await hotelsRepository.findAmenitiesByHotelIds(hotelIds);
+            const allImages = await hotelsRepository.findImagesByHotelIds(hotelIds);
+
+            // Enrich and map each hotel
+            hotels.forEach(hotel => {
+                hotel.amenities = allAmenities[hotel.id] || [];
+                hotel.images = allImages[hotel.id] || [];
+            });
+        }
+
+        const mappedHotels = hotels.map(hotel => this.mapHotel(hotel));
 
         const result = {
-            hotels: enrichedHotels,
+            hotels: mappedHotels,
             pagination: {
                 total,
                 page: parseInt(page),
@@ -35,20 +65,28 @@ class HotelsService {
     }
 
     async getHotelById(id) {
-        const cacheKey = `hotels:detail:${id}`;
+        const cacheKey = `hotels:v3:detail:${id}`;
         const cachedData = await cache.get(cacheKey);
         if (cachedData) return cachedData;
 
         const hotel = await hotelsRepository.findById(id);
         if (hotel) {
-            hotel.amenities = await hotelsRepository.findAmenitiesByHotelId(id);
-            hotel.rooms = await roomsRepository.findAllByHotelId(id);
+            const [amenities, images, rooms] = await Promise.all([
+                hotelsRepository.findAmenitiesByHotelId(id),
+                hotelsRepository.findImagesByHotelId(id),
+                roomsRepository.findAllByHotelId(id)
+            ]);
+            hotel.amenities = amenities;
+            hotel.images = images;
+            hotel.rooms = rooms;
         }
 
-        if (hotel) {
-            await cache.set(cacheKey, hotel, 300);
+        const result = this.mapHotel(hotel);
+
+        if (result) {
+            await cache.set(cacheKey, result, 300);
         }
-        return hotel;
+        return result;
     }
 
     async createHotel(hotelData) {

@@ -63,12 +63,14 @@ export const styles = StyleSheet.create({
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: spacing.lg,
     },
     bookingIdContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        flex: 1,
+        marginRight: spacing.md,
     },
     iconBox: {
         width: 44,
@@ -77,19 +79,20 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(2, 136, 172, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: spacing.md,
+        marginRight: spacing.sm,
     },
     label: {
-        fontSize: 11,
+        fontSize: 10,
         color: '#9BA3A3',
         fontWeight: '700',
         textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
     bookingId: {
         fontSize: 15,
         color: colors.dark,
         fontWeight: '700',
-        marginTop: 2,
+        marginTop: 1,
     },
     amountContainer: {
         alignItems: 'flex-end',
@@ -97,8 +100,8 @@ export const styles = StyleSheet.create({
     amount: {
         fontSize: 18,
         color: colors.primary,
-        fontWeight: '700',
-        marginTop: 2,
+        fontWeight: '800',
+        marginTop: 1,
     },
     divider: {
         height: 1,
@@ -106,7 +109,10 @@ export const styles = StyleSheet.create({
         width: '100%',
         marginBottom: spacing.lg,
     },
-    detailsRow: {
+    detailsSection: {
+        gap: spacing.sm,
+    },
+    detailItem: {
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -115,6 +121,13 @@ export const styles = StyleSheet.create({
         color: colors.secondaryText,
         marginLeft: spacing.sm,
         fontWeight: '500',
+    },
+    helperText: {
+        fontSize: 13,
+        color: colors.secondaryText,
+        textAlign: 'center',
+        marginTop: spacing.sm,
+        lineHeight: 18,
     },
     footerContainer: {
         paddingHorizontal: spacing.lg,

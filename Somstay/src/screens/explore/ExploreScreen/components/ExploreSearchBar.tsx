@@ -2,31 +2,31 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '@/src/theme';
+import { useTheme } from '@/src/context/AppContext';
 
 interface ExploreSearchBarProps {
     location: string;
     details: string;
     onFilterPress: () => void;
-    onSearchPress?: () => void;
 }
 
 export const ExploreSearchBar: React.FC<ExploreSearchBarProps> = ({
     location,
     details,
     onFilterPress,
-    onSearchPress,
 }) => {
+    const theme = useTheme();
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.searchButton} onPress={onSearchPress}>
+            <View style={[styles.searchDisplay, { backgroundColor: theme.inputBg }]}>
                 <Ionicons name="search" size={20} color={colors.primary} style={styles.searchIcon} />
                 <View style={styles.textContainer}>
                     <Text style={styles.locationText}>{location.toUpperCase()}</Text>
-                    <Text style={styles.detailsText} numberOfLines={1}>{details}</Text>
+                    <Text style={[styles.detailsText, { color: theme.textSecondary }]} numberOfLines={1}>{details}</Text>
                 </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
+            <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.inputBg }]} onPress={onFilterPress}>
                 <Ionicons name="filter" size={20} color={colors.primary} />
             </TouchableOpacity>
         </View>
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         gap: spacing.sm,
     },
-    searchButton: {
+    searchDisplay: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',

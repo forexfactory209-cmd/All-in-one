@@ -9,7 +9,7 @@ const SKELETON_IMG_H = SKELETON_CARD_W * 0.8; // match new ratio
 
 export const styles = StyleSheet.create({
     container: {
-        marginTop: 20,
+        marginTop: 13,
     },
     header: {
         flexDirection: 'row',

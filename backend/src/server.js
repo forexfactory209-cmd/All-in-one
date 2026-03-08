@@ -15,6 +15,8 @@ async function startServer() {
         // Step 1 & 2: SSH tunnel + MySQL pool
         await initDatabase();
 
+
+
         // Step 3: Start Express
         const server = app.listen(process.env.PORT || 5000, () => {
             console.log(`

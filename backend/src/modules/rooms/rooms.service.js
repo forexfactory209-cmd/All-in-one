@@ -2,6 +2,51 @@ const roomsRepository = require('./rooms.repository');
 const cache = require('../../utils/cache');
 
 class RoomsService {
+    mapRoom(room) {
+        if (!room) return null;
+        return {
+            ...room,
+            id: (room.id || '').toString(),
+            hotel_id: (room.hotel_id || '').toString(),
+            title: room.title || `${room.type || 'Standard'} Room`,
+            hotel_name: room.hotel_name || '',
+            price_per_night: parseFloat(room.price) || 0,
+            city: room.hotel_location || '',
+            country: 'Somalia',
+            photos: room.images && room.images.length > 0
+                ? room.images.map((url, i) => ({ id: `img-${i}`, photo_url: url }))
+                : [{ id: 'main', photo_url: room.image_url || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811' }],
+            average_rating: 4.5,
+            isVerified: true,
+            type: 'room'
+        };
+    }
+
+    async getAllRooms(page = 1, limit = 10, filters = {}) {
+        const cacheKey = `rooms:v1:all:p${page}:l${limit}:f${JSON.stringify(filters)}`;
+        const cachedData = await cache.get(cacheKey);
+        if (cachedData) return cachedData;
+
+        const offset = (page - 1) * limit;
+        const rooms = await roomsRepository.findAll(limit, offset, filters);
+        const total = await roomsRepository.countAll(filters);
+
+        const mappedRooms = rooms.map(room => this.mapRoom(room));
+
+        const result = {
+            rooms: mappedRooms,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / limit)
+            }
+        };
+
+        await cache.set(cacheKey, result, 300);
+        return result;
+    }
+
     async getRoomsByHotelId(hotelId, page = 1, limit = 10) {
         const cacheKey = `rooms:list:h${hotelId}:p${page}:l${limit}`;
         const cachedData = await cache.get(cacheKey);

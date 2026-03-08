@@ -1,44 +1,46 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/src/theme';
-
-const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
     container: {
-        paddingVertical: 20,
-        width: '100%',
+        paddingVertical: spacing.md,
+        backgroundColor: colors.white,
     },
-    scrollContent: {
-        paddingHorizontal: 20,
+    listContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: width, // Force width to handle centering sensation
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingHorizontal: spacing.sm,
     },
     categoryItem: {
         alignItems: 'center',
-
-        width: (width - 40 - 45) / 4, // Calculate width based on screen and gaps
+        justifyContent: 'center',
+        minWidth: 70,
     },
     iconContainer: {
-        width: 65,
-        height: 65,
-        borderRadius: 16,
-        backgroundColor: colors.primary,
-        justifyContent: 'center',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#F0F9FB', // Light version of primary
         alignItems: 'center',
-        marginBottom: 10,
-        // Add subtle shadow to icons too
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        justifyContent: 'center',
+        marginBottom: 8,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    activeIconContainer: {
+        backgroundColor: colors.primary,
     },
     categoryName: {
-        fontSize: 12,
-        color: colors.text.primary,
+        fontSize: 13,
         fontWeight: '600',
-        textAlign: 'center',
-        lineHeight: 14,
+        color: colors.secondaryText,
+    },
+    activeCategoryName: {
+        color: colors.primary,
+        fontWeight: '700',
     },
 });

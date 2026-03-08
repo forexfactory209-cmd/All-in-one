@@ -1,4 +1,4 @@
-const redis = require('../config/redis');
+const { redis, getIsUsable } = require('../config/redis');
 
 /**
  * Cache utility for Redis
@@ -9,6 +9,7 @@ class Cache {
      * @param {string} key 
      */
     async get(key) {
+        if (!getIsUsable()) return null;
         try {
             const data = await redis.get(key);
             return data ? JSON.parse(data) : null;
@@ -25,6 +26,7 @@ class Cache {
      * @param {number} ttl In seconds, default 300s (5 mins)
      */
     async set(key, value, ttl = 300) {
+        if (!getIsUsable()) return false;
         try {
             await redis.set(key, JSON.stringify(value), 'EX', ttl);
             return true;
@@ -39,6 +41,7 @@ class Cache {
      * @param {string} key 
      */
     async del(key) {
+        if (!getIsUsable()) return false;
         try {
             await redis.del(key);
             return true;
@@ -53,6 +56,7 @@ class Cache {
      * @param {string} pattern 
      */
     async delByPattern(pattern) {
+        if (!getIsUsable()) return false;
         try {
             const keys = await redis.keys(pattern);
             if (keys.length > 0) {

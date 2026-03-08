@@ -56,12 +56,14 @@ export const LocationSelectorScreen: React.FC = () => {
 
     const handleLocationSelect = (city: string) => {
         if (from === 'map') {
-            router.push({
+            router.replace({
                 pathname: '/map',
                 params: { city }
             });
         } else {
-            router.push({
+            // Use replace to prevent stacking search results on top of each other
+            // When combined with replace from SearchResults to Selector, this maintains a clean stack
+            router.replace({
                 pathname: '/search-results',
                 params: { city }
             });

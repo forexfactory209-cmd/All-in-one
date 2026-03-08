@@ -13,8 +13,11 @@ export interface WishlistItem {
 
 class WishlistService {
     async getMyWishlist() {
-        const response = await api.get('/wishlist');
-        return response.data;
+        // In development, we use userId: 1 as a placeholder
+        const response = await api.get('/wishlist', {
+            params: { userId: 1 }
+        });
+        return response.data.data;
     }
 
     async toggleWishlist(entityType: 'Hotel' | 'Property', entityId: number) {

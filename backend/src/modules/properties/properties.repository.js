@@ -1,21 +1,56 @@
 const pool = require('../../config/database');
 
 class PropertiesRepository {
-    async findAll(limit = 10, offset = 0) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM properties ORDER BY created_at DESC LIMIT ? OFFSET ?',
-            [limit.toString(), offset.toString()]
-        );
+    async findAll(limit = 10, offset = 0, filters = {}) {
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+
+        let query = 'SELECT * FROM properties WHERE deleted_at IS NULL';
+        const queryParams = [];
+
+        if (filters.city || filters.destination) {
+            query += ' AND location = ?';
+            queryParams.push(filters.city || filters.destination);
+        }
+        if (filters.type || filters.propertyType) {
+            query += ' AND type = ?';
+            queryParams.push(filters.type || filters.propertyType);
+        }
+        if (filters.minPrice) {
+            query += ' AND price_per_night >= ?';
+            queryParams.push(parseFloat(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+            query += ' AND price_per_night <= ?';
+            queryParams.push(parseFloat(filters.maxPrice));
+        }
+
+        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        queryParams.push(safeLimit.toString(), safeOffset.toString());
+
+        const [rows] = await pool.execute(query, queryParams);
         return rows;
     }
 
-    async countAll() {
-        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM properties');
+    async countAll(filters = {}) {
+        let query = 'SELECT COUNT(*) as count FROM properties WHERE deleted_at IS NULL';
+        const queryParams = [];
+
+        if (filters.city || filters.destination) {
+            query += ' AND location = ?';
+            queryParams.push(filters.city || filters.destination);
+        }
+        if (filters.type || filters.propertyType) {
+            query += ' AND type = ?';
+            queryParams.push(filters.type || filters.propertyType);
+        }
+
+        const [rows] = await pool.execute(query, queryParams);
         return rows[0].count;
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT * FROM properties WHERE id = ?', [id]);
+        const [rows] = await pool.execute('SELECT * FROM properties WHERE id = ? AND deleted_at IS NULL', [id]);
         if (!rows[0]) return null;
 
         const property = rows[0];
@@ -98,12 +133,12 @@ class PropertiesRepository {
         const fields = Object.keys(updateFields).map(key => `${key} = ?`).join(', ');
         const values = [...Object.values(updateFields), id];
         console.log('SQL UPDATE properties:', `UPDATE properties SET ${fields} WHERE id = ?`, values);
-        const [result] = await pool.execute(`UPDATE properties SET ${fields} WHERE id = ?`, values);
+        const [result] = await pool.execute(`UPDATE properties SET ${fields} WHERE id = ? AND deleted_at IS NULL`, values);
         return result.affectedRows > 0;
     }
 
     async delete(id) {
-        const [result] = await pool.execute('DELETE FROM properties WHERE id = ?', [id]);
+        const [result] = await pool.execute('UPDATE properties SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 

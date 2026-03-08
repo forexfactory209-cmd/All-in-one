@@ -9,9 +9,10 @@ interface Category {
 
 const CATEGORIES: Category[] = [
     { id: 'all', label: 'All' },
-    { id: 'vacation', label: 'Apartment Rental' },
-    { id: 'real_estate', label: 'Hotels' },
-    { id: 'brokers', label: 'Properties' },
+    { id: 'Standard', label: 'Standard Hotel' },
+    { id: 'Deluxe', label: 'Deluxe Hotel' },
+    { id: 'Luxury', label: 'Luxury Hotel' },
+    { id: 'Boutique', label: 'Boutique Hotel' },
 ];
 
 interface ExploreCategoryListProps {

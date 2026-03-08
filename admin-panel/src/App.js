@@ -17,6 +17,9 @@ import NotificationsPage from './pages/Notifications/pages/NotificationsPage';
 import ReportsPage from './pages/Reports/pages/ReportsPage';
 import AnalyticsPage from './pages/Analytics/pages/AnalyticsPage';
 import SettingsPage from './pages/Settings/pages/SettingsPage';
+import CarsPage from './pages/Cars/CarsPage';
+import CarBookingsPage from './pages/Cars/CarBookingsPage';
+import ToursPage from './pages/Tours/ToursPage';
 import './theme/DesignSystem.css';
 
 function App() {
@@ -38,6 +41,9 @@ function App() {
           <Route path="/disputes/:id?" element={<DisputesList />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/services/cars" element={<CarsPage />} />
+          <Route path="/services/car-bookings" element={<CarBookingsPage />} />
+          <Route path="/services/tours" element={<ToursPage />} />
           <Route path="/reviews" element={<div>Reviews Page (Coming Soon)</div>} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />

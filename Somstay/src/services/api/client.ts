@@ -65,7 +65,10 @@ apiClient.interceptors.response.use(
 
                 case 404:
                     // Not found
-                    console.error('Resource not found');
+                    console.error(`[API 404] Resource not found: ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
+                    if (error.response?.data) {
+                        console.error(`[API 404] Response data:`, JSON.stringify(error.response.data));
+                    }
                     break;
 
                 case 500:

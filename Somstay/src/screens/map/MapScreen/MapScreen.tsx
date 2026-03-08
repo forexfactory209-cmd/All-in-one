@@ -7,64 +7,13 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { styles } from './styles/MapScreen.styles';
 import { colors } from '@/src/theme';
 import { FilterModal } from '../../home/HomeScreen/popups/FilterModal';
-
-// Mock properties with real coordinates in Hargeisa
-const INITIAL_PROPERTIES = [
-    {
-        id: '1',
-        title: 'Hargeisa Heights Luxury Apartment',
-        location: 'Ibraahim Koodbuur District, Hargeisa',
-        rating: 4.9,
-        price: 150,
-        priceDisplay: '$150/n',
-        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
-        coordinate: { latitude: 9.5624, longitude: 44.0670 },
-        isVerified: true,
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        title: 'Somaliland Grand Villa',
-        location: 'Berbera Road, Hargeisa',
-        rating: 4.7,
-        price: 450,
-        priceDisplay: '$450k',
-        image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
-        coordinate: { latitude: 9.5650, longitude: 44.0720 },
-        isVerified: true,
-        isFeatured: false,
-    },
-    {
-        id: '3',
-        title: 'City Center Studio',
-        location: 'Downtown, Hargeisa',
-        rating: 4.5,
-        price: 120,
-        priceDisplay: '$120',
-        image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-        coordinate: { latitude: 9.5590, longitude: 44.0650 },
-        isVerified: false,
-        isFeatured: false,
-    },
-    {
-        id: '4',
-        title: 'Budget Friendly Inn',
-        location: 'Airport Road, Hargeisa',
-        rating: 4.2,
-        price: 85,
-        priceDisplay: '$85',
-        image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80',
-        coordinate: { latitude: 9.5550, longitude: 44.0600 },
-        isVerified: true,
-        isFeatured: false,
-    },
-];
+import propertyService from '@/src/services/property/propertyService';
 
 const INITIAL_REGION = {
     latitude: 9.5624,
     longitude: 44.0670,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
 };
 
 export const MapScreen: React.FC = () => {
@@ -72,44 +21,84 @@ export const MapScreen: React.FC = () => {
     const { city } = useLocalSearchParams<{ city?: string }>();
     const mapRef = useRef<MapView>(null);
 
-    const [selectedProperty, setSelectedProperty] = useState(INITIAL_PROPERTIES[0]);
+    const [selectedProperty, setSelectedProperty] = useState<any>(null);
     const [isFavorite, setIsFavorite] = useState(false);
     const [filterVisible, setFilterVisible] = useState(false);
     const [showSearchArea, setShowSearchArea] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [properties, setProperties] = useState(INITIAL_PROPERTIES);
+    const [loading, setLoading] = useState(true);
+    const [properties, setProperties] = useState<any[]>([]);
+    const [activeFilters, setActiveFilters] = useState<any>({});
+
+    const fetchHotels = async (searchFilters: any = {}) => {
+        setLoading(true);
+        try {
+            const response = await propertyService.getHotels(1, 50, searchFilters);
+            // filter properties with valid coordinates
+            const validProperties = response.data.filter((p: any) => p.latitude && p.longitude).map((p: any) => ({
+                id: p.id.toString(),
+                title: p.name,
+                location: p.location || p.address,
+                rating: parseFloat(p.rating) || 4.5,
+                price: parseFloat(p.base_price) || 0,
+                priceDisplay: `$${p.base_price || 0}`,
+                image: (p.main_image && typeof p.main_image === 'string' && p.main_image.startsWith('http'))
+                    ? p.main_image
+                    : `http://206.183.129.220:5000/uploads/${p.main_image || 'placeholder.jpg'}`,
+                coordinate: {
+                    latitude: parseFloat(p.latitude),
+                    longitude: parseFloat(p.longitude)
+                },
+                isVerified: p.status === 'Active',
+                isFeatured: p.rating >= 4.5,
+            }));
+
+            setProperties(validProperties);
+            if (validProperties.length > 0 && !selectedProperty) {
+                setSelectedProperty(validProperties[0]);
+            }
+        } catch (error) {
+            console.error('Map fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (city && city !== 'Hargeisa') {
-            // In a real app, you would look up coordinates for the city
-            // For now, let's just simulate moving the map slightly or to a new predefined spot
-            const newRegion = {
-                latitude: 9.5624 + (Math.random() - 0.5) * 0.1,
-                longitude: 44.0670 + (Math.random() - 0.5) * 0.1,
+        const filters: any = { ...activeFilters };
+        if (city && city !== 'All') {
+            filters.city = city;
+        }
+        fetchHotels(filters);
+    }, [city, activeFilters]);
+
+    useEffect(() => {
+        if (properties.length > 0 && mapRef.current) {
+            const first = properties[0];
+            mapRef.current.animateToRegion({
+                ...first.coordinate,
                 latitudeDelta: 0.05,
                 longitudeDelta: 0.05,
-            };
-            mapRef.current?.animateToRegion(newRegion, 1000);
+            }, 1000);
         }
-    }, [city]);
+    }, [properties.length === 0]); // Animate only when transitioning from empty to non-empty
 
-    const handleMarkerPress = (property: typeof INITIAL_PROPERTIES[0]) => {
+    const handleMarkerPress = (property: any) => {
         setSelectedProperty(property);
         // Animate map to marker
         mapRef.current?.animateToRegion({
             ...property.coordinate,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.015,
         }, 500);
     };
 
     const handleSearchArea = () => {
-        setLoading(true);
-        // Simulate API fetch delay
-        setTimeout(() => {
-            setLoading(false);
-            setShowSearchArea(false);
-        }, 1500);
+        const filters: any = { ...activeFilters };
+        if (city && city !== 'All') {
+            filters.city = city;
+        }
+        fetchHotels(filters);
+        setShowSearchArea(false);
     };
 
     const onRegionChangeComplete = () => {
@@ -130,7 +119,7 @@ export const MapScreen: React.FC = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
 
             {/* Header */}
@@ -150,10 +139,12 @@ export const MapScreen: React.FC = () => {
                     provider={PROVIDER_GOOGLE}
                     style={styles.mapPlaceholder}
                     initialRegion={INITIAL_REGION}
-                    mapType="satellite"
+                    mapType="hybrid"
                     onRegionChangeComplete={onRegionChangeComplete}
                     showsUserLocation
                     showsMyLocationButton={false}
+                    showsPointsOfInterest={true}
+                    showsBuildings={true}
                 >
                     {properties.map(property => (
                         <Marker
@@ -161,15 +152,21 @@ export const MapScreen: React.FC = () => {
                             coordinate={property.coordinate}
                             onPress={() => handleMarkerPress(property)}
                         >
-                            <View style={[
-                                styles.priceMarker,
-                                selectedProperty.id === property.id && { backgroundColor: colors.primary, transform: [{ scale: 1.1 }] }
-                            ]}>
-                                <Text style={styles.priceMarkerText}>{property.priceDisplay}</Text>
-                            </View>
+                                <View style={[
+                                    styles.priceMarker,
+                                    { backgroundColor: selectedProperty?.id === property.id ? colors.primary : colors.dark },
+                                    selectedProperty?.id === property.id && { transform: [{ scale: 1.1 }] }
+                                ]}>
+                                    <View style={{ alignItems: 'center' }}>
+                                        <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.8)', fontWeight: '600', marginBottom: 2 }} numberOfLines={1}>
+                                            {property.title}
+                                        </Text>
+                                        <Text style={styles.priceMarkerText}>{property.priceDisplay}</Text>
+                                    </View>
+                                </View>
                             <View style={[
                                 styles.markerPoint,
-                                selectedProperty.id === property.id && { borderTopColor: colors.primary }
+                                { borderTopColor: selectedProperty?.id === property.id ? colors.primary : colors.dark }
                             ]} />
                         </Marker>
                     ))}
@@ -183,7 +180,7 @@ export const MapScreen: React.FC = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.searchInfo}
-                            onPress={() => router.push({
+                            onPress={() => router.replace({
                                 pathname: '/location-selector',
                                 params: { from: 'map' }
                             })}
@@ -198,7 +195,7 @@ export const MapScreen: React.FC = () => {
 
                     <TouchableOpacity
                         style={styles.listToggleButton}
-                        onPress={() => router.push({
+                        onPress={() => router.replace({
                             pathname: '/search-results',
                             params: { city: city || 'Hargeisa' }
                         })}
@@ -241,80 +238,82 @@ export const MapScreen: React.FC = () => {
                 </View>
 
                 {/* Bottom Property Preview Card */}
-                <View style={styles.propertyCard}>
-                    <TouchableOpacity
-                        onPress={() => router.push({ pathname: '/property/[id]', params: { id: selectedProperty.id } })}
-                        activeOpacity={0.9}
-                    >
-                        <View>
-                            <Image source={{ uri: selectedProperty.image }} style={styles.cardImage} />
-                            <View style={styles.badgeContainer}>
-                                {selectedProperty.isVerified && (
-                                    <View style={styles.verifiedBadge}>
-                                        <Ionicons name="checkmark-circle" size={14} color={colors.white} />
-                                        <Text style={[styles.badgeText, { color: colors.white }]}>Verified</Text>
-                                    </View>
-                                )}
-                                {selectedProperty.isFeatured && (
-                                    <View style={styles.featuredBadge}>
-                                        <Ionicons name="star" size={14} color={colors.dark} />
-                                        <Text style={styles.badgeText}>Featured</Text>
-                                    </View>
-                                )}
-                            </View>
-                            <TouchableOpacity
-                                style={styles.favoriteButton}
-                                onPress={() => setIsFavorite(!isFavorite)}
-                            >
-                                <Ionicons
-                                    name={isFavorite ? "heart" : "heart-outline"}
-                                    size={20}
-                                    color={isFavorite ? colors.error : colors.dark}
-                                />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardHeader}>
-                                <Text style={styles.propertyTitle}>{selectedProperty.title}</Text>
-                                <View style={styles.ratingContainer}>
-                                    <Ionicons name="star" size={16} color="#FFD700" />
-                                    <Text style={styles.ratingText}>{selectedProperty.rating}</Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.addressRow}>
-                                <Ionicons name="location" size={14} color={colors.primary} />
-                                <Text style={styles.addressText}>{selectedProperty.location}</Text>
-                            </View>
-
-                            <View style={styles.cardFooter}>
-                                <View>
-                                    <Text style={styles.priceLabel}>Starting from</Text>
-                                    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                                        <Text style={styles.priceValue}>${selectedProperty.price}</Text>
-                                        <Text style={styles.perNightText}>/night</Text>
-                                    </View>
+                {selectedProperty && (
+                    <View style={styles.propertyCard}>
+                        <TouchableOpacity
+                            onPress={() => router.push({ pathname: '/hotel/[id]', params: { id: selectedProperty.id } })}
+                            activeOpacity={0.9}
+                        >
+                            <View>
+                                <Image source={{ uri: selectedProperty.image }} style={styles.cardImage} />
+                                <View style={styles.badgeContainer}>
+                                    {selectedProperty.isVerified && (
+                                        <View style={styles.verifiedBadge}>
+                                            <Ionicons name="checkmark-circle" size={14} color={colors.white} />
+                                            <Text style={[styles.badgeText, { color: colors.white }]}>Verified</Text>
+                                        </View>
+                                    )}
+                                    {selectedProperty.isFeatured && (
+                                        <View style={styles.featuredBadge}>
+                                            <Ionicons name="star" size={14} color={colors.dark} />
+                                            <Text style={styles.badgeText}>Featured</Text>
+                                        </View>
+                                    )}
                                 </View>
                                 <TouchableOpacity
-                                    style={styles.detailsButton}
-                                    onPress={() => router.push({ pathname: '/property/[id]', params: { id: selectedProperty.id } })}
+                                    style={styles.favoriteButton}
+                                    onPress={() => setIsFavorite(!isFavorite)}
                                 >
-                                    <Text style={styles.detailsButtonText}>Details</Text>
+                                    <Ionicons
+                                        name={isFavorite ? "heart" : "heart-outline"}
+                                        size={20}
+                                        color={isFavorite ? colors.error : colors.dark}
+                                    />
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                    </TouchableOpacity>
-                </View>
+
+                            <View style={styles.cardContent}>
+                                <View style={styles.cardHeader}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.propertyTitle} numberOfLines={1}>{selectedProperty.title}</Text>
+                                        <View style={styles.addressRow}>
+                                            <Ionicons name="location" size={12} color={colors.primary} />
+                                            <Text style={styles.addressText} numberOfLines={1}>{selectedProperty.location}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.ratingContainer}>
+                                        <Ionicons name="star" size={16} color="#FFD700" />
+                                        <Text style={styles.ratingText}>{selectedProperty.rating}</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.cardFooter}>
+                                    <View>
+                                        <Text style={styles.priceLabel}>Starting from</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                                            <Text style={styles.priceValue}>${selectedProperty.price}</Text>
+                                            <Text style={styles.perNightText}>/night</Text>
+                                        </View>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.detailsButton}
+                                        onPress={() => router.push({ pathname: '/hotel/[id]', params: { id: selectedProperty.id } })}
+                                    >
+                                        <Text style={styles.detailsButtonText}>Details</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
 
-            {/* Filter Modal Integration */}
             <FilterModal
                 visible={filterVisible}
                 onClose={() => setFilterVisible(false)}
                 onApply={(filters) => {
+                    setActiveFilters(filters);
                     setFilterVisible(false);
-                    handleSearchArea(); // Simulate filter apply
                 }}
             />
         </SafeAreaView>

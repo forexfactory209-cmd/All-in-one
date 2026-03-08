@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '@/src/theme';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 // Components
 import { ProfileHeader } from './components/ProfileHeader';
@@ -10,12 +10,18 @@ import { ProfileStats } from './components/ProfileStats';
 import { ProfileMenu } from './components/ProfileMenu';
 
 export const ProfileScreen: React.FC = () => {
-    return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <StatusBar barStyle="dark-content" />
-            <ProfileHeader />
+    const { settings } = useApp();
+    const theme = useTheme();
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
+            <StatusBar barStyle={settings.darkMode ? 'light-content' : 'dark-content'} />
+            <ProfileHeader />
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                style={{ backgroundColor: theme.background }}
+            >
                 <ProfileInfo />
                 <ProfileStats />
                 <ProfileMenu />
@@ -27,9 +33,8 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
     },
     scrollContent: {
-        paddingBottom: 40,
+        paddingBottom: 100,
     },
 });

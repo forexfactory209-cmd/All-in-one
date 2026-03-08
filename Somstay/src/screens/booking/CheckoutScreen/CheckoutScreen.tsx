@@ -2,12 +2,20 @@ import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, TextInput, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { styles } from './styles/CheckoutScreen.styles';
 import { colors, spacing } from '@/src/theme';
+import BookingService from '@/src/services/booking/bookingService';
+import { ActivityIndicator, Alert } from 'react-native';
 
 export const CheckoutScreen: React.FC = () => {
     const router = useRouter();
+    const params = useLocalSearchParams();
+    const [loading, setLoading] = useState(false);
+
+    // Destructure params
+    const { id, type, title, image, checkIn, checkOut, totalPrice, adults, children } = params;
+
     const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card' | 'bank'>('mobile');
     const [phoneNumber, setPhoneNumber] = useState('');
 
@@ -26,18 +34,53 @@ export const CheckoutScreen: React.FC = () => {
         return matched ? matched.join(' ') : cleaned;
     };
 
-    const bookingSummary = {
-        title: 'Hargeisa Luxury Apartment',
-        category: 'ACCOMMODATION',
-        dates: 'Oct 12 - Oct 15, 2024',
-        subtotal: 135.00,
-        serviceFee: 15.00,
-        total: 150.00,
-        image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80',
+    const handleConfirmPay = async () => {
+        try {
+            setLoading(true);
+
+            const bookingData: any = {
+                user_id: 1, // API expects number
+                entity_type: (type?.toString().toLowerCase() === 'property' ? 'Property' : 'Room'),
+                entity_id: parseInt(id as string, 10) || 1, // API expects number
+                check_in: checkIn as string || '2023-10-12',
+                check_out: checkOut as string || '2023-10-14',
+                total_price: parseFloat(totalPrice as string) || 150.00,
+                status: 'Confirmed',
+                payment_status: 'Paid'
+            };
+
+            const response = await BookingService.createBooking(bookingData);
+
+            if (response.success) {
+                router.push({
+                    pathname: '/payment-success',
+                    params: { 
+                        bookingId: response.data?.id || response.id || 'new',
+                        title: title as string,
+                        checkIn: checkIn as string,
+                        checkOut: checkOut as string,
+                        totalPrice: bookingTotal.toFixed(2),
+                        guests: `${adults} Adults, ${children} Children`,
+                        type: type as string
+                    }
+                });
+            } else {
+                Alert.alert('Error', response.message || 'Failed to create booking');
+            }
+        } catch (error: any) {
+            console.error('Booking error:', error.message || error);
+            // Show more detailed error message to help debug if it fails
+            const errorMsg = error.response?.data?.message || 'An unexpected error occurred during booking';
+            Alert.alert('Error', errorMsg);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    const bookingTotal = parseFloat(totalPrice as string) || 150.00;
+
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
 
             {/* Header */}
@@ -53,29 +96,25 @@ export const CheckoutScreen: React.FC = () => {
                 {/* Summary Card */}
                 <View style={styles.summaryCard}>
                     <View style={styles.summaryHeader}>
-                        <Image source={{ uri: bookingSummary.image }} style={styles.propertyImage} />
+                        <Image source={{ uri: (image as string) || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80' }} style={styles.propertyImage} />
                         <View style={styles.propertyInfo}>
-                            <Text style={styles.categoryText}>{bookingSummary.category}</Text>
-                            <Text style={styles.propertyTitle}>{bookingSummary.title}</Text>
+                            <Text style={styles.categoryText}>{type === 'property' ? 'VACATION RENTAL' : 'HOTEL ROOM'}</Text>
+                            <Text style={styles.propertyTitle}>{title || `Booking for ${type}`}</Text>
                             <View style={styles.datesRow}>
                                 <Ionicons name="calendar-outline" size={14} color="#999" />
-                                <Text style={styles.datesText}>{bookingSummary.dates}</Text>
+                                <Text style={styles.datesText}>{checkIn} - {checkOut}</Text>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.priceDetails}>
                         <View style={styles.priceRow}>
-                            <Text style={styles.priceLabel}>Subtotal (3 nights)</Text>
-                            <Text style={styles.priceValue}>${bookingSummary.subtotal.toFixed(2)}</Text>
-                        </View>
-                        <View style={styles.priceRow}>
-                            <Text style={styles.priceLabel}>Service Fee</Text>
-                            <Text style={styles.priceValue}>${bookingSummary.serviceFee.toFixed(2)}</Text>
+                            <Text style={styles.priceLabel}>Guests</Text>
+                            <Text style={styles.priceValue}>{adults} Adults, {children} Children</Text>
                         </View>
                         <View style={styles.totalRow}>
                             <Text style={styles.totalLabel}>Total</Text>
-                            <Text style={styles.totalValue}>${bookingSummary.total.toFixed(2)}</Text>
+                            <Text style={styles.totalValue}>${bookingTotal.toFixed(2)}</Text>
                         </View>
                     </View>
                 </View>
@@ -259,11 +298,18 @@ export const CheckoutScreen: React.FC = () => {
 
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={() => router.push('/payment-success')}
+                    style={[styles.confirmButton, loading && { opacity: 0.7 }]}
+                    onPress={handleConfirmPay}
+                    disabled={loading}
                 >
-                    <Text style={styles.confirmButtonText}>Confirm & Pay $150.00</Text>
-                    <Ionicons name="arrow-forward" size={18} color={colors.white} />
+                    {loading ? (
+                        <ActivityIndicator color={colors.white} />
+                    ) : (
+                        <>
+                            <Text style={styles.confirmButtonText}>Confirm & Pay ${bookingTotal.toFixed(2)}</Text>
+                            <Ionicons name="arrow-forward" size={18} color={colors.white} />
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

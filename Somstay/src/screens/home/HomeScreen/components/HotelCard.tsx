@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { PropertyResponse } from '@/src/services/property/propertyService.types';
 import { styles } from './HotelCard.styles';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 interface HotelCardProps {
     hotel: PropertyResponse;
@@ -18,11 +19,14 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
     isWishlisted = false,
     onToggleWishlist
 }) => {
+    const { t, settings } = useApp();
+    const theme = useTheme();
+
     const imageUri = hotel.photos?.[0]?.photo_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=70';
 
     return (
         <TouchableOpacity
-            style={styles.container}
+            style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}
             onPress={onPress}
             activeOpacity={0.88}
         >
@@ -45,7 +49,7 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
                 {/* FEATURED badge — top left */}
                 <View style={styles.featuredBadge}>
                     <Icon name="flash" size={8} color="#1A1A1A" />
-                    <Text style={styles.featuredText}>FEATURED</Text>
+                    <Text style={styles.featuredText}>{settings.language === 'so' ? 'MUDAN' : 'FEATURED'}</Text>
                 </View>
 
                 {/* Favourite — top right */}
@@ -65,11 +69,11 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
                 </TouchableOpacity>
 
                 {/* Rating chip — bottom right of image */}
-                {hotel.average_rating != null && (
+                {typeof hotel.average_rating === 'number' && (
                     <View style={styles.ratingOverlay}>
                         <Icon name="star" size={10} color="#FFD700" />
                         <Text style={styles.ratingOverlayText}>
-                            {hotel.average_rating.toFixed(1)}
+                            {Number(hotel.average_rating || 4.5).toFixed(1)}
                         </Text>
                     </View>
                 )}
@@ -80,9 +84,16 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
             <View style={styles.infoContainer}>
 
                 {/* Hotel name */}
-                <Text style={styles.title} numberOfLines={1}>
+                <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
                     {hotel.title}
                 </Text>
+
+                {/* Subtitle - Hotel name if this is a room */}
+                {(hotel as any).hotel_name && (
+                    <Text style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 2 }} numberOfLines={1}>
+                        at {(hotel as any).hotel_name}
+                    </Text>
+                )}
 
                 {/* Location */}
                 <View style={styles.locationRow}>
@@ -98,16 +109,16 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
                 {/* Price + Verified */}
                 <View style={styles.priceRow}>
                     <View style={styles.priceWrap}>
-                        <Text style={styles.currency}>$</Text>
-                        <Text style={styles.price}>
+                        <Text style={[styles.currency, { color: theme.primary }]}>$</Text>
+                        <Text style={[styles.price, { color: theme.text }]}>
                             {hotel.price_per_night}
                         </Text>
-                        <Text style={styles.priceLabel}>/night</Text>
+                        <Text style={[styles.priceLabel, { color: theme.textSecondary }]}>/{t('night')}</Text>
                     </View>
 
                     <View style={styles.verifiedBadge}>
                         <Icon name="checkmark-circle" size={11} color="#06A649" />
-                        <Text style={styles.verifiedText}>VERIFIED</Text>
+                        <Text style={styles.verifiedText}>{settings.language === 'so' ? 'LA XAQIIJIYAY' : 'VERIFIED'}</Text>
                     </View>
                 </View>
 
