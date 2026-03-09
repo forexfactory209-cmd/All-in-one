@@ -1,6 +1,0 @@
-
-> somstay-backend@1.0.0 start
-> node src/server.js
-
-UNCAUGHT EXCEPTION! 💥 Shutting down...
-Error listen EADDRINUSE: address already in use :::5000
