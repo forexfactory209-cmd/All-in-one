@@ -10,32 +10,69 @@ const FALLBACK_IMAGES = [
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'
 ];
 
+import { carService } from '@/src/services/api/carService';
+
 export const useBookings = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchBookings = async () => {
         try {
-            // Using user_id=1 as default placeholder
-            const response = await BookingService.getMyBookings('1');
+            // Fetch both regular and car bookings in parallel
+            const [propertyRes, carRes] = await Promise.all([
+                BookingService.getMyBookings('1'),
+                carService.getMyBookings(1)
+            ]);
 
-            if (response && response.success && response.data) {
-                const formatted = response.data.map((item: any) => {
+            let allBookings: Booking[] = [];
+
+            // Process property/room bookings
+            if (propertyRes && propertyRes.success && propertyRes.data) {
+                const formatted = propertyRes.data.map((item: any) => {
                     const checkInDate = new Date(item.check_in).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     const checkOutDate = new Date(item.check_out).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    
+
                     return {
-                        id: item.id.toString(),
+                        id: `p-${item.id}`,
                         title: item.title || item.entity_name || `${item.entity_type} Booking`,
                         dateRange: `${checkInDate} - ${checkOutDate}`,
                         status: (item.status && ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].includes(item.status.toUpperCase()))
                             ? item.status.toUpperCase() as any
                             : 'PENDING',
-                        image: FALLBACK_IMAGES[item.id % FALLBACK_IMAGES.length],
+                        image: (item.main_image && item.main_image.startsWith('http'))
+                            ? item.main_image
+                            : `http://206.183.129.220:5000/uploads/${item.main_image || 'placeholder.jpg'}`,
+                        entity_type: item.entity_type,
+                        entity_id: item.entity_id,
                     };
                 });
-                setBookings(formatted);
+                allBookings = [...allBookings, ...formatted];
             }
+
+            // Process car bookings
+            if (carRes && carRes.success && carRes.data) {
+                const formattedCars = carRes.data.map((item: any) => {
+                    const pickupDate = new Date(item.pickup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const returnDate = new Date(item.return_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    return {
+                        id: `c-${item.id}`, // Prefixing for uniqueness
+                        title: `${item.make} ${item.model} Rental`,
+                        dateRange: `${pickupDate} - ${returnDate}`,
+                        status: (item.status && ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].includes(item.status.toUpperCase()))
+                            ? item.status.toUpperCase() as any
+                            : 'PENDING',
+                        image: (item.main_image && item.main_image.startsWith('http'))
+                            ? item.main_image
+                            : `http://206.183.129.220:5000/uploads/${item.main_image || 'placeholder.jpg'}`,
+                        entity_type: 'Car',
+                        entity_id: item.car_id,
+                    };
+                });
+                allBookings = [...allBookings, ...formattedCars];
+            }
+
+            setBookings(allBookings);
         } catch (error) {
             console.error("Failed to fetch bookings:", error);
         } finally {

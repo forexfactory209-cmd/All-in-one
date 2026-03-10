@@ -8,69 +8,92 @@ import { useRouter } from 'expo-router';
 import { colors, spacing, shadows } from '@/src/theme';
 import { useApp, useTheme } from '@/src/context/AppContext';
 
-const getNotifications = (lang: string) => [
-    {
-        id: '1', type: 'booking',
-        icon: 'calendar-outline' as const,
-        title: lang === 'so' ? 'Buukinka Waa La Xaqiijiyay' : 'Booking Confirmed',
-        body: lang === 'so'
-            ? 'Buukinkaa hoteelka Mansoor Palace waa la xaqiijiyay Oct 12–15'
-            : 'Your booking at Mansoor Palace Hotel has been confirmed for Oct 12–15.',
-        time: lang === 'so' ? '2 saac kahor' : '2 hours ago', read: false,
-    },
-    {
-        id: '2', type: 'promo',
-        icon: 'pricetag-outline' as const,
-        title: lang === 'so' ? 'Xawaaraha Toddobaadka 🎉' : 'Weekend Special 🎉',
-        body: lang === 'so'
-            ? 'Hel %20 oo dhimo dhammaan hoteelada Hargeysa toddobaadkan!'
-            : 'Get 20% off on all hotels in Hargeisa this weekend only!',
-        time: lang === 'so' ? '5 saac kahor' : '5 hours ago', read: false,
-    },
-    {
-        id: '3', type: 'system',
-        icon: 'shield-checkmark-outline' as const,
-        title: lang === 'so' ? 'Cusbooneysiinta Amniga' : 'Security Update',
-        body: lang === 'so'
-            ? 'Furimaha sirta akawntigaaga si guul ah ayaa loo beddeley.'
-            : 'Your account password was changed successfully.',
-        time: lang === 'so' ? 'Shalay' : 'Yesterday', read: true,
-    },
-    {
-        id: '4', type: 'booking',
-        icon: 'star-outline' as const,
-        title: lang === 'so' ? 'Qii Joogitaankaaga' : 'Rate Your Stay',
-        body: lang === 'so'
-            ? 'Sideed u martiqaadsatay hoteelka Beder? Kala wadaag khibradahaaga.'
-            : 'How was your stay at Beder Hotel? Share your experience.',
-        time: lang === 'so' ? '3 maalmood kahor' : '3 days ago', read: true,
-    },
-];
+import { notificationService } from '@/src/services/api/notificationService';
 
-const iconColorMap: Record<string, { bg: string; color: string }> = {
-    booking: { bg: colors.primary + '15', color: colors.primary },
-    promo: { bg: '#FF6B3515', color: '#FF6B35' },
-    system: { bg: '#06A64915', color: '#06A649' },
+const iconColorMap: Record<string, { bg: string; color: string; icon: string }> = {
+    booking: { bg: colors.primary + '15', color: colors.primary, icon: 'calendar-outline' },
+    promo: { bg: '#FF6B3515', color: '#FF6B35', icon: 'pricetag-outline' },
+    system: { bg: '#06A64915', color: '#06A649', icon: 'shield-checkmark-outline' },
+    inapp: { bg: colors.primary + '15', color: colors.primary, icon: 'notifications-outline' },
 };
 
 export const NotificationsScreen: React.FC = () => {
     const router = useRouter();
     const { settings, t } = useApp();
     const theme = useTheme();
-    const [notifs, setNotifs] = useState(() => getNotifications(settings.language));
+    const [notifs, setNotifs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [prefs, setPrefs] = useState({
-        bookingUpdates: true,
-        promotions: true,
-        priceAlerts: false,
-        appUpdates: true,
-        reminders: true,
+        push_enabled: true,
+        email_enabled: true,
+        sms_enabled: false,
+        promotions_enabled: false,
     });
 
-    const setPref = (key: keyof typeof prefs) => (val: boolean) =>
-        setPrefs(prev => ({ ...prev, [key]: val }));
+    const fetchNotificationsAndSettings = async () => {
+        try {
+            setLoading(true);
+            const [notifData, settingsData] = await Promise.all([
+                notificationService.getNotifications('1'),
+                notificationService.getSettings('1')
+            ]);
 
-    const markAllRead = () => setNotifs(notifs.map(n => ({ ...n, read: true })));
-    const unreadCount = notifs.filter(n => !n.read).length;
+            if (notifData && notifData.success) {
+                setNotifs(notifData.data);
+            }
+            if (settingsData && settingsData.success && settingsData.data) {
+                setPrefs({
+                    push_enabled: !!settingsData.data.push_enabled,
+                    email_enabled: !!settingsData.data.email_enabled,
+                    sms_enabled: !!settingsData.data.sms_enabled,
+                    promotions_enabled: !!settingsData.data.promotions_enabled,
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching notifications or settings:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchNotificationsAndSettings();
+    }, []);
+
+    const setPref = (key: keyof typeof prefs) => async (val: boolean) => {
+        // Optimistic UI Update
+        const newPrefs = { ...prefs, [key]: val };
+        setPrefs(newPrefs);
+
+        // Sync with backend
+        try {
+            await notificationService.updateSettings('1', newPrefs);
+        } catch (error) {
+            console.error('Failed to update settings:', error);
+            // Rollback if failed
+            setPrefs(prefs);
+        }
+    };
+
+    const handleMarkAsRead = async (id: string | number) => {
+        try {
+            await notificationService.markAsRead(id.toString(), '1');
+            setNotifs(notifs.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
+        } catch (error) {
+            console.error('Failed to mark as read', error);
+        }
+    };
+
+    const markAllRead = async () => {
+        try {
+            await notificationService.markAllAsRead('1');
+            setNotifs(notifs.map(n => ({ ...n, read_at: new Date().toISOString() })));
+        } catch (error) {
+            console.error('Failed to mark all as read', error);
+        }
+    };
+
+    const unreadCount = notifs.filter(n => !n.read_at).length;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
@@ -99,35 +122,49 @@ export const NotificationsScreen: React.FC = () => {
                 {/* Recent Notifications */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>{t('recent').toUpperCase()}</Text>
-                    <View style={[styles.card, { backgroundColor: theme.card }]}>
-                        {notifs.map((n, i) => {
-                            const c = iconColorMap[n.type] || iconColorMap.system;
-                            return (
-                                <TouchableOpacity
-                                    key={n.id}
-                                    style={[
-                                        styles.notifRow,
-                                        !n.read && { backgroundColor: colors.primary + '06' },
-                                        i < notifs.length - 1 && [styles.notifBorder, { borderBottomColor: theme.border }],
-                                    ]}
-                                    onPress={() => setNotifs(notifs.map(x => x.id === n.id ? { ...x, read: true } : x))}
-                                    activeOpacity={0.8}
-                                >
-                                    <View style={[styles.notifIcon, { backgroundColor: c.bg }]}>
-                                        <Ionicons name={n.icon} size={20} color={c.color} />
-                                    </View>
-                                    <View style={styles.notifText}>
-                                        <View style={styles.notifTitleRow}>
-                                            <Text style={[styles.notifTitle, { color: theme.text }]}>{n.title}</Text>
-                                            {!n.read && <View style={styles.unreadDot} />}
+
+                    {loading ? (
+                        <View style={{ padding: 20, alignItems: 'center' }}>
+                            <Text style={{ color: theme.textSecondary }}>Loading notifications...</Text>
+                        </View>
+                    ) : notifs.length === 0 ? (
+                        <View style={{ padding: 20, alignItems: 'center' }}>
+                            <Text style={{ color: theme.textSecondary }}>No new notifications available.</Text>
+                        </View>
+                    ) : (
+                        <View style={[styles.card, { backgroundColor: theme.card }]}>
+                            {notifs.map((n, i) => {
+                                const c = iconColorMap[n.type?.toLowerCase()] || iconColorMap.inapp;
+                                const isRead = !!n.read_at;
+                                return (
+                                    <TouchableOpacity
+                                        key={n.id}
+                                        style={[
+                                            styles.notifRow,
+                                            !isRead && { backgroundColor: colors.primary + '06' },
+                                            i < notifs.length - 1 && [styles.notifBorder, { borderBottomColor: theme.border }],
+                                        ]}
+                                        onPress={() => !isRead && handleMarkAsRead(n.id)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <View style={[styles.notifIcon, { backgroundColor: c.bg }]}>
+                                            <Ionicons name={c.icon as any} size={20} color={c.color} />
                                         </View>
-                                        <Text style={[styles.notifBody, { color: theme.textSecondary }]} numberOfLines={2}>{n.body}</Text>
-                                        <Text style={styles.notifTime}>{n.time}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
+                                        <View style={styles.notifText}>
+                                            <View style={styles.notifTitleRow}>
+                                                <Text style={[styles.notifTitle, { color: theme.text }]}>{n.title}</Text>
+                                                {!isRead && <View style={styles.unreadDot} />}
+                                            </View>
+                                            <Text style={[styles.notifBody, { color: theme.textSecondary }]} numberOfLines={2}>{n.message}</Text>
+                                            <Text style={styles.notifTime}>
+                                                {new Date(n.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    )}
                 </View>
 
                 {/* Preferences */}
@@ -135,11 +172,10 @@ export const NotificationsScreen: React.FC = () => {
                     <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>{t('notification_preferences').toUpperCase()}</Text>
                     <View style={[styles.card, { backgroundColor: theme.card }]}>
                         {[
-                            { key: 'bookingUpdates', icon: 'calendar-outline', bg: colors.primary + '15', color: colors.primary, titleKey: 'booking_updates', subKey: 'booking_updates_sub' },
-                            { key: 'promotions', icon: 'pricetag-outline', bg: '#FF6B3515', color: '#FF6B35', titleKey: 'promotions', subKey: 'promotions_sub' },
-                            { key: 'priceAlerts', icon: 'trending-down-outline', bg: '#06A64915', color: '#06A649', titleKey: 'price_alerts', subKey: 'price_alerts_sub' },
-                            { key: 'reminders', icon: 'notifications-outline', bg: '#7C3AED15', color: '#7C3AED', titleKey: 'reminders', subKey: 'reminders_sub' },
-                            { key: 'appUpdates', icon: 'phone-portrait-outline', bg: '#0288AC15', color: colors.primary, titleKey: 'app_updates', subKey: 'app_updates_sub' },
+                            { key: 'push_enabled', icon: 'notifications-outline', bg: colors.primary + '15', color: colors.primary, title: 'Push Notifications', sub: 'Receive app push notifications' },
+                            { key: 'email_enabled', icon: 'mail-outline', bg: '#06A64915', color: '#06A649', title: 'Email Alerts', sub: 'Receive updates via email' },
+                            { key: 'sms_enabled', icon: 'chatbubble-outline', bg: '#7C3AED15', color: '#7C3AED', title: 'SMS Reminders', sub: 'Urgent booking texts to your phone' },
+                            { key: 'promotions_enabled', icon: 'pricetag-outline', bg: '#FF6B3515', color: '#FF6B35', title: 'Promotions & Offers', sub: 'Get notified about discounts' }
                         ].map((item, i, arr) => (
                             <View key={item.key}>
                                 <View style={styles.toggleRow}>
@@ -147,8 +183,8 @@ export const NotificationsScreen: React.FC = () => {
                                         <Ionicons name={item.icon as any} size={20} color={item.color} />
                                     </View>
                                     <View style={styles.toggleText}>
-                                        <Text style={[styles.toggleTitle, { color: theme.text }]}>{t(item.titleKey)}</Text>
-                                        <Text style={[styles.toggleSub, { color: theme.textSecondary }]}>{t(item.subKey)}</Text>
+                                        <Text style={[styles.toggleTitle, { color: theme.text }]}>{item.title}</Text>
+                                        <Text style={[styles.toggleSub, { color: theme.textSecondary }]}>{item.sub}</Text>
                                     </View>
                                     <Switch
                                         value={prefs[item.key as keyof typeof prefs]}

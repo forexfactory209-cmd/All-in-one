@@ -1,17 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { carService } from '@/src/services/api/carService';
 
 export const useCarBooking = (car_id: string) => {
     const router = useRouter();
+    const params = useLocalSearchParams();
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(false);
 
     // Initial state matching user requirements
     const [formData, setFormData] = useState({
         pickup_date: new Date().toISOString().split('T')[0],
+        pickup_time: '10:00 AM',
         return_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        return_time: '10:00 AM',
         pickup_location: 'Hargeisa Airport',
         dropoff_location: 'Hargeisa Airport',
         delivery_type: 'airport', // 'airport' or 'hotel'
@@ -35,17 +38,24 @@ export const useCarBooking = (car_id: string) => {
             emergency_relation: '',
         },
         insurance_plan: 'Basic',
-        per_day_price: 40, // Base price should come from car details
-        total_price: 120,
+        per_day_price: 50, // Updated via useEffect
+        total_price: 150,
         deposit: 200,
     });
 
+    useEffect(() => {
+        if (params.price) {
+            setFormData(prev => ({ ...prev, per_day_price: parseInt(params.price as string) }));
+        }
+    }, [params.price]);
+
     const daysCount = useMemo(() => {
-        const start = new Date(formData.pickup_date);
-        const end = new Date(formData.return_date);
-        const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
-        return Math.max(diff, 1);
-    }, [formData.pickup_date, formData.return_date]);
+        const start = new Date(`${formData.pickup_date} ${formData.pickup_time}`);
+        const end = new Date(`${formData.return_date} ${formData.return_time}`);
+        const diffMs = end.getTime() - start.getTime();
+        const diffDays = Math.ceil(diffMs / (1000 * 3600 * 24));
+        return Math.max(diffDays, 1);
+    }, [formData.pickup_date, formData.pickup_time, formData.return_date, formData.return_time]);
 
     const calculateTotal = useMemo(() => {
         const base = daysCount * formData.per_day_price;
@@ -69,8 +79,8 @@ export const useCarBooking = (car_id: string) => {
         }
         if (currentStep === 2) {
             if (!formData.driver_info.license_number) {
-                 Alert.alert('Missing Info', 'Please provide a valid driver license number.');
-                 return;
+                Alert.alert('Missing Info', 'Please provide a valid driver license number.');
+                return;
             }
         }
 
@@ -92,34 +102,45 @@ export const useCarBooking = (car_id: string) => {
     const submitBooking = async () => {
         setLoading(true);
         try {
+            const formatToDateTime = (dateStr: string, timeStr: string) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':');
+                let h = parseInt(hours);
+                if (period === 'PM' && h < 12) h += 12;
+                if (period === 'AM' && h === 12) h = 0;
+                return `${dateStr} ${h.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
+            };
+
             const payload = {
                 ...formData,
+                pickup_date: formatToDateTime(formData.pickup_date, formData.pickup_time),
+                return_date: formatToDateTime(formData.return_date, formData.return_time),
                 total_price: calculateTotal,
                 car_id: parseInt(car_id),
-                user_id: 1, // Get from Auth Context ideally
+                user_id: 1,
             };
             const response = await carService.createBooking(payload);
             if (response.success) {
                 Alert.alert('Success', 'Your booking has been placed successfully!', [
-                    { text: 'View Bookings', onPress: () => router.push('/(tabs)/booking') },
+                    { text: 'View Bookings', onPress: () => router.push('/booking') },
                     { text: 'OK', onPress: () => router.push('/') }
                 ]);
             }
         } catch (error: any) {
-             Alert.alert('Booking Failed', error.response?.data?.message || 'Something went wrong. Please try again later.');
+            Alert.alert('Booking Failed', error.response?.data?.message || 'Something went wrong. Please try again later.');
         } finally {
             setLoading(false);
         }
     };
 
-    return { 
-        currentStep, 
-        formData, 
-        setFormData, 
-        handleNext, 
-        handleBack, 
-        loading, 
-        daysCount, 
-        totalPrice: calculateTotal 
+    return {
+        currentStep,
+        formData,
+        setFormData,
+        handleNext,
+        handleBack,
+        loading,
+        daysCount,
+        totalPrice: calculateTotal
     };
 };

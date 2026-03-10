@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography } from '@/src/theme';
+import { spacing } from '@/src/theme';
 import { useApp, useTheme } from '@/src/context/AppContext';
 
 export const BookingHeader: React.FC = () => {
@@ -11,7 +11,7 @@ export const BookingHeader: React.FC = () => {
     const theme = useTheme();
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+        <View style={[styles.container, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
             <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
                 <Ionicons name="chevron-back" size={24} color={theme.text} />
             </TouchableOpacity>
@@ -33,9 +33,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
-        backgroundColor: colors.white,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
     },
     iconButton: {
         width: 40,
@@ -50,6 +48,5 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 19,
         fontWeight: '700',
-        color: colors.dark,
     },
 });

@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, shadows } from '@/src/theme';
-
-const { width } = Dimensions.get('window');
+import { colors, spacing, borderRadius } from '@/src/theme';
+import { useTheme } from '@/src/context/AppContext';
 
 export interface Property {
     id: string;
@@ -33,10 +32,15 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
     onFavoritePress,
     onActionPress,
 }) => {
+    const theme = useTheme();
     const isRental = property.type === 'rental';
 
     return (
-        <TouchableOpacity style={styles.container} activeOpacity={0.9} onPress={onPress}>
+        <TouchableOpacity
+            style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}
+            activeOpacity={0.9}
+            onPress={onPress}
+        >
             {/* Image Section */}
             <View style={styles.imageContainer}>
                 <Image source={{ uri: property.image }} style={styles.image} />
@@ -51,8 +55,8 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
                     )}
                     {property.isFeatured && (
                         <View style={[styles.badge, styles.featuredBadge]}>
-                            <Ionicons name="star" size={12} color={colors.dark} />
-                            <Text style={[styles.badgeText, { color: colors.dark }]}>FEATURED</Text>
+                            <Ionicons name="flash" size={12} color="#1A1A1A" />
+                            <Text style={[styles.badgeText, { color: '#1A1A1A' }]}>FEATURED</Text>
                         </View>
                     )}
                     {property.isForSale && (
@@ -63,11 +67,14 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
                 </View>
 
                 {/* Favorite Button */}
-                <TouchableOpacity style={styles.favoriteButton} onPress={onFavoritePress}>
+                <TouchableOpacity
+                    style={[styles.favoriteButton, { backgroundColor: theme.card + 'CC' }]}
+                    onPress={onFavoritePress}
+                >
                     <Ionicons
                         name={property.isFavorite ? "heart" : "heart-outline"}
                         size={22}
-                        color={property.isFavorite ? colors.error : colors.dark}
+                        color={property.isFavorite ? colors.error : theme.textSecondary}
                     />
                 </TouchableOpacity>
             </View>
@@ -75,30 +82,30 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
             {/* Content Section */}
             <View style={styles.content}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.title} numberOfLines={1}>{property.title}</Text>
+                    <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>{property.title}</Text>
                     <View style={styles.ratingContainer}>
                         <Ionicons name="star" size={14} color="#FFD700" />
-                        <Text style={styles.ratingText}>{Number(property.rating || 4.5).toFixed(1)}</Text>
+                        <Text style={[styles.ratingText, { color: theme.text }]}>{Number(property.rating || 4.5).toFixed(1)}</Text>
                     </View>
                 </View>
 
                 <View style={styles.locationRow}>
-                    <Ionicons name="location-outline" size={14} color="#999" />
-                    <Text style={styles.locationText} numberOfLines={1}>{property.location}</Text>
+                    <Ionicons name="location-outline" size={14} color={theme.primary} />
+                    <Text style={[styles.locationText, { color: theme.textSecondary }]} numberOfLines={1}>{property.location}</Text>
                 </View>
 
                 <View style={styles.footerRow}>
                     <View style={styles.priceContainer}>
-                        <Text style={styles.priceText}>{property.price}</Text>
+                        <Text style={[styles.priceText, { color: theme.primary }]}>{property.price}</Text>
                         {property.priceLabel && (
-                            <Text style={styles.priceLabelText}> {property.priceLabel}</Text>
+                            <Text style={[styles.priceLabelText, { color: theme.textSecondary }]}> {property.priceLabel}</Text>
                         )}
                     </View>
 
                     <TouchableOpacity
                         style={[
                             styles.actionButton,
-                            isRental ? styles.bookButton : styles.contactButton
+                            { backgroundColor: isRental ? theme.surfaceSecondary : theme.primary }
                         ]}
                         onPress={(e) => {
                             e.stopPropagation();
@@ -107,7 +114,7 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
                     >
                         <Text style={[
                             styles.actionButtonText,
-                            isRental ? styles.bookButtonText : styles.contactButtonText
+                            { color: isRental ? theme.primary : colors.white }
                         ]}>
                             {isRental ? 'Book Now' : 'Contact Agent'}
                         </Text>
@@ -120,26 +127,23 @@ export const ExplorePropertyCard: React.FC<ExplorePropertyCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
-        borderRadius: 12, // Standardizing with home screen
+        borderRadius: 16,
         marginHorizontal: spacing.md,
-        marginBottom: 20, // Match home screen spacing for shadows
-        // Refined individual card shadow (matching HomeScreen PropertyCard)
+        marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowRadius: 10,
         elevation: 6,
-        overflow: 'visible',
     },
     imageContainer: {
         width: '100%',
         height: 220,
         position: 'relative',
         backgroundColor: colors.gray100,
-        borderTopLeftRadius: 12,
-        borderTopRightRadius: 12,
-        overflow: 'hidden', // Keep overflow hidden here for the image
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        overflow: 'hidden',
     },
     image: {
         width: '100%',
@@ -148,17 +152,17 @@ const styles = StyleSheet.create({
     },
     badgeContainer: {
         position: 'absolute',
-        top: spacing.sm,
-        left: spacing.sm,
-        gap: spacing.xs,
+        top: 10,
+        left: 10,
+        gap: 6,
         zIndex: 2,
     },
     badge: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.xs,
-        borderRadius: 4, // Match home screen badge radius
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
         gap: 4,
     },
     verifiedBadge: {
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFEA00',
     },
     saleBadge: {
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
     },
     badgeText: {
         color: colors.white,
@@ -177,15 +181,13 @@ const styles = StyleSheet.create({
     },
     favoriteButton: {
         position: 'absolute',
-        top: spacing.sm,
-        right: spacing.sm,
+        top: 10,
+        right: 10,
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
-        ...shadows.small,
     },
     content: {
         padding: spacing.md,
@@ -194,14 +196,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 6,
     },
     title: {
         fontSize: 18,
         fontWeight: '700',
-        color: colors.dark,
         flex: 1,
-        marginRight: spacing.sm,
+        marginRight: 8,
     },
     ratingContainer: {
         flexDirection: 'row',
@@ -211,17 +212,16 @@ const styles = StyleSheet.create({
     ratingText: {
         fontSize: 14,
         fontWeight: '600',
-        color: colors.dark,
     },
     locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        marginBottom: spacing.md,
+        marginBottom: 12,
     },
     locationText: {
         fontSize: 13,
-        color: '#7C7C7C',
+        fontWeight: '500',
     },
     footerRow: {
         flexDirection: 'row',
@@ -234,32 +234,19 @@ const styles = StyleSheet.create({
     },
     priceText: {
         fontSize: 20,
-        fontWeight: '700',
-        color: colors.primary,
+        fontWeight: '800',
     },
     priceLabelText: {
         fontSize: 14,
-        color: '#7C7C7C',
+        fontWeight: '500',
     },
     actionButton: {
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
-        borderRadius: borderRadius.large,
-    },
-    bookButton: {
-        backgroundColor: '#E6F3F7',
-    },
-    contactButton: {
-        backgroundColor: colors.primary,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 10,
     },
     actionButtonText: {
         fontSize: 14,
         fontWeight: '700',
-    },
-    bookButtonText: {
-        color: colors.primary,
-    },
-    contactButtonText: {
-        color: colors.white,
     },
 });

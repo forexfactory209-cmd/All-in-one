@@ -12,15 +12,13 @@ const IMAGE_HEIGHT = CARD_WIDTH * 0.8; // Smaller image for longer info section
 export const styles = StyleSheet.create({
     container: {
         width: CARD_WIDTH,
-        backgroundColor: '#FFFFFF',
         borderRadius: 18,
-        // iOS polished shadow — multiple-layer illusion using primary color tint
-        shadowColor: '#0288AC',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.18,
-        shadowRadius: 18,
-        // Android elevation
-        elevation: 10,
+        // Standard shadow for better dark mode compatibility
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
         marginBottom: COLUMN_GAP,
         overflow: 'visible',
     },
@@ -28,7 +26,6 @@ export const styles = StyleSheet.create({
     innerClip: {
         borderRadius: 18,
         overflow: 'hidden',
-        backgroundColor: '#FFFFFF',
     },
     image: {
         width: '100%',
@@ -71,7 +68,6 @@ export const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,255,255,0.93)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 2,
@@ -109,7 +105,6 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 13,
         fontWeight: '800',
-        color: colors.text.primary,
         marginBottom: 4,
         lineHeight: 17,
     },
@@ -121,14 +116,12 @@ export const styles = StyleSheet.create({
     location: {
         marginLeft: 3,
         fontSize: 11,
-        color: colors.text.secondary,
         flex: 1,
         lineHeight: 14,
     },
     // ── Divider ─────────────────────────────────────────────────────────────────
     divider: {
         height: 1,
-        backgroundColor: colors.gray200,
         marginBottom: 8,
         marginHorizontal: 2,
     },
@@ -145,26 +138,22 @@ export const styles = StyleSheet.create({
     currency: {
         fontSize: 11,
         fontWeight: '600',
-        color: colors.primary,
         marginRight: 1,
     },
     price: {
         fontSize: 17,
         fontWeight: '900',
-        color: colors.primary,
         letterSpacing: -0.3,
     },
     priceLabel: {
         marginLeft: 2,
         fontSize: 10,
-        color: colors.text.secondary,
         fontWeight: '500',
     },
     // ── Verified badge (bottom right) ────────────────────────────────────────────
     verifiedBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#E6F8ED',
         paddingHorizontal: 6,
         paddingVertical: 3,
         borderRadius: 5,

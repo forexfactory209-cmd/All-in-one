@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius } from '@/src/theme';
+import { spacing } from '@/src/theme';
 
 export const styles = StyleSheet.create({
     container: {
@@ -13,7 +13,6 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#05303D', // Darker blue for premium look
     },
     scrollContent: {
         paddingHorizontal: 16,
@@ -29,7 +28,6 @@ export const styles = StyleSheet.create({
         borderRadius: 35,
         overflow: 'hidden',
         borderWidth: 2,
-        borderColor: '#E6F3F7',
         marginBottom: 8,
     },
     image: {
@@ -40,7 +38,6 @@ export const styles = StyleSheet.create({
     locationName: {
         fontSize: 14,
         fontWeight: '600',
-        color: colors.dark,
         textAlign: 'center',
     },
     loadingContainer: {

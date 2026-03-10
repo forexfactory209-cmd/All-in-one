@@ -1,29 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/src/theme';
+import { useTheme } from '@/src/context/AppContext';
 import { styles } from '../styles/CarRentalDetailScreen.styles';
 
 export const RentalTerms: React.FC = () => {
+    const theme = useTheme();
     const terms = [
-        { icon: 'time', text: 'Minimum 1 day rental', color: '#6366F1' },
-        { icon: 'card', text: 'Valid driving license required', color: '#10B981' },
-        { icon: 'person', text: 'Driver age must be 21+', color: '#F59E0B' },
-        { icon: 'shield-checkmark', text: 'Refundable security deposit', color: '#EC4899' },
-        { icon: 'beaker', text: 'Clean fuel level on return', color: '#0EA5E9' },
+        { icon: 'time-outline', text: 'Minimum 1 day rental', color: '#6366F1' },
+        { icon: 'card-outline', text: 'Valid driving license required', color: '#10B981' },
+        { icon: 'person-outline', text: 'Driver age must be 21+', color: '#F59E0B' },
+        { icon: 'shield-checkmark-outline', text: 'Refundable security deposit', color: '#EC4899' },
+        { icon: 'flash-outline', text: 'Clean fuel level on return', color: '#0EA5E9' },
     ];
 
     return (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Rental Terms & Conditions</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Rental Terms & Conditions</Text>
             <View style={{ marginTop: 16 }}>
                 {terms.map((term, index) => (
-                    <View key={index} style={styles.termItem}>
+                    <View key={index} style={[styles.termItem, { backgroundColor: theme.card, borderColor: theme.border }]}>
                         <View style={[styles.termIconBox, { backgroundColor: term.color + '15' }]}>
-                             <Ionicons name={term.icon as any} size={22} color={term.color} />
+                            <Ionicons name={term.icon as any} size={20} color={term.color} />
                         </View>
-                        <Text style={styles.termText}>{term.text}</Text>
-                        <Ionicons name="information-circle-outline" size={20} color={colors.secondaryText} />
+                        <Text style={[styles.termText, { color: theme.text }]}>{term.text}</Text>
+                        <Ionicons name="information-circle-outline" size={18} color={theme.textSecondary} />
                     </View>
                 ))}
             </View>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/src/theme';
+import { useTheme } from '@/src/context/AppContext';
 
 interface Category {
     id: string;
@@ -24,29 +25,37 @@ export const ExploreCategoryList: React.FC<ExploreCategoryListProps> = ({
     selectedId,
     onSelect,
 }) => {
+    const theme = useTheme();
+
     return (
         <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.container}
         >
-            {CATEGORIES.map((category) => (
-                <TouchableOpacity
-                    key={category.id}
-                    style={[
-                        styles.chip,
-                        selectedId === category.id && styles.activeChip
-                    ]}
-                    onPress={() => onSelect(category.id)}
-                >
-                    <Text style={[
-                        styles.chipText,
-                        selectedId === category.id && styles.activeChipText
-                    ]}>
-                        {category.label}
-                    </Text>
-                </TouchableOpacity>
-            ))}
+            {CATEGORIES.map((category) => {
+                const isActive = selectedId === category.id;
+                return (
+                    <TouchableOpacity
+                        key={category.id}
+                        style={[
+                            styles.chip,
+                            {
+                                backgroundColor: isActive ? theme.primary : theme.surfaceSecondary,
+                                borderColor: isActive ? theme.primary : theme.border
+                            }
+                        ]}
+                        onPress={() => onSelect(category.id)}
+                    >
+                        <Text style={[
+                            styles.chipText,
+                            { color: isActive ? colors.white : theme.textSecondary }
+                        ]}>
+                            {category.label}
+                        </Text>
+                    </TouchableOpacity>
+                );
+            })}
         </ScrollView>
     );
 };
@@ -58,24 +67,13 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     chip: {
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: spacing.xl,
         paddingVertical: spacing.sm,
         borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: '#E8E8E8',
-    },
-    activeChip: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
     },
     chipText: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#666',
-    },
-    activeChipText: {
-        color: colors.white,
         fontWeight: '600',
     },
 });

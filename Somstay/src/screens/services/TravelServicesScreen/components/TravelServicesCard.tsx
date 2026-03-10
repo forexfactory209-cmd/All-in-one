@@ -27,7 +27,7 @@ export const TravelServicesCard: React.FC<TravelServicesCardProps> = ({ service 
 
     const handlePress = () => {
         if (service.type === 'car' || service.type === 'airport' || service.type === 'intercity') {
-             router.push({ pathname: '/car/[id]', params: { id: service.id } } as any);
+            router.push({ pathname: '/car/[id]', params: { id: service.id } } as any);
         } else if (service.type === 'tour') {
             console.log('Tours not implemented yet');
         } else {
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.large,
         marginHorizontal: spacing.md,
         marginBottom: spacing.lg,
-        ...shadows.medium,
+        ...shadows.large,
         overflow: 'hidden',
     },
     imageContainer: {

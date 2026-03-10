@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '@/src/theme';
+import { useTheme } from '@/src/context/AppContext';
 
 interface StepPaymentProps {
     formData: any;
@@ -10,6 +11,7 @@ interface StepPaymentProps {
 }
 
 export const StepPayment: React.FC<StepPaymentProps> = ({ formData, daysCount, totalPrice }) => {
+    const theme = useTheme();
     const summaryItems = [
         { label: 'Booking Duration', value: `${daysCount} Days`, icon: 'calendar-outline' },
         { label: 'Pickup Location', value: formData.delivery_type === 'airport' ? 'Hargeisa Airport' : 'Hotel Delivery', icon: 'location-outline' },
@@ -17,67 +19,67 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ formData, daysCount, t
     ];
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-            <Text style={styles.title}>SUMMARY & PAYMENT</Text>
-            
-            <View style={styles.summaryCard}>
+        <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, { backgroundColor: theme.background }]}>
+            <Text style={[styles.title, { color: theme.text }]}>SUMMARY & PAYMENT</Text>
+
+            <View style={[styles.summaryCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
                 <View style={styles.summaryHeader}>
-                    <Text style={styles.summaryTitle}>Review Your Booking</Text>
-                    <Ionicons name="checkmark-done-circle" size={24} color={colors.success} />
+                    <Text style={[styles.summaryTitle, { color: theme.text }]}>Review Your Booking</Text>
+                    <Ionicons name="checkmark-done-circle" size={24} color={theme.success} />
                 </View>
 
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
                 {summaryItems.map((item, idx) => (
                     <View key={idx} style={styles.summaryItem}>
-                        <View style={styles.itemIconWrap}>
-                             <Ionicons name={item.icon as any} size={20} color={colors.primary} />
+                        <View style={[styles.itemIconWrap, { backgroundColor: theme.surfaceSecondary }]}>
+                            <Ionicons name={item.icon as any} size={20} color={theme.primary} />
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Text style={styles.itemLabel}>{item.label}</Text>
-                            <Text style={styles.itemValue}>{item.value}</Text>
+                            <Text style={[styles.itemLabel, { color: theme.textSecondary }]}>{item.label}</Text>
+                            <Text style={[styles.itemValue, { color: theme.text }]}>{item.value}</Text>
                         </View>
                     </View>
                 ))}
 
-                <View style={styles.totalSection}>
-                    <Text style={styles.totalLabel}>Total Rental Amount</Text>
-                    <Text style={styles.totalVal}>${totalPrice.toFixed(2)}</Text>
+                <View style={[styles.totalSection, { borderTopColor: theme.border }]}>
+                    <Text style={[styles.totalLabel, { color: theme.text }]}>Total Rental Amount</Text>
+                    <Text style={[styles.totalVal, { color: theme.primary }]}>${totalPrice.toFixed(2)}</Text>
                 </View>
             </View>
 
-            <View style={styles.depositBox}>
+            <View style={[styles.depositBox, { backgroundColor: theme.primary + '05', borderColor: theme.primary + '20' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                    <Ionicons name="alert-circle" size={24} color={colors.primary} />
-                    <Text style={[styles.summaryTitle, { fontSize: 18 }]}>Security Deposit</Text>
+                    <Ionicons name="alert-circle" size={24} color={theme.primary} />
+                    <Text style={[styles.summaryTitle, { fontSize: 18, color: theme.text }]}>Security Deposit</Text>
                 </View>
-                <Text style={styles.itemLabel}>
-                    A refundable security deposit of <Text style={{ fontWeight: '900', color: colors.dark }}>$200.00</Text> will be required at the time of pickup.
+                <Text style={[styles.itemLabel, { color: theme.textSecondary }]}>
+                    A refundable security deposit of <Text style={{ fontWeight: '900', color: theme.text }}>$200.00</Text> will be required at the time of pickup.
                 </Text>
             </View>
 
             <View style={{ marginTop: 24 }}>
-                <Text style={[styles.label, { marginBottom: 12 }]}>SELECT PAYMENT METHOD</Text>
-                <TouchableOpacity style={styles.paymentMethod}>
-                    <View style={styles.paymentIcon}>
-                         <Ionicons name="phone-portrait" size={24} color={colors.primary} />
+                <Text style={[styles.label, { marginBottom: 12, color: theme.textSecondary }]}>SELECT PAYMENT METHOD</Text>
+                <TouchableOpacity style={[styles.paymentMethod, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                    <View style={[styles.paymentIcon, { backgroundColor: theme.surfaceSecondary }]}>
+                        <Ionicons name="phone-portrait" size={24} color={theme.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.itemValue}>ZAAD / Telesom</Text>
-                        <Text style={styles.itemLabel}>Mobile Money Transfer</Text>
+                        <Text style={[styles.itemValue, { color: theme.text }]}>ZAAD / Telesom</Text>
+                        <Text style={[styles.itemLabel, { color: theme.textSecondary }]}>Mobile Money Transfer</Text>
                     </View>
-                    <Ionicons name="radio-button-on" size={24} color={colors.primary} />
+                    <Ionicons name="radio-button-on" size={24} color={theme.primary} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.paymentMethod, { opacity: 0.6, marginTop: 12 }]}>
-                    <View style={styles.paymentIcon}>
-                         <Ionicons name="card-outline" size={24} color={colors.secondaryText} />
+                <TouchableOpacity style={[styles.paymentMethod, { backgroundColor: theme.card, borderColor: theme.border, opacity: 0.6, marginTop: 12 }]}>
+                    <View style={[styles.paymentIcon, { backgroundColor: theme.surfaceSecondary }]}>
+                        <Ionicons name="card-outline" size={24} color={theme.textSecondary} />
                     </View>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.itemValue}>Credit / Debit Card</Text>
-                        <Text style={styles.itemLabel}>Coming soon</Text>
+                        <Text style={[styles.itemValue, { color: theme.text }]}>Credit / Debit Card</Text>
+                        <Text style={[styles.itemLabel, { color: theme.textSecondary }]}>Coming soon</Text>
                     </View>
-                    <Ionicons name="radio-button-off" size={24} color={colors.gray300} />
+                    <Ionicons name="radio-button-off" size={24} color={theme.textSecondary + '60'} />
                 </TouchableOpacity>
             </View>
             <View style={{ height: 40 }} />
@@ -86,60 +88,96 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ formData, daysCount, t
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: spacing.md },
-    title: { ...typography.textStyles.h3, color: colors.dark, fontWeight: '900', marginBottom: 24, fontSize: 32 },
-    label: { ...typography.textStyles.labelSmall, color: colors.secondaryText, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
-    summaryCard: {
-        backgroundColor: colors.white,
-        borderRadius: 32,
-        padding: 24,
-        ...shadows.large,
-        borderWidth: 1,
-        borderColor: colors.gray100,
+    container: { flex: 1, paddingVertical: spacing.md },
+    title: {
+        ...typography.textStyles.h1,
+        marginBottom: spacing.lg,
+        fontSize: 28,
     },
-    summaryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    summaryTitle: { ...typography.textStyles.h6, color: colors.dark, fontWeight: '800', fontSize: 20 },
-    divider: { height: 1.5, backgroundColor: colors.gray100, marginBottom: 16 },
-    summaryItem: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 },
-    itemIconWrap: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primary + '10', justifyContent: 'center', alignItems: 'center' },
-    itemLabel: { ...typography.textStyles.caption, color: colors.secondaryText, fontWeight: '600', fontSize: 13 },
-    itemValue: { ...typography.textStyles.bodySmall, color: colors.dark, fontWeight: '800', fontSize: 16 },
-    totalSection: {
-        marginTop: 8,
-        paddingTop: 20,
-        borderTopWidth: 2,
-        borderTopColor: colors.gray50,
+    label: {
+        ...typography.textStyles.labelSmall,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 1.2
+    },
+    summaryCard: {
+        borderRadius: 24,
+        padding: 20,
+        ...shadows.medium,
+        borderWidth: 1,
+    },
+    summaryHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'baseline',
+        alignItems: 'center',
+        marginBottom: 16
     },
-    totalLabel: { ...typography.textStyles.labelSmall, color: colors.secondaryText, fontWeight: '800' },
-    totalVal: { ...typography.textStyles.h2, color: colors.primary, fontWeight: '900', fontSize: 32 },
+    summaryTitle: {
+        ...typography.textStyles.h6,
+        fontWeight: '700',
+    },
+    divider: {
+        height: 1,
+        marginBottom: 16
+    },
+    summaryItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        marginBottom: 16
+    },
+    itemIconWrap: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    itemLabel: {
+        ...typography.textStyles.caption,
+        fontWeight: '600',
+    },
+    itemValue: {
+        ...typography.textStyles.bodySmall,
+        fontWeight: '700',
+    },
+    totalSection: {
+        marginTop: 8,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    totalLabel: {
+        ...typography.textStyles.label,
+        fontWeight: '700'
+    },
+    totalVal: {
+        ...typography.textStyles.h1,
+        fontWeight: '800',
+        fontSize: 28
+    },
     depositBox: {
         marginTop: 24,
-        padding: 24,
-        backgroundColor: colors.primary + '05',
-        borderRadius: 24,
+        padding: 20,
+        borderRadius: 20,
         borderWidth: 1,
-        borderColor: colors.primary + '20',
         borderStyle: 'dashed',
     },
     paymentMethod: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        borderWidth: 2,
-        borderColor: colors.gray100,
+        padding: 16,
+        borderRadius: borderRadius.base,
+        borderWidth: 1,
         gap: 16,
         ...shadows.small,
     },
     paymentIcon: {
         width: 48,
         height: 48,
-        borderRadius: 14,
-        backgroundColor: colors.gray100,
+        borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
     },

@@ -5,11 +5,14 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { styles } from './ReceiptScreen.styles';
 import BookingService from '@/src/services/booking/bookingService';
+import { carService } from '@/src/services/api/carService';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { useTheme } from '@/src/context/AppContext';
 
 export const ReceiptScreen = () => {
     const router = useRouter();
+    const theme = useTheme();
     const { bookingId } = useLocalSearchParams();
     const [booking, setBooking] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -19,11 +22,42 @@ export const ReceiptScreen = () => {
             if (!bookingId) return;
             try {
                 setLoading(true);
-                const data = await BookingService.getBookingById(bookingId as string);
-                setBooking(data);
+                const rawId = bookingId as string;
+
+                // Strip the p- (property/room) or c- (car) prefix that was added by BookingScreen
+                const isCar = rawId.startsWith('c-');
+                const isProperty = rawId.startsWith('p-');
+                const numericId = rawId.replace(/^[pc]-/, '');
+
+                if (isCar) {
+                    // Fetch car booking details
+                    const res = await carService.getBookingById(numericId);
+                    if (res && res.data) {
+                        const item = res.data;
+                        setBooking({
+                            id: numericId,
+                            entity_type: 'Car',
+                            entity_name: `${item.make || ''} ${item.model || ''} Rental`.trim(),
+                            check_in: item.pickup_date,
+                            check_out: item.return_date,
+                            total_price: item.total_price,
+                            payment_status: item.payment_status,
+                            status: item.status,
+                            guest_name: item.driver_name,
+                            guest_phone: item.driver_phone,
+                            guest_email: item.driver_email,
+                            location: item.pickup_location,
+                            created_at: item.created_at,
+                        });
+                    }
+                } else {
+                    // Hotel/room/property booking
+                    const data = await BookingService.getBookingById(numericId);
+                    setBooking(data);
+                }
             } catch (error) {
                 console.error('Error fetching booking for receipt:', error);
-                Alert.alert('Error', 'Failed to load receipt details');
+                Alert.alert('Error', 'Failed to load receipt details. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -123,7 +157,7 @@ export const ReceiptScreen = () => {
                 </html>
             `;
             const { uri } = await Print.printToFileAsync({ html });
-            
+
             if (Platform.OS === 'ios') {
                 await Sharing.shareAsync(uri);
             } else {
@@ -138,16 +172,20 @@ export const ReceiptScreen = () => {
 
     if (loading) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color="#0288AC" />
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }]}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
 
     if (!booking) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Text>Booking not found</Text>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }]}>
+                <Ionicons name="alert-circle-outline" size={48} color={theme.textSecondary} />
+                <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600', marginTop: 12 }}>Booking not found</Text>
+                <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16, padding: 12 }}>
+                    <Text style={{ color: theme.primary, fontWeight: '700' }}>← Go Back</Text>
+                </TouchableOpacity>
             </View>
         );
     }

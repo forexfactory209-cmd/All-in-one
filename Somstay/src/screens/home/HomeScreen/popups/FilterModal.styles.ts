@@ -10,7 +10,6 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContainer: {
-        backgroundColor: colors.white,
         borderTopLeftRadius: borderRadius.lg,
         borderTopRightRadius: borderRadius.lg,
         maxHeight: height * 0.9,
@@ -31,12 +30,10 @@ export const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray100,
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: colors.dark,
     },
     closeButton: {
         padding: 5,
@@ -50,7 +47,6 @@ export const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: colors.dark,
         marginBottom: spacing.md,
     },
     chipContainer: {
@@ -62,7 +58,6 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 25,
-        backgroundColor: colors.gray100,
         borderWidth: 1,
         borderColor: 'transparent',
     },
@@ -71,7 +66,6 @@ export const styles = StyleSheet.create({
     },
     chipText: {
         fontSize: 14,
-        color: colors.secondaryText,
         fontWeight: '500',
     },
     activeChipText: {
@@ -89,7 +83,6 @@ export const styles = StyleSheet.create({
         gap: 8,
     },
     priceBadge: {
-        backgroundColor: '#E6F3F7',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 20,
@@ -100,7 +93,6 @@ export const styles = StyleSheet.create({
         fontSize: 14,
     },
     priceSeparator: {
-        color: colors.gray300,
         fontSize: 16,
     },
     sliderContainer: {
@@ -110,7 +102,6 @@ export const styles = StyleSheet.create({
     },
     sliderTrack: {
         height: 4,
-        backgroundColor: colors.gray200,
         borderRadius: 2,
         position: 'relative',
     },
@@ -127,7 +118,6 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: colors.primary,
         borderWidth: 4,
-        borderColor: colors.white,
         top: -10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -142,7 +132,6 @@ export const styles = StyleSheet.create({
     },
     sliderLabelText: {
         fontSize: 12,
-        color: colors.gray300,
         fontWeight: '500',
     },
     rowSection: {
@@ -157,7 +146,6 @@ export const styles = StyleSheet.create({
     },
     rowSubTitle: {
         fontSize: 14,
-        color: colors.secondaryText,
         marginTop: 4,
     },
     ratingChipContainer: {
@@ -172,19 +160,15 @@ export const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 25,
         borderWidth: 1,
-        borderColor: colors.gray200,
-        backgroundColor: colors.white,
         gap: 6,
     },
     activeRatingChip: {
         borderColor: colors.primary,
         borderWidth: 2,
-        backgroundColor: '#F0F9FB',
     },
     ratingText: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.dark,
     },
     footer: {
         flexDirection: 'row',
@@ -194,9 +178,7 @@ export const styles = StyleSheet.create({
         paddingBottom: spacing.lg,
         marginTop: spacing.xl,
         borderTopWidth: 1,
-        borderTopColor: colors.gray100,
         gap: 20,
-        backgroundColor: colors.white,
     },
     resetButton: {
         flex: 1,
@@ -206,7 +188,6 @@ export const styles = StyleSheet.create({
     resetText: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.secondaryText,
     },
     applyButton: {
         flex: 2,
@@ -232,7 +213,6 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: colors.gray100,
         marginRight: 10,
         borderWidth: 1,
         borderColor: 'transparent',
@@ -240,14 +220,12 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     activeDestinationChip: {
-        backgroundColor: colors.white,
         borderColor: colors.primary,
         borderWidth: 1.5,
     },
     destinationText: {
         fontSize: 14,
         fontWeight: '600',
-        color: colors.secondaryText,
     },
     activeDestinationText: {
         color: colors.primary,

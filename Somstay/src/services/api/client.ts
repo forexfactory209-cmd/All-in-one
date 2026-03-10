@@ -4,6 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL, API_TIMEOUT } from './endpoints';
 
 // Create axios instance
@@ -15,15 +16,13 @@ export const apiClient: AxiosInstance = axios.create({
     },
 });
 
+
 // Request interceptor - Add auth token to requests
 apiClient.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
         try {
-            // Get auth token from storage (implement your storage logic)
-            // const token = await AsyncStorage.getItem('authToken');
-
-            // For now, we'll use a placeholder
-            const token = null;
+            // Get auth token from SecureStore
+            const token = await SecureStore.getItemAsync('authToken');
 
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;

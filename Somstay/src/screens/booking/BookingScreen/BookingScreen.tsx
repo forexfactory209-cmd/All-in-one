@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, FlatList, ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/src/theme';
+import { spacing } from '@/src/theme';
 import { useApp, useTheme } from '@/src/context/AppContext';
 
 // Components
@@ -35,7 +35,7 @@ export const BookingScreen: React.FC = () => {
 
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.primary} />
+                    <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -53,7 +53,6 @@ export const BookingScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F7FBFD', // Ultra light blueish gray
     },
     loadingContainer: {
         flex: 1,

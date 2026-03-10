@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { styles } from './SearchBar.styles';
-import { useApp } from '@/src/context/AppContext';
+import { useApp, useTheme } from '@/src/context/AppContext';
 
 interface SearchBarProps {
     value: string;
@@ -24,29 +24,34 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onSearchBarPress,
 }) => {
     const { t } = useApp();
+    const theme = useTheme();
+
     return (
         <View style={styles.container}>
             {/* Search Input Container */}
             <View style={styles.searchRow}>
                 <TouchableOpacity
-                    style={styles.searchInputContainer}
+                    style={[styles.searchInputContainer, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}
                     activeOpacity={0.9}
                     onPress={onSearchBarPress}
                 >
+                    <Icon name="search" size={24} color={theme.primary} style={styles.searchIcon} />
                     <TextInput
-                        style={styles.searchInput}
+                        style={[styles.searchInput, { color: theme.text }]}
                         placeholder={t('search_cities')}
-                        placeholderTextColor="#999"
+                        placeholderTextColor={theme.textSecondary + '80'}
                         value={value}
                         editable={false}
                         pointerEvents="none"
                     />
-                    <Icon name="search" size={24} color="#0288AC" style={styles.searchIcon} />
                 </TouchableOpacity>
 
                 {/* Filter Button */}
-                <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
-                    <Icon name="options" size={24} color="#0288AC" />
+                <TouchableOpacity
+                    style={[styles.filterButton, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}
+                    onPress={onFilterPress}
+                >
+                    <Icon name="options" size={24} color={theme.primary} />
                 </TouchableOpacity>
             </View>
         </View>

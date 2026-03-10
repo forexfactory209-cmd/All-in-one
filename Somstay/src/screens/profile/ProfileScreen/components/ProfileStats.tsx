@@ -1,23 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius } from '@/src/theme';
+import { spacing, borderRadius } from '@/src/theme';
+
+import { useTheme } from '@/src/context/AppContext';
 
 export const ProfileStats: React.FC = () => {
+    const theme = useTheme();
+
     return (
-        <View style={styles.container}>
-            <View style={styles.statCard}>
-                <Text style={styles.statValue}>12</Text>
-                <Text style={styles.statLabel}>REVIEWS</Text>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
+                <Text style={[styles.statValue, { color: theme.primary }]}>12</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>REVIEWS</Text>
             </View>
 
-            <View style={styles.statCard}>
-                <Text style={styles.statValue}>45</Text>
-                <Text style={styles.statLabel}>FAVORITES</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
+                <Text style={[styles.statValue, { color: theme.primary }]}>45</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>FAVORITES</Text>
             </View>
 
-            <View style={styles.statCard}>
-                <Text style={styles.statValue}>8</Text>
-                <Text style={styles.statLabel}>BOOKINGS</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
+                <Text style={[styles.statValue, { color: theme.primary }]}>8</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>BOOKINGS</Text>
             </View>
         </View>
     );
@@ -29,11 +33,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.lg,
-        backgroundColor: colors.white,
     },
     statCard: {
         width: '30%',
-        backgroundColor: '#F0F9FB',
         paddingVertical: spacing.md,
         borderRadius: borderRadius.large,
         alignItems: 'center',
@@ -41,12 +43,10 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 20,
         fontWeight: '700',
-        color: colors.primary,
     },
     statLabel: {
         fontSize: 10,
         fontWeight: '600',
-        color: '#999',
         marginTop: 4,
     },
 });

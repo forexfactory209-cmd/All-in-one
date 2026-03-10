@@ -21,8 +21,13 @@ export const API_BASE_URL = __DEV__
     ? `http://${getHostUrl()}:5000/api/v1`  // Development - points to host machine
     : 'https://api.vacationrental.com/api/v1';  // Production
 
+export const NOTIFICATION_BASE_URL = __DEV__
+    ? `http://${getHostUrl()}:5001/api/v1`
+    : 'https://notifications.vacationrental.com/api/v1';
+
 // API Timeout
 export const API_TIMEOUT = 30000; // 30 seconds
+
 
 // Auth Endpoints
 export const AUTH_ENDPOINTS = {

@@ -19,9 +19,9 @@ export const colors = {
     info: '#0288AC',    // Using Primary for info
 
     // Neutral Colors
-    dark: '#000000',      // Maximum contrast for main text
-    secondaryText: '#333333', // Deep gray for secondary text
-    background: '#F3F4F6',    // Slightly darker gray background to make white cards pop
+    dark: '#04252E',      // Matches DESIGN_SYSTEM.md Main text
+    secondaryText: '#5A5E5E', // Matches DESIGN_SYSTEM.md Subtitles
+    background: '#FFFFFF',    // Matches DESIGN_SYSTEM.md screen background
     white: '#FFFFFF',
 
     // Grays (for borders, dividers) - Derived from Secondary Text or Dark

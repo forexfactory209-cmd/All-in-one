@@ -12,7 +12,10 @@ interface FilterModalProps {
     hideDestination?: boolean;
 }
 
+import { useTheme } from '@/src/context/AppContext';
+
 export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onApply, hideDestination = false }) => {
+    const theme = useTheme();
     const [selectedType, setSelectedType] = useState('All');
     const [priceRange, setPriceRange] = useState([0, 200]);
     const [selectedDestination, setSelectedDestination] = useState('All');
@@ -47,13 +50,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
             onRequestClose={onClose}
         >
             <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.handle} />
+                <View style={[styles.modalContainer, { backgroundColor: theme.card }]}>
+                    <View style={[styles.handle, { backgroundColor: theme.border }]} />
 
-                    <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Filters</Text>
+                    <View style={[styles.header, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.headerTitle, { color: theme.text }]}>Filters</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <Ionicons name="close" size={24} color={colors.dark} />
+                            <Ionicons name="close" size={24} color={theme.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -61,19 +64,21 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                         {/* Sort by Destination */}
                         {!hideDestination && (
                             <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>Destination</Text>
+                                <Text style={[styles.sectionTitle, { color: theme.text }]}>Destination</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationScrollView}>
                                     {destinations.map((dest) => (
                                         <TouchableOpacity
                                             key={dest}
                                             style={[
                                                 styles.destinationChip,
-                                                selectedDestination === dest && styles.activeDestinationChip
+                                                { backgroundColor: theme.surfaceSecondary },
+                                                selectedDestination === dest && [styles.activeDestinationChip, { backgroundColor: theme.card }]
                                             ]}
                                             onPress={() => setSelectedDestination(dest)}
                                         >
                                             <Text style={[
                                                 styles.destinationText,
+                                                { color: theme.textSecondary },
                                                 selectedDestination === dest && styles.activeDestinationText
                                             ]}>{dest}</Text>
                                         </TouchableOpacity>
@@ -85,13 +90,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                         {/* Price Range */}
                         <View style={styles.section}>
                             <View style={styles.priceRangeHeader}>
-                                <Text style={styles.sectionTitle}>Price range</Text>
+                                <Text style={[styles.sectionTitle, { color: theme.text }]}>Price range</Text>
                                 <View style={styles.priceDisplayRow}>
-                                    <View style={styles.priceBadge}>
+                                    <View style={[styles.priceBadge, { backgroundColor: theme.surfaceSecondary }]}>
                                         <Text style={styles.priceBadgeText}>${priceRange[0]}</Text>
                                     </View>
-                                    <Text style={styles.priceSeparator}>-</Text>
-                                    <View style={styles.priceBadge}>
+                                    <Text style={[styles.priceSeparator, { color: theme.textSecondary }]}>-</Text>
+                                    <View style={[styles.priceBadge, { backgroundColor: theme.surfaceSecondary }]}>
                                         <Text style={styles.priceBadgeText}>${priceRange[1]}</Text>
                                     </View>
                                 </View>
@@ -111,7 +116,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                                         backgroundColor: colors.primary,
                                     }}
                                     unselectedStyle={{
-                                        backgroundColor: colors.gray200,
+                                        backgroundColor: theme.border,
                                     }}
                                     containerStyle={{
                                         height: 40,
@@ -125,7 +130,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                                         height: 24,
                                         width: 24,
                                         borderRadius: 12,
-                                        backgroundColor: colors.white,
+                                        backgroundColor: theme.card,
                                         borderWidth: 2,
                                         borderColor: colors.primary,
                                         shadowColor: '#000',
@@ -136,30 +141,32 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                                     }}
                                 />
                                 <View style={styles.sliderLabels}>
-                                    <Text style={styles.sliderLabelText}>$0</Text>
-                                    <Text style={styles.sliderLabelText}>$250</Text>
-                                    <Text style={styles.sliderLabelText}>$500</Text>
-                                    <Text style={styles.sliderLabelText}>$750</Text>
-                                    <Text style={styles.sliderLabelText}>$1000+</Text>
+                                    <Text style={[styles.sliderLabelText, { color: theme.textSecondary }]}>$0</Text>
+                                    <Text style={[styles.sliderLabelText, { color: theme.textSecondary }]}>$250</Text>
+                                    <Text style={[styles.sliderLabelText, { color: theme.textSecondary }]}>$500</Text>
+                                    <Text style={[styles.sliderLabelText, { color: theme.textSecondary }]}>$750</Text>
+                                    <Text style={[styles.sliderLabelText, { color: theme.textSecondary }]}>$1000+</Text>
                                 </View>
                             </View>
                         </View>
 
                         {/* Property Type */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Stay Type</Text>
+                            <Text style={[styles.sectionTitle, { color: theme.text }]}>Stay Type</Text>
                             <View style={styles.chipContainer}>
                                 {propertyTypes.map((type) => (
                                     <TouchableOpacity
                                         key={type}
                                         style={[
                                             styles.chip,
+                                            { backgroundColor: theme.surfaceSecondary },
                                             selectedType === type && styles.activeChip
                                         ]}
                                         onPress={() => setSelectedType(type)}
                                     >
                                         <Text style={[
                                             styles.chipText,
+                                            { color: theme.textSecondary },
                                             selectedType === type && styles.activeChipText
                                         ]}>{type}</Text>
                                     </TouchableOpacity>
@@ -170,8 +177,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                         {/* Verification Toggle */}
                         <View style={styles.rowSection}>
                             <View style={styles.textContainer}>
-                                <Text style={styles.sectionTitle}>Verified only</Text>
-                                <Text style={styles.rowSubTitle}>Show properties verified by SomStay team</Text>
+                                <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 0 }]}>Verified only</Text>
+                                <Text style={[styles.rowSubTitle, { color: theme.textSecondary }]}>Show properties verified by SomStay team</Text>
                             </View>
                             <TouchableOpacity
                                 onPress={() => setVerifiedOnly(!verifiedOnly)}
@@ -179,20 +186,20 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                                     width: 50,
                                     height: 30,
                                     borderRadius: 15,
-                                    backgroundColor: verifiedOnly ? colors.primary : colors.gray200,
+                                    backgroundColor: verifiedOnly ? colors.primary : theme.border,
                                     paddingHorizontal: 2,
                                     justifyContent: 'center',
                                     alignItems: verifiedOnly ? 'flex-end' : 'flex-start'
                                 }}
                             >
-                                <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: colors.white }} />
+                                <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: theme.card }} />
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
 
-                    <View style={styles.footer}>
+                    <View style={[styles.footer, { borderTopColor: theme.border, backgroundColor: theme.card }]}>
                         <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-                            <Text style={styles.resetText}>Clear all</Text>
+                            <Text style={[styles.resetText, { color: theme.textSecondary }]}>Clear all</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
                             <Text style={styles.applyButtonText}>Show results</Text>

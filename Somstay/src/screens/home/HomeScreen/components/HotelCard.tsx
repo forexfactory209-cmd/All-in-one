@@ -5,6 +5,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { PropertyResponse } from '@/src/services/property/propertyService.types';
 import { styles } from './HotelCard.styles';
 import { useApp, useTheme } from '@/src/context/AppContext';
+import { colors } from '@/src/theme';
 
 interface HotelCardProps {
     hotel: PropertyResponse;
@@ -26,35 +27,29 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
 
     return (
         <TouchableOpacity
-            style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}
+            style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}
             onPress={onPress}
             activeOpacity={0.88}
         >
-            {/* Inner clip for image rounded corners */}
             <View style={styles.innerClip}>
-
-                {/* Hotel Image */}
                 <Image
                     source={{ uri: imageUri }}
-                    style={styles.image}
+                    style={[styles.image, { backgroundColor: theme.surfaceSecondary }]}
                     resizeMode="cover"
                 />
 
-                {/* Gradient overlay at bottom of image for legibility */}
                 <LinearGradient
-                    colors={['transparent', 'rgba(4,37,46,0.58)']}
+                    colors={['transparent', 'rgba(0,0,0,0.6)']}
                     style={styles.imageOverlay}
                 />
 
-                {/* FEATURED badge — top left */}
-                <View style={styles.featuredBadge}>
+                <View style={[styles.featuredBadge, { backgroundColor: '#FFD700' }]}>
                     <Icon name="flash" size={8} color="#1A1A1A" />
-                    <Text style={styles.featuredText}>{settings.language === 'so' ? 'MUDAN' : 'FEATURED'}</Text>
+                    <Text style={[styles.featuredText, { color: '#1A1A1A' }]}>{settings.language === 'so' ? 'MUDAN' : 'FEATURED'}</Text>
                 </View>
 
-                {/* Favourite — top right */}
                 <TouchableOpacity
-                    style={styles.favoriteButton}
+                    style={[styles.favoriteButton, { backgroundColor: theme.card + 'CC' }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     onPress={(e) => {
                         e.stopPropagation();
@@ -64,49 +59,40 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
                     <Icon
                         name={isWishlisted ? "heart" : "heart-outline"}
                         size={15}
-                        color={isWishlisted ? "#FE3335" : "#FE3335"}
+                        color={isWishlisted ? (theme.error || '#FE3335') : theme.textSecondary}
                     />
                 </TouchableOpacity>
 
-                {/* Rating chip — bottom right of image */}
                 {typeof hotel.average_rating === 'number' && (
-                    <View style={styles.ratingOverlay}>
+                    <View style={[styles.ratingOverlay, { backgroundColor: 'rgba(0,0,0,0.6)' }]}>
                         <Icon name="star" size={10} color="#FFD700" />
                         <Text style={styles.ratingOverlayText}>
-                            {Number(hotel.average_rating || 4.5).toFixed(1)}
+                            {Number(hotel.average_rating || 0).toFixed(1)}
                         </Text>
                     </View>
                 )}
-
             </View>
 
-            {/* Info body */}
             <View style={styles.infoContainer}>
-
-                {/* Hotel name */}
                 <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
                     {hotel.title}
                 </Text>
 
-                {/* Subtitle - Hotel name if this is a room */}
                 {(hotel as any).hotel_name && (
                     <Text style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 2 }} numberOfLines={1}>
                         at {(hotel as any).hotel_name}
                     </Text>
                 )}
 
-                {/* Location */}
                 <View style={styles.locationRow}>
-                    <Icon name="location-outline" size={11} color="#0288AC" />
-                    <Text style={styles.location} numberOfLines={1}>
+                    <Icon name="location-outline" size={11} color={theme.primary} />
+                    <Text style={[styles.location, { color: theme.textSecondary }]} numberOfLines={1}>
                         {[hotel.city, hotel.country].filter(Boolean).join(', ')}
                     </Text>
                 </View>
 
-                {/* Divider */}
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-                {/* Price + Verified */}
                 <View style={styles.priceRow}>
                     <View style={styles.priceWrap}>
                         <Text style={[styles.currency, { color: theme.primary }]}>$</Text>
@@ -116,15 +102,16 @@ export const HotelCard: React.FC<HotelCardProps> = memo(({
                         <Text style={[styles.priceLabel, { color: theme.textSecondary }]}>/{t('night')}</Text>
                     </View>
 
-                    <View style={styles.verifiedBadge}>
-                        <Icon name="checkmark-circle" size={11} color="#06A649" />
-                        <Text style={styles.verifiedText}>{settings.language === 'so' ? 'LA XAQIIJIYAY' : 'VERIFIED'}</Text>
+                    <View style={[styles.verifiedBadge, { backgroundColor: theme.success + '15' }]}>
+                        <Icon name="checkmark-circle" size={11} color={theme.success} />
+                        <Text style={[styles.verifiedText, { color: theme.success }]}>{settings.language === 'so' ? 'LA XAQIIJIYAY' : 'VERIFIED'}</Text>
                     </View>
                 </View>
-
             </View>
         </TouchableOpacity>
     );
 });
+
+HotelCard.displayName = 'HotelCard';
 
 HotelCard.displayName = 'HotelCard';

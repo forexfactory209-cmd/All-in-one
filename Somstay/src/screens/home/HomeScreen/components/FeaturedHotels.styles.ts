@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@/src/theme';
 import { CARD_WIDTH } from './HotelCard.styles';
 
 const COLUMN_GAP = 12;
@@ -21,11 +20,9 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 19,
         fontWeight: '700',
-        color: colors.text?.primary ?? '#1A1A1A',
     },
     seeAll: {
         fontSize: 14,
-        color: colors.primary ?? '#0288AC',
         fontWeight: '600',
     },
     gridContent: {
@@ -40,7 +37,6 @@ export const styles = StyleSheet.create({
     // Skeleton
     skeletonCard: {
         width: SKELETON_CARD_W,
-        backgroundColor: colors.white,
         borderRadius: 14,
         overflow: 'hidden',
         shadowColor: '#000',
@@ -52,7 +48,6 @@ export const styles = StyleSheet.create({
     skeletonImage: {
         width: '100%',
         height: SKELETON_IMG_H,
-        backgroundColor: '#E5E7EB',
     },
     skeletonBody: {
         padding: 10,
@@ -60,14 +55,12 @@ export const styles = StyleSheet.create({
     skeletonTitle: {
         height: 12,
         width: '80%',
-        backgroundColor: '#E5E7EB',
         borderRadius: 6,
         marginBottom: 8,
     },
     skeletonSub: {
         height: 10,
         width: '55%',
-        backgroundColor: '#F3F4F6',
         borderRadius: 6,
     },
     // Footer
@@ -77,6 +70,5 @@ export const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 13,
-        color: '#888',
     },
 });

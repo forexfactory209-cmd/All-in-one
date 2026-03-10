@@ -26,7 +26,7 @@ export const PopularLocations: React.FC<PopularLocationsProps> = ({
 
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color="#0288AC" />
+                    <ActivityIndicator size="small" color={theme.primary} />
                 </View>
             ) : (
                 <ScrollView
@@ -41,13 +41,13 @@ export const PopularLocations: React.FC<PopularLocationsProps> = ({
                             onPress={() => onLocationPress(loc.name)}
                             activeOpacity={0.8}
                         >
-                            <View style={styles.imageContainer}>
+                            <View style={[styles.imageContainer, { borderColor: theme.border }]}>
                                 <Image
                                     source={{ uri: loc.image || 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=150&q=80' }}
                                     style={styles.image}
                                 />
                             </View>
-                            <Text style={[styles.locationName, { color: theme.text }]}>{loc.name}</Text>
+                            <Text style={[styles.locationName, { color: theme.textSecondary }]}>{loc.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>

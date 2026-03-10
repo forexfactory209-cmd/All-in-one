@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { styles } from '@/src/screens/home/HomeScreen/components/CategoryList.styles';
 import { colors } from '@/src/theme';
 
@@ -25,32 +25,34 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryPress, act
     return (
         <View style={styles.container}>
             <View style={styles.listContainer}>
-                {categories.map((item) => (
-                    <TouchableOpacity
-                        key={item.id}
-                        style={styles.categoryItem}
-                        onPress={() => onCategoryPress(item.id)}
-                        activeOpacity={0.7}
-                    >
-                        <View style={[
-                            styles.iconContainer,
-                            activeCategory === item.id && styles.activeIconContainer
-                        ]}>
-                            <Ionicons
-                                name={item.icon as any}
-                                size={28}
-                                color={activeCategory === item.id ? colors.white : colors.primary}
-                            />
-                        </View>
-                        <Text style={[
-                            styles.categoryName,
-                            { color: theme.textSecondary },
-                            activeCategory === item.id && styles.activeCategoryName
-                        ]}>
-                            {item.name}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+                {categories.map((item) => {
+                    const isActive = activeCategory === item.id;
+                    return (
+                        <TouchableOpacity
+                            key={item.id}
+                            style={styles.categoryItem}
+                            onPress={() => onCategoryPress(item.id)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={[
+                                styles.iconContainer,
+                                { backgroundColor: isActive ? colors.primary : theme.surfaceSecondary },
+                            ]}>
+                                <Ionicons
+                                    name={item.icon as any}
+                                    size={28}
+                                    color={isActive ? colors.white : theme.primary}
+                                />
+                            </View>
+                            <Text style={[
+                                styles.categoryName,
+                                { color: isActive ? theme.primary : theme.textSecondary, fontWeight: isActive ? '700' : '600' },
+                            ]}>
+                                {item.name}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
             </View>
         </View>
     );

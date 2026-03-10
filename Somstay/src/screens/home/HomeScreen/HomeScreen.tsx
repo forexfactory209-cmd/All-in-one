@@ -9,6 +9,7 @@ import { SearchBar } from '@/src/screens/home/HomeScreen/components/SearchBar';
 import { FeaturedHotels } from '@/src/screens/home/HomeScreen/components/FeaturedHotels';
 import { CategoryList } from '@/src/screens/home/HomeScreen/components/CategoryList';
 import { PopularLocations } from '@/src/screens/home/HomeScreen/components/PopularLocations';
+import { ReviewPrompt } from '@/src/screens/home/HomeScreen/components/ReviewPrompt';
 
 // Screen-specific hooks
 import { useRecentRooms } from './hooks/useRecentRooms';
@@ -146,6 +147,9 @@ export const HomeScreen: React.FC = () => {
                     />
                 }
             >
+                {/* 0. Review Prompt (if exists) */}
+                <ReviewPrompt />
+
                 {/* 1. Category List */}
                 <View style={styles.section}>
                     <CategoryList onCategoryPress={handleCategoryPress} activeCategory={activeCategory} />

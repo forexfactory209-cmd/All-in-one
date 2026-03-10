@@ -3,28 +3,32 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '@/src/theme';
 
+import { useTheme } from '@/src/context/AppContext';
+
 export const ProfileInfo: React.FC = () => {
+    const theme = useTheme();
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.avatarContainer}>
                 <Image
                     source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?bg=white&auto=format&fit=crop&w=200&q=80' }}
-                    style={styles.avatar}
+                    style={[styles.avatar, { borderColor: theme.border }]}
                 />
-                <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark" size={12} color={colors.white} />
+                <View style={[styles.verifiedBadge, { backgroundColor: theme.success, borderColor: theme.card }]}>
+                    <Ionicons name="checkmark" size={12} color="#ffffff" />
                 </View>
             </View>
 
-            <Text style={styles.name}>Hassan Ali</Text>
+            <Text style={[styles.name, { color: theme.text }]}>Hassan Ali</Text>
 
             <View style={styles.verifiedRow}>
-                <Ionicons name="shield-checkmark-outline" size={14} color={colors.primary} />
-                <Text style={styles.verifiedText}>Verified Guest</Text>
+                <Ionicons name="shield-checkmark-outline" size={14} color={theme.primary} />
+                <Text style={[styles.verifiedText, { color: theme.primary }]}>Verified Guest</Text>
             </View>
 
-            <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Edit Profile</Text>
+            <TouchableOpacity style={[styles.editButton, { borderColor: theme.primary, backgroundColor: theme.primary + '10' }]}>
+                <Text style={[styles.editButtonText, { color: theme.primary }]}>Edit Profile</Text>
             </TouchableOpacity>
         </View>
     );
@@ -34,7 +38,6 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         paddingVertical: spacing.lg,
-        backgroundColor: colors.white,
     },
     avatarContainer: {
         position: 'relative',
@@ -45,25 +48,21 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 3,
-        borderColor: '#F0F0F0',
     },
     verifiedBadge: {
         position: 'absolute',
         bottom: 5,
         right: 5,
-        backgroundColor: '#4CAF50',
         width: 20,
         height: 20,
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: colors.white,
     },
     name: {
         fontSize: 22,
         fontWeight: '700',
-        color: colors.dark,
         marginBottom: 4,
     },
     verifiedRow: {
@@ -74,7 +73,6 @@ const styles = StyleSheet.create({
     },
     verifiedText: {
         fontSize: 14,
-        color: colors.primary,
         fontWeight: '600',
     },
     editButton: {
@@ -82,11 +80,9 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         borderRadius: borderRadius.full,
         borderWidth: 2,
-        borderColor: colors.primary,
     },
     editButtonText: {
         fontSize: 16,
         fontWeight: '700',
-        color: colors.primary,
     },
 });

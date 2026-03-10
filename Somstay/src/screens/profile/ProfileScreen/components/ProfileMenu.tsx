@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, spacing, shadows } from '@/src/theme';
 import { useApp, useTheme } from '@/src/context/AppContext';
+import { notificationService } from '@/src/services/api/notificationService';
 
 interface MenuItemProps {
     icon: keyof typeof Ionicons.glyphMap;
@@ -17,17 +18,26 @@ interface MenuItemProps {
 
 const MenuItem: React.FC<MenuItemProps> = ({ icon, label, sublabel, onPress, isLogout, badgeCount, theme }) => (
     <TouchableOpacity style={[styles.menuItem, { backgroundColor: 'transparent' }]} onPress={onPress} activeOpacity={0.75}>
-        <View style={[styles.iconContainer, isLogout ? { backgroundColor: '#FFF5F5' } : { backgroundColor: colors.primary + '12' }]}>
-            <Ionicons name={icon} size={20} color={isLogout ? '#FF5252' : colors.primary} />
+        <View style={[
+            styles.iconContainer,
+            isLogout
+                ? { backgroundColor: theme.error + '12' }
+                : { backgroundColor: theme.primary + '12' }
+        ]}>
+            <Ionicons
+                name={icon}
+                size={20}
+                color={isLogout ? theme.error : theme.primary}
+            />
         </View>
         <View style={styles.labelContainer}>
-            <Text style={[styles.label, { color: isLogout ? '#FF5252' : theme.text }]}>{label}</Text>
+            <Text style={[styles.label, { color: isLogout ? theme.error : theme.text }]}>{label}</Text>
             {sublabel ? <Text style={[styles.sublabel, { color: theme.textSecondary }]}>{sublabel}</Text> : null}
         </View>
         {!isLogout && (
             <View style={styles.rightSide}>
                 {badgeCount !== undefined && badgeCount > 0 && (
-                    <View style={styles.badge}>
+                    <View style={[styles.badge, { backgroundColor: theme.error }]}>
                         <Text style={styles.badgeText}>{badgeCount}</Text>
                     </View>
                 )}
@@ -41,6 +51,25 @@ export const ProfileMenu: React.FC = () => {
     const router = useRouter();
     const { t, settings } = useApp();
     const theme = useTheme();
+    const [unreadCount, setUnreadCount] = useState<number>(0);
+
+    useFocusEffect(
+        useCallback(() => {
+            let isActive = true;
+            const fetchUnread = async () => {
+                try {
+                    const data = await notificationService.getUnreadCount('1');
+                    if (isActive && data && data.success) {
+                        setUnreadCount(data.data.unreadCount);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch unread count:', err);
+                }
+            };
+            fetchUnread();
+            return () => { isActive = false; };
+        }, [])
+    );
 
     const handleLogout = () => {
         Alert.alert(
@@ -66,7 +95,7 @@ export const ProfileMenu: React.FC = () => {
         <View style={styles.container}>
             {/* Account Settings Section */}
             <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t('account_settings').toUpperCase()}</Text>
-            <View style={[styles.menuCard, { backgroundColor: theme.card }]}>
+            <View style={[styles.menuCard, { backgroundColor: theme.card, shadowColor: theme.text }]}>
                 <MenuItem icon="heart-outline" label={t('my_favorites')} sublabel={t('saved_hotels')}
                     onPress={() => Alert.alert(t('my_favorites'), settings.language === 'so' ? 'Dhawaan!' : 'Coming soon!')}
                     theme={theme}
@@ -77,7 +106,7 @@ export const ProfileMenu: React.FC = () => {
                 />
                 {divider}
                 <MenuItem icon="notifications-outline" label={t('notifications')} sublabel={t('manage_alerts')}
-                    onPress={() => router.push('/notifications')} badgeCount={2} theme={theme}
+                    onPress={() => router.push('/notifications')} badgeCount={unreadCount} theme={theme}
                 />
             </View>
 
@@ -85,7 +114,7 @@ export const ProfileMenu: React.FC = () => {
             <Text style={[styles.sectionTitle, { color: theme.textSecondary, marginTop: spacing.xl }]}>
                 {settings.language === 'so' ? 'KALE' : 'MORE'}
             </Text>
-            <View style={[styles.menuCard, { backgroundColor: theme.card }]}>
+            <View style={[styles.menuCard, { backgroundColor: theme.card, shadowColor: theme.text }]}>
                 <MenuItem icon="chatbubble-ellipses-outline" label={t('help_support')} sublabel={t('chat_email_call')}
                     onPress={() => router.push('/support')} theme={theme}
                 />
@@ -100,12 +129,12 @@ export const ProfileMenu: React.FC = () => {
             </View>
 
             {/* Logout */}
-            <View style={[styles.logoutCard]}>
+            <View style={[styles.logoutCard, { backgroundColor: theme.error + '08', borderColor: theme.error + '25' }]}>
                 <MenuItem icon="log-out-outline" label={t('logout')} onPress={handleLogout} isLogout theme={theme} />
             </View>
 
             {/* App version */}
-            <Text style={[styles.version, { color: theme.border }]}>{t('somstay_version')}</Text>
+            <Text style={[styles.version, { color: theme.textSecondary + '40' }]}>{t('somstay_version')}</Text>
         </View>
     );
 };
@@ -115,8 +144,8 @@ const styles = StyleSheet.create({
     sectionTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, marginBottom: spacing.sm },
     menuCard: { borderRadius: 20, overflow: 'hidden', ...shadows.medium },
     logoutCard: {
-        backgroundColor: '#FFF5F5', borderRadius: 20, overflow: 'hidden',
-        marginTop: spacing.xl, borderWidth: 1, borderColor: '#FFE0E0',
+        borderRadius: 20, overflow: 'hidden',
+        marginTop: spacing.xl, borderWidth: 1,
     },
     menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: spacing.md },
     iconContainer: { width: 44, height: 44, borderRadius: 13, justifyContent: 'center', alignItems: 'center', marginRight: spacing.md },
@@ -124,7 +153,7 @@ const styles = StyleSheet.create({
     label: { fontSize: 15, fontWeight: '600' },
     sublabel: { fontSize: 12, marginTop: 2 },
     rightSide: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    badge: { backgroundColor: colors.error, width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+    badge: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
     badgeText: { color: colors.white, fontSize: 11, fontWeight: '800' },
     divider: { height: 1, marginHorizontal: spacing.md },
     version: { textAlign: 'center', fontSize: 12, marginTop: spacing.xl, marginBottom: spacing.sm },

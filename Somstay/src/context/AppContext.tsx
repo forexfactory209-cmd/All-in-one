@@ -390,6 +390,9 @@ export const darkTheme = {
     textSecondary: '#8B949E',
     primary: '#0288AC',
     inputBg: '#21262D',
+    success: '#66BB6A',
+    error: '#F85149',
+    warning: '#E3B341',
 };
 
 export const lightTheme = {
@@ -402,6 +405,9 @@ export const lightTheme = {
     textSecondary: '#5A5E5E',
     primary: '#0288AC',
     inputBg: '#F7F8F9',
+    success: '#06A649',
+    error: '#D32F2F',
+    warning: '#F59E0B',
 };
 
 export type AppTheme = typeof lightTheme;
@@ -409,9 +415,9 @@ export type AppTheme = typeof lightTheme;
 // ─── Context ──────────────────────────────────────────────────────────────────
 const AppContext = createContext<AppContextValue>({
     settings: { darkMode: false, language: 'en', locationEnabled: false },
-    setDarkMode: () => {},
-    setLanguage: () => {},
-    setLocationEnabled: async () => {},
+    setDarkMode: () => { },
+    setLanguage: () => { },
+    setLocationEnabled: async () => { },
     userLocation: null,
     t: (key) => key,
 });
@@ -435,14 +441,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     const parsed = JSON.parse(raw) as AppSettings;
                     setSettings(parsed);
                     if (parsed.locationEnabled) fetchLocation();
-                } catch {}
+                } catch { }
             }
-        }).catch(() => {});
+        }).catch(() => { });
     }, []);
 
     // Persist settings whenever they change
     const persist = useCallback((next: AppSettings) => {
-        SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+        SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(next)).catch(() => { });
         setSettings(next);
     }, []);
 

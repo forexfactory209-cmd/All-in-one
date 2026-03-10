@@ -32,4 +32,9 @@ export const carService = {
         });
         return response.data;
     },
+
+    getBookingById: async (id: string) => {
+        const response = await apiClient.get(`${SERVICE_ENDPOINTS.CAR_BOOKINGS}/${id}`);
+        return response.data;
+    },
 };

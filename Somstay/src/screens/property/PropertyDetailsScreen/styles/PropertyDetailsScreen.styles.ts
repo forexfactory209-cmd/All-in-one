@@ -6,7 +6,7 @@ const { width } = Dimensions.get('window');
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
     },
     imageSliderContainer: {
         width: '100%',
@@ -80,8 +80,7 @@ export const styles = StyleSheet.create({
         marginBottom: 4,
     },
     title: {
-        fontSize: 24,
-        fontWeight: '700',
+        ...typography.textStyles.h2,
         color: colors.dark,
         flex: 1,
         marginRight: spacing.sm,
@@ -106,8 +105,8 @@ export const styles = StyleSheet.create({
         marginBottom: spacing.lg,
     },
     locationText: {
-        fontSize: 14,
-        color: '#7C7C7C',
+        ...typography.textStyles.bodySmall,
+        color: colors.secondaryText,
         marginLeft: 4,
     },
     ratingRow: {
@@ -146,19 +145,18 @@ export const styles = StyleSheet.create({
         marginTop: 4,
     },
     statLabel: {
-        fontSize: 12,
-        color: '#999',
+        ...typography.textStyles.captionSmall,
+        color: colors.secondaryText,
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
+        ...typography.textStyles.h4,
         color: colors.dark,
         marginBottom: spacing.md,
     },
     description: {
-        fontSize: 14,
-        lineHeight: 22,
-        color: '#7C7C7C',
+        ...typography.textStyles.bodySmall,
+        lineHeight: 24,
+        color: colors.secondaryText,
         marginBottom: spacing.sm,
     },
     readMore: {

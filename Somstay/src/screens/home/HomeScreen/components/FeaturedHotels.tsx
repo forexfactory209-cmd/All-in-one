@@ -8,27 +8,19 @@ import { HotelCard } from './HotelCard';
 import { styles } from './FeaturedHotels.styles';
 import { useApp, useTheme } from '@/src/context/AppContext';
 
-interface FeaturedHotelsProps {
-    hotels: PropertyResponse[];
-    loading: boolean;
-    loadingMore: boolean;
-    hasMore: boolean;
-    wishlistedIds?: Set<number | string>;
-    onHotelPress: (hotelId: string) => void;
-    onLoadMore: () => void;
-    onToggleWishlist?: (hotelId: string | number) => void;
-}
-
 // ── Skeleton row for initial load ──────────────────────────────────────────────
-const SkeletonCard = memo(() => (
-    <View style={styles.skeletonCard}>
-        <View style={styles.skeletonImage} />
-        <View style={styles.skeletonBody}>
-            <View style={styles.skeletonTitle} />
-            <View style={styles.skeletonSub} />
+const SkeletonCard = memo(() => {
+    const theme = useTheme();
+    return (
+        <View style={[styles.skeletonCard, { backgroundColor: theme.card }]}>
+            <View style={[styles.skeletonImage, { backgroundColor: theme.surfaceSecondary }]} />
+            <View style={styles.skeletonBody}>
+                <View style={[styles.skeletonTitle, { backgroundColor: theme.surfaceSecondary }]} />
+                <View style={[styles.skeletonSub, { backgroundColor: theme.surfaceSecondary }]} />
+            </View>
         </View>
-    </View>
-));
+    );
+});
 SkeletonCard.displayName = 'SkeletonCard';
 
 const SKELETON_ROWS = [0, 1, 2]; // 3 rows × 2 cols = 6 skeleton cards
@@ -46,10 +38,11 @@ const SkeletonGrid = () => (
 
 // ── Footer for lazy-load indicator ─────────────────────────────────────────────
 const ListFooter = memo(({ loadingMore }: { loadingMore: boolean }) => {
+    const theme = useTheme();
     if (!loadingMore) return null;
     return (
         <View style={styles.footerLoader}>
-            <ActivityIndicator size="small" color="#0288AC" />
+            <ActivityIndicator size="small" color={theme.primary} />
         </View>
     );
 });
@@ -95,7 +88,7 @@ export const FeaturedHotels: React.FC<FeaturedHotelsProps> = ({
             <View style={styles.header}>
                 <Text style={[styles.title, { color: theme.text }]}>{t('featured_hotels')}</Text>
                 <TouchableOpacity>
-                    <Text style={styles.seeAll}>{t('see_all')}</Text>
+                    <Text style={[styles.seeAll, { color: theme.primary }]}>{t('see_all')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -110,14 +103,12 @@ export const FeaturedHotels: React.FC<FeaturedHotelsProps> = ({
                     numColumns={2}
                     columnWrapperStyle={styles.row}
                     contentContainerStyle={styles.gridContent}
-                    // ── Performance tuning ─────────────────────────────────────
                     scrollEnabled={false}          // outer ScrollView handles scroll
-                    initialNumToRender={6}         // first 3 rows immediately
-                    maxToRenderPerBatch={6}        // batch 6 per frame
-                    windowSize={5}                 // render 5 screen-heights
-                    removeClippedSubviews={true}   // unmount off-screen cards
+                    initialNumToRender={6}
+                    maxToRenderPerBatch={6}
+                    windowSize={5}
+                    removeClippedSubviews={true}
                     updateCellsBatchingPeriod={50}
-                    // ── Lazy load trigger ──────────────────────────────────────
                     onEndReached={handleEndReached}
                     onEndReachedThreshold={0.3}
                     ListFooterComponent={<ListFooter loadingMore={loadingMore} />}
@@ -126,3 +117,14 @@ export const FeaturedHotels: React.FC<FeaturedHotelsProps> = ({
         </View>
     );
 };
+
+interface FeaturedHotelsProps {
+    hotels: PropertyResponse[];
+    loading: boolean;
+    loadingMore: boolean;
+    hasMore: boolean;
+    wishlistedIds?: Set<number | string>;
+    onHotelPress: (hotelId: string) => void;
+    onLoadMore: () => void;
+    onToggleWishlist?: (hotelId: string | number) => void;
+}
