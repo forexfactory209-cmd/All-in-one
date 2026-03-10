@@ -1,6 +1,7 @@
 const hotelsRepository = require('./hotels.repository');
 const roomsRepository = require('../rooms/rooms.repository');
 const cache = require('../../utils/cache');
+const searchService = require('./hotels.search.service');
 
 class HotelsService {
     mapHotel(hotel) {
@@ -12,7 +13,8 @@ class HotelsService {
             id: hotel.id.toString(),
             title: hotel.name,
             price_per_night: parseFloat(hotel.base_price) || 0,
-            average_rating: parseFloat(hotel.rating) || 4.5,
+            average_rating: parseFloat(hotel.rating) || 0,
+            review_count: parseInt(hotel.review_count) || 0,
             city: hotel.location || 'Hargeisa',
             country: 'Somalia',
             photos: [
@@ -99,6 +101,19 @@ class HotelsService {
         }
         // Invalidate list cache
         await cache.delByPattern('hotels:list:*');
+
+        // Index in Elasticsearch
+        try {
+            const hotel = await hotelsRepository.findById(hotelId);
+            if (hotel) {
+                const amenities = await hotelsRepository.findAmenitiesByHotelId(hotelId);
+                hotel.amenities = amenities;
+                await searchService.indexHotel(hotel);
+            }
+        } catch (err) {
+            console.error('Failed to index new hotel in ES:', err);
+        }
+
         return hotelId;
     }
 
@@ -117,6 +132,18 @@ class HotelsService {
             // Invalidate caches
             await cache.del(`hotels:detail:${id}`);
             await cache.delByPattern('hotels:list:*');
+
+            // Update in Elasticsearch
+            try {
+                const hotel = await hotelsRepository.findById(id);
+                if (hotel) {
+                    const amenities = await hotelsRepository.findAmenitiesByHotelId(id);
+                    hotel.amenities = amenities;
+                    await searchService.indexHotel(hotel);
+                }
+            } catch (err) {
+                console.error('Failed to update hotel in ES:', err);
+            }
         }
         return updated;
     }
@@ -126,6 +153,13 @@ class HotelsService {
         if (success) {
             await cache.del(`hotels:detail:${id}`);
             await cache.delByPattern('hotels:list:*');
+            
+            // Delete from Elasticsearch
+            try {
+                await searchService.deleteHotel(id);
+            } catch (err) {
+                console.error('Failed to delete hotel from ES:', err);
+            }
         }
         return success;
     }
@@ -138,6 +172,30 @@ class HotelsService {
         const locations = await hotelsRepository.findUniqueLocations();
         await cache.set(cacheKey, locations, 3600); // 1 hour cache
         return locations;
+    }
+
+    /**
+     * Search hotels using Elasticsearch
+     */
+    async searchHotels(filters) {
+        const cacheKey = `search:v1:${JSON.stringify(filters)}`;
+        try {
+            const cachedResults = await cache.get(cacheKey);
+            if (cachedResults) return cachedResults;
+
+            const results = await searchService.search(filters);
+            
+            // Map the results back to the standard hotel format
+            results.hotels = results.hotels.map(hotel => this.mapHotel(hotel));
+            
+            // Cache search results for 2 minutes (shorter TTL than list as search is dynamic)
+            await cache.set(cacheKey, results, 120);
+
+            return results;
+        } catch (error) {
+            console.error('SearchHotels Service Error:', error);
+            throw error;
+        }
     }
 }
 

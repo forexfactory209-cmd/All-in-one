@@ -20,7 +20,7 @@ class CarBookingsController {
             if (rows.length > 0) {
                 return sendResponse(res, 200, false, 'Car is not available for selected dates');
             }
-            
+
             return sendResponse(res, 200, true, 'Car is available');
         } catch (error) {
             console.error('Check Availability Error:', error);
@@ -31,7 +31,7 @@ class CarBookingsController {
     async createBooking(req, res) {
         let connection;
         try {
-            const { 
+            const {
                 user_id, car_id, pickup_date, return_date, pickup_location, dropoff_location,
                 total_price, deposit, insurance_plan, delivery_type, hotel_id, hotel_room, delivery_time, add_ons,
                 driver_info // Object containing driver details
@@ -79,7 +79,7 @@ class CarBookingsController {
                 `, [
                     booking_id, driver_info.full_name, driver_info.phone_number, driver_info.email, driver_info.dob,
                     driver_info.nationality, driver_info.city, driver_info.country, driver_info.license_number,
-                    driver_info.license_country, driver_info.license_expiry, driver_info.license_photo, 
+                    driver_info.license_country, driver_info.license_expiry, driver_info.license_photo,
                     driver_info.passport_photo, driver_info.selfie_photo, driver_info.emergency_name,
                     driver_info.emergency_phone, driver_info.emergency_relation
                 ]);
@@ -129,6 +129,32 @@ class CarBookingsController {
         }
     }
 
+    async getBookingById(req, res) {
+        try {
+            const { id } = req.params;
+            const [rows] = await pool.execute(`
+                SELECT cb.*, 
+                    c.make, c.model, c.year, c.main_image,
+                    d.full_name as driver_name,
+                    d.phone_number as driver_phone,
+                    d.email as driver_email,
+                    d.license_number
+                FROM car_bookings cb
+                JOIN rental_cars c ON cb.car_id = c.id
+                LEFT JOIN driver_info d ON cb.id = d.booking_id
+                WHERE cb.id = ?
+            `, [id]);
+
+            if (rows.length === 0) {
+                return sendError(res, 404, 'Car booking not found');
+            }
+            return sendResponse(res, 200, true, 'Car booking details retrieved', rows[0]);
+        } catch (error) {
+            console.error('Error fetching car booking by id:', error);
+            return sendError(res, 500, 'Internal Server Error');
+        }
+    }
+
     async updateBookingStatus(req, res) {
         try {
             const { id } = req.params;
@@ -143,7 +169,7 @@ class CarBookingsController {
 
             values.push(id);
             await pool.execute(`UPDATE car_bookings SET ${fields.join(', ')} WHERE id = ?`, values);
-            
+
             return sendResponse(res, 200, true, 'Status updated');
         } catch (error) {
             console.error('Error updating status', error);

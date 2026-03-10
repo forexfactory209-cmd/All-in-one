@@ -11,7 +11,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@elastic/elasticsearch": "^8.13.0",
         "bcryptjs": "^2.4.3",
+        "bullmq": "^5.70.4",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
         "dotenv": "^16.4.1",

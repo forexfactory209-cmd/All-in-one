@@ -83,6 +83,7 @@ app.use('/api/v1/wishlist', require('./modules/wishlist/wishlist.routes'));
 app.use('/api/v1/cars', require('./modules/cars/cars.routes'));
 app.use('/api/v1/car-bookings', require('./modules/car_bookings/car_bookings.routes'));
 app.use('/api/v1/tours', require('./modules/tours/tours.routes'));
+app.use('/api/v1/reviews', require('./modules/reviews/reviews.routes'));
 
 // 9. 404 Handler
 app.all('*', notFoundHandler);

@@ -11,6 +11,9 @@ router.get('/my-bookings', carBookingsController.getUserBookings);
 // Get all bookings (Admin)
 router.get('/', carBookingsController.getAllBookings);
 
+// Get a single car booking by ID
+router.get('/:id', carBookingsController.getBookingById);
+
 // Update status (Admin/Agent)
 router.put('/:id/status', carBookingsController.updateBookingStatus);
 

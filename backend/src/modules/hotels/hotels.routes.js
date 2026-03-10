@@ -6,6 +6,7 @@ const { hotelSchema } = require('../../utils/validation.schemas');
 
 router.get('/', hotelsController.getAllHotels);
 router.get('/locations', hotelsController.getLocations);
+router.get('/search', hotelsController.searchHotels);
 router.get('/:id', hotelsController.getHotelById);
 router.post('/', validate(hotelSchema), hotelsController.createHotel);
 router.put('/:id', validate(hotelSchema), hotelsController.updateHotel);

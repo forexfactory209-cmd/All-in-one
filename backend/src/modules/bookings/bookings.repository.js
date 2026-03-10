@@ -1,4 +1,5 @@
 const pool = require('../../config/database');
+const { redis } = require('../../config/redis');
 
 class BookingsRepository {
     async findAll(limit = 10, offset = 0) {
@@ -45,11 +46,23 @@ class BookingsRepository {
         if (payment_status && payment_status.toUpperCase() === 'PAID') normalizedPaymentStatus = 'Paid';
         if (payment_status && payment_status.toUpperCase() === 'REFUNDED') normalizedPaymentStatus = 'Refunded';
 
+        // 1. Inventory Locking via Redis Lock
+        const lockKey = `lock:booking:${entity_type}:${entity_id}`;
+        const lockValue = `${user_id}-${Date.now()}`;
+        const lockTtlSeconds = 15; // Lock the entity for 15 seconds max
+
+        // Try to acquire lock
+        const lockAcquired = await redis.set(lockKey, lockValue, 'NX', 'EX', lockTtlSeconds);
+        if (!lockAcquired) {
+            // Someone else is currently in the process of booking this exact room
+            throw new Error('This accommodation is currently being booked by someone else. Please try again in a few moments.');
+        }
+
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();
 
-            // 1. Check Availability (with lock to prevent double bookings)
+            // 2. Check Availability (with lock to prevent double bookings if Redis lock wasn't enough or expired)
             const [overlapping] = await connection.execute(`
                 SELECT id FROM bookings 
                 WHERE entity_type = ? AND entity_id = ? 
@@ -63,7 +76,7 @@ class BookingsRepository {
                 throw new Error('These dates are no longer available.');
             }
 
-            // 2. Insert Booking
+            // 3. Insert Booking
             const [result] = await connection.execute(
                 'INSERT INTO bookings (user_id, entity_type, entity_id, check_in, check_out, total_price, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [user_id, entity_type, entity_id, check_in, check_out, total_price, status || 'Pending', normalizedPaymentStatus]
@@ -75,7 +88,14 @@ class BookingsRepository {
             await connection.rollback();
             throw error;
         } finally {
+            // Always release the database connection
             connection.release();
+            
+            // Release the Redis lock if we still own it
+            const currentLockValue = await redis.get(lockKey);
+            if (currentLockValue === lockValue) {
+                await redis.del(lockKey);
+            }
         }
     }
 
@@ -90,7 +110,11 @@ class BookingsRepository {
             CASE 
                 WHEN b.entity_type = 'Property' THEN p.location 
                 WHEN b.entity_type = 'Room' THEN h.location 
-            END as location
+            END as location,
+            CASE 
+                WHEN b.entity_type = 'Property' THEN p.main_image 
+                WHEN b.entity_type = 'Room' THEN r.image_url 
+            END as main_image
             FROM bookings b
             LEFT JOIN properties p ON b.entity_type = 'Property' AND b.entity_id = p.id
             LEFT JOIN rooms r ON b.entity_type = 'Room' AND b.entity_id = r.id

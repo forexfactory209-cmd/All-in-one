@@ -15,7 +15,14 @@ async function startServer() {
         // Step 1 & 2: SSH tunnel + MySQL pool
         await initDatabase();
 
+        // Step 2.5: Initialize Elasticsearch (non-blocking)
+        const { checkConnection, initIndex } = require('./utils/elasticsearch');
+        checkConnection().then(connected => {
+            if (connected) initIndex();
+        });
 
+        // Step 2.6: Start Background Workers
+        require('./workers/booking.worker');
 
         // Step 3: Start Express
         const server = app.listen(process.env.PORT || 5000, () => {

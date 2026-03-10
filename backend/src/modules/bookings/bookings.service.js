@@ -1,5 +1,6 @@
 const bookingsRepository = require('./bookings.repository');
 const paymentsService = require('../payments/payments.service');
+const queueService = require('../../shared/queue.service');
 
 class BookingsService {
     async getAllBookings(page = 1, limit = 10) {
@@ -21,7 +22,31 @@ class BookingsService {
     async createBooking(bookingData) {
         const bookingId = await bookingsRepository.create(bookingData);
 
-        // If payment status is Paid, ensure a payment record exists
+        // --- BACKGROUND JOBS ---
+        // 1. Offload payment sync and notifications to BullMQ
+        queueService.addBookingJob('SEND_CONFIRMATION', {
+            bookingId,
+            userId: bookingData.user_id,
+            totalPrice: bookingData.total_price
+            // In a real app, you'd fetch user email/phone here or pass it in
+        });
+
+        queueService.addBookingJob('NOTIFY_ADMIN', {
+            bookingId,
+            entityType: bookingData.entity_type,
+            entityId: bookingData.entity_id
+        });
+
+        // If it's a room booking, update hotel analytics in background
+        if (bookingData.entity_type === 'Room') {
+            queueService.addBookingJob('PROCESS_ANALYTICS', {
+                bookingId,
+                entityId: bookingData.entity_id
+            });
+        }
+
+        // Keep the sync payment for now as it's critical path, 
+        // but we could also move it to worker if the user prefers ultimate speed.
         if (bookingData.payment_status && bookingData.payment_status.toUpperCase() === 'PAID') {
             try {
                 await paymentsService.syncPaymentByBookingId(bookingId, {

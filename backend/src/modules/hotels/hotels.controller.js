@@ -74,6 +74,21 @@ class HotelsController {
             return sendError(res, 500, 'Internal Server Error');
         }
     }
+
+    async searchHotels(req, res) {
+        try {
+            const { page = 1, limit = 10, ...filters } = req.query;
+            const result = await hotelsService.searchHotels({
+                ...filters,
+                page: parseInt(page),
+                limit: parseInt(limit)
+            });
+            return sendResponse(res, 200, true, 'Search results retrieved successfully', result.hotels, null, result.pagination);
+        } catch (error) {
+            console.error('Error searching hotels:', error);
+            return sendError(res, 500, 'Search failed: ' + error.message);
+        }
+    }
 }
 
 module.exports = new HotelsController();
