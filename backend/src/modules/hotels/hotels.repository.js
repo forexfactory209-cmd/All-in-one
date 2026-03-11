@@ -1,11 +1,16 @@
 const pool = require('../../config/database');
 
 class HotelsRepository {
-    async findAll(limit = 10, offset = 0, filters = {}) {
+    async findAll(limit = 10, offset = 0, filters = {}, options = {}) {
         const safeLimit = Math.min(parseInt(limit) || 10, 50);
         const safeOffset = Math.max(parseInt(offset) || 0, 0);
 
-        let query = 'SELECT h.* FROM hotels h WHERE h.deleted_at IS NULL';
+        let fields = 'h.id, h.name, h.location, h.type, h.base_price, h.rating, h.main_image, h.status';
+        if (!options.simplified) {
+            fields += ', h.description, h.address, h.total_rooms, h.available_rooms, h.latitude, h.longitude';
+        }
+
+        let query = `SELECT ${fields} FROM hotels h WHERE h.deleted_at IS NULL`;
         const queryParams = [];
 
         if (filters.city && filters.city !== '' && filters.city !== 'All') {
@@ -47,7 +52,8 @@ class HotelsRepository {
         query += ` ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
         queryParams.push(safeLimit, safeOffset);
 
-        const [rows] = await pool.execute(query, queryParams.map(v => v.toString()));
+        // Using .query instead of .execute to avoid 'Incorrect arguments' error with LIMIT/OFFSET on some versions
+        const [rows] = await pool.query(query, queryParams);
         return rows;
     }
 
@@ -82,12 +88,20 @@ class HotelsRepository {
             query += ' AND status = "Active"';
         }
 
-        const [rows] = await pool.execute(query, queryParams);
+        const [rows] = await pool.query(query, queryParams);
         return rows[0].count;
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT * FROM hotels WHERE id = ? AND deleted_at IS NULL', [id]);
+        const query = `
+            SELECT id, name, description, type, location, address, latitude, longitude, 
+                   total_rooms as totalRooms, available_rooms as availableRooms, 
+                   base_price as basePrice, status, main_image as image, rating, 
+                   owner_name, owner_phone, owner_email 
+            FROM hotels 
+            WHERE id = ? AND deleted_at IS NULL
+        `;
+        const [rows] = await pool.execute(query, [id]);
         return rows[0] || null;
     }
 

@@ -41,7 +41,7 @@ app.use(responseTime((req, res, time) => {
 
 // 6. Rate Limiting
 const limiter = rateLimit({
-    max: 1000, // 1000 requests per 1 minute during development
+    max: 100, // 100 requests per 1 minute as requested
     windowMs: 1 * 60 * 1000,
     message: 'Too many requests from this IP, please try again in a minute!',
     standardHeaders: true,
@@ -69,6 +69,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // 8. API Routes
+app.use('/api/v1/search', require('./modules/search/search.routes'));
+app.use('/api/v1/availability', require('./modules/search/availability.routes'));
 app.use('/api/v1/properties', require('./modules/properties/properties.routes'));
 app.use('/api/v1/hotels', require('./modules/hotels/hotels.routes'));
 app.use('/api/v1/rooms', require('./modules/rooms/rooms.routes'));
@@ -84,6 +86,8 @@ app.use('/api/v1/cars', require('./modules/cars/cars.routes'));
 app.use('/api/v1/car-bookings', require('./modules/car_bookings/car_bookings.routes'));
 app.use('/api/v1/tours', require('./modules/tours/tours.routes'));
 app.use('/api/v1/reviews', require('./modules/reviews/reviews.routes'));
+app.use('/api/v1/screens', require('./modules/screens/screens.routes'));
+app.use('/api/v1/dashboard', require('./modules/search/dashboard.routes'));
 
 // 9. 404 Handler
 app.all('*', notFoundHandler);

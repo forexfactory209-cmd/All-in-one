@@ -70,16 +70,33 @@ class RoomsService {
         return result;
     }
 
-    async getRoomById(id) {
+    async getRoomById(id, dates = {}) {
+        const { checkIn, checkOut } = dates;
         const cacheKey = `rooms:detail:${id}`;
-        const cachedData = await cache.get(cacheKey);
-        if (cachedData) return cachedData;
 
-        const room = await roomsRepository.findById(id);
-        if (room) {
-            await cache.set(cacheKey, room, 300);
+        // Cache basic room info, but NOT availability
+        let room = await cache.get(cacheKey);
+        if (!room) {
+            room = await roomsRepository.findById(id);
+            if (room) await cache.set(cacheKey, room, 300);
         }
-        return room;
+
+        if (!room) return null;
+
+        // --- REAL-TIME AVAILABILITY CHECK (MANDATORY) ---
+        // High-class engines never cache availability long-term
+        const searchService = require('../search/search.service');
+        const availability = await searchService.checkAvailability(
+            id,
+            checkIn || new Date().toISOString().split('T')[0],
+            checkOut || new Date(Date.now() + 86400000).toISOString().split('T')[0]
+        );
+
+        return {
+            ...room,
+            realtime_status: availability.available ? 'Available' : 'Booked',
+            availability_info: availability
+        };
     }
 
     async createRoom(roomData) {

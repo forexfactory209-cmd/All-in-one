@@ -16,11 +16,12 @@ class RoomsController {
     async getRoomById(req, res) {
         try {
             const { id } = req.params;
-            const room = await roomsService.getRoomById(id);
+            const { checkIn, checkOut } = req.query;
+            const room = await roomsService.getRoomById(id, { checkIn, checkOut });
             if (!room) {
                 return sendError(res, 404, 'Room not found');
             }
-            return sendResponse(res, 200, true, 'Room retrieved successfully', room);
+            return sendResponse(res, 200, true, 'Room retrieved successfully with real-time availability', room);
         } catch (error) {
             console.error('Error fetching room by id:', error);
             return sendError(res, 500, 'Internal Server Error');

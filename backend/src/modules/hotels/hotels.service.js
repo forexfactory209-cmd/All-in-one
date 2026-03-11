@@ -23,7 +23,7 @@ class HotelsService {
             ],
             isVerified: hotel.status === 'Active',
             isFeatured: hotel.rating >= 4.0,
-            type: hotel.type || 'Hotel' 
+            type: hotel.type || 'Hotel'
         };
     }
 
@@ -66,29 +66,47 @@ class HotelsService {
         return result;
     }
 
-    async getHotelById(id) {
+    async getHotelById(id, options = {}) {
         const cacheKey = `hotels:v3:detail:${id}`;
         const cachedData = await cache.get(cacheKey);
-        if (cachedData) return cachedData;
+        if (cachedData && !options.skipRooms && !options.skipReviews) return cachedData;
 
         const hotel = await hotelsRepository.findById(id);
-        if (hotel) {
-            const [amenities, images, rooms] = await Promise.all([
+        if (!hotel) return null;
+
+        if (!options.skipRooms && !options.skipReviews) {
+            const [amenities, images, roomResult] = await Promise.all([
                 hotelsRepository.findAmenitiesByHotelId(id),
                 hotelsRepository.findImagesByHotelId(id),
                 roomsRepository.findAllByHotelId(id)
             ]);
             hotel.amenities = amenities;
             hotel.images = images;
-            hotel.rooms = rooms;
+            hotel.rooms = roomResult;
+        } else {
+            // Minimal data for lazy loading
+            const [amenities, images] = await Promise.all([
+                hotelsRepository.findAmenitiesByHotelId(id),
+                hotelsRepository.findImagesByHotelId(id)
+            ]);
+            hotel.amenities = amenities;
+            hotel.images = images;
         }
 
         const result = this.mapHotel(hotel);
-
-        if (result) {
+        if (result && !options.skipRooms && !options.skipReviews) {
             await cache.set(cacheKey, result, 300);
         }
         return result;
+    }
+
+    async getHotelRooms(id) {
+        return await roomsRepository.findAllByHotelId(id, 50, 0);
+    }
+
+    async getHotelReviews(id, page = 1, limit = 5) {
+        const reviewsService = require('../reviews/reviews.service');
+        return await reviewsService.getReviewsByEntity('Hotel', id, { page, limit });
     }
 
     async createHotel(hotelData) {
@@ -153,7 +171,7 @@ class HotelsService {
         if (success) {
             await cache.del(`hotels:detail:${id}`);
             await cache.delByPattern('hotels:list:*');
-            
+
             // Delete from Elasticsearch
             try {
                 await searchService.deleteHotel(id);
@@ -184,10 +202,10 @@ class HotelsService {
             if (cachedResults) return cachedResults;
 
             const results = await searchService.search(filters);
-            
+
             // Map the results back to the standard hotel format
             results.hotels = results.hotels.map(hotel => this.mapHotel(hotel));
-            
+
             // Cache search results for 2 minutes (shorter TTL than list as search is dynamic)
             await cache.set(cacheKey, results, 120);
 

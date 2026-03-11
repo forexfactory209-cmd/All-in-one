@@ -17,13 +17,43 @@ class HotelsController {
         try {
             const { id } = req.params;
             const hotel = await hotelsService.getHotelById(id);
-            if (!hotel) {
-                return sendError(res, 404, 'Hotel not found');
-            }
-            return sendResponse(res, 200, true, 'Hotel retrieved successfully', hotel);
+            if (!hotel) return sendError(res, 404, 'Hotel not found');
+            return sendResponse(res, 200, true, 'Hotel details fetched', hotel);
         } catch (error) {
-            console.error('Error fetching hotel:', error);
-            return sendError(res, 500, 'Internal Server Error');
+            console.error('getHotelById:', error);
+            return sendError(res, 500, error.message);
+        }
+    }
+
+    async getHotelBasic(req, res) {
+        try {
+            const { id } = req.params;
+            const hotel = await hotelsService.getHotelById(id, { skipRooms: true, skipReviews: true });
+            if (!hotel) return sendError(res, 404, 'Hotel not found');
+            return sendResponse(res, 200, true, 'Basic hotel info fetched', hotel);
+        } catch (error) {
+            return sendError(res, 500, error.message);
+        }
+    }
+
+    async getHotelRooms(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await hotelsService.getHotelRooms(id);
+            return sendResponse(res, 200, true, 'Hotel rooms fetched', result);
+        } catch (error) {
+            return sendError(res, 500, error.message);
+        }
+    }
+
+    async getHotelReviews(req, res) {
+        try {
+            const { id } = req.params;
+            const { page = 1, limit = 5 } = req.query;
+            const results = await hotelsService.getHotelReviews(id, page, limit);
+            return sendResponse(res, 200, true, 'Hotel reviews fetched', results);
+        } catch (error) {
+            return sendError(res, 500, error.message);
         }
     }
 

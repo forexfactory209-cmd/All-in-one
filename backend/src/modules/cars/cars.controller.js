@@ -4,9 +4,9 @@ const { sendResponse, sendError } = require('../../utils/response');
 class CarsController {
     async getAllCars(req, res) {
         try {
-            const [rows] = await pool.execute('SELECT * FROM rental_cars ORDER BY created_at DESC');
-            const [images] = await pool.execute('SELECT car_id, image_url FROM property_images WHERE car_id IS NOT NULL');
-            
+            const [rows] = await pool.query('SELECT * FROM rental_cars ORDER BY created_at DESC');
+            const [images] = await pool.query('SELECT car_id, image_url FROM property_images WHERE car_id IS NOT NULL');
+
             const imageMap = {};
             images.forEach(img => {
                 if (!imageMap[img.car_id]) imageMap[img.car_id] = [];
@@ -30,10 +30,10 @@ class CarsController {
             const { id } = req.params;
             const [rows] = await pool.execute('SELECT * FROM rental_cars WHERE id = ?', [id]);
             if (rows.length === 0) return sendError(res, 404, 'Car not found');
-            
+
             const [images] = await pool.execute('SELECT image_url FROM property_images WHERE car_id = ?', [id]);
             const car = { ...rows[0], images: images.map(img => img.image_url) };
-            
+
             return sendResponse(res, 200, true, 'Car retrieved successfully', car);
         } catch (error) {
             console.error('Error fetching car:', error);
@@ -44,7 +44,7 @@ class CarsController {
     async createCar(req, res) {
         try {
             const { make, model, year, description, price_per_day, status, location, transmission, seats, doors, main_image, owner_name, owner_phone, owner_email, rating, images } = req.body;
-            
+
             const [result] = await pool.execute(
                 `INSERT INTO rental_cars (make, model, year, description, price_per_day, status, location, transmission, seats, doors, main_image, owner_name, owner_phone, owner_email, rating) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,

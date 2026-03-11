@@ -27,7 +27,7 @@ class ReviewsService {
 
             // Inherit entity info from booking if not provided
             data.entity_type = data.entity_type || booking.entity_type;
-            data.entity_id   = data.entity_id   || booking.entity_id;
+            data.entity_id = data.entity_id || booking.entity_id;
         }
 
         if (!data.entity_type || !data.entity_id) {
@@ -47,11 +47,11 @@ class ReviewsService {
      */
     async getReviewsByEntity(entity_type, entity_id, options = {}) {
         const cacheKey = `reviews:${entity_type}:${entity_id}:p${options.page || 1}:s${options.sort || 'newest'}`;
-        const cached   = await cache.get(cacheKey);
+        const cached = await cache.get(cacheKey);
         if (cached) return cached;
 
-        const limit  = parseInt(options.limit)  || 10;
-        const offset = ((parseInt(options.page)  || 1) - 1) * limit;
+        const limit = parseInt(options.limit) || 10;
+        const offset = ((parseInt(options.page) || 1) - 1) * limit;
 
         const [reviews, count, stats] = await Promise.all([
             reviewsRepository.findByEntity(entity_type, entity_id, { limit, offset, sort: options.sort }),
@@ -63,8 +63,8 @@ class ReviewsService {
             stats,
             reviews,
             pagination: {
-                total:      count,
-                page:       parseInt(options.page) || 1,
+                total: count,
+                page: parseInt(options.page) || 1,
                 limit,
                 totalPages: Math.ceil(count / limit),
             },
@@ -79,7 +79,7 @@ class ReviewsService {
      */
     async getStats(entity_type, entity_id) {
         const cacheKey = `reviews:stats:${entity_type}:${entity_id}`;
-        const cached   = await cache.get(cacheKey);
+        const cached = await cache.get(cacheKey);
         if (cached) return cached;
 
         const stats = await reviewsRepository.statsByEntity(entity_type, entity_id);
@@ -90,9 +90,9 @@ class ReviewsService {
     /**
      * Reviews written by a specific user
      */
-    async getUserReviews(userId, page = 1, limit = 20) {
+    async getUserReviews(userId, page = 1, limit = 20, options = {}) {
         const offset = (page - 1) * limit;
-        return reviewsRepository.findByUser(userId, limit, offset);
+        return reviewsRepository.findByUser(userId, limit, offset, options);
     }
 
     /**

@@ -5,9 +5,12 @@ class RoomsRepository {
         const safeLimit = Math.min(parseInt(limit) || 10, 50);
         const safeOffset = Math.max(parseInt(offset) || 0, 0);
 
+        const fields = filters.simplified
+            ? 'r.id, r.hotel_id, r.room_number, r.type, r.price, r.image_url, h.name as hotel_name, h.location as hotel_location'
+            : 'r.*, h.name as hotel_name, h.location as hotel_location, h.main_image as hotel_image, (SELECT GROUP_CONCAT(image_url) FROM property_images WHERE room_id = r.id) as images_list';
+
         let query = `
-            SELECT r.*, h.name as hotel_name, h.location as hotel_location, h.main_image as hotel_image,
-                   (SELECT GROUP_CONCAT(image_url) FROM property_images WHERE room_id = r.id) as images_list
+            SELECT ${fields}
             FROM rooms r 
             JOIN hotels h ON r.hotel_id = h.id 
             WHERE r.deleted_at IS NULL AND h.deleted_at IS NULL
@@ -36,7 +39,7 @@ class RoomsRepository {
         }
 
         query += ` ORDER BY r.created_at DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`;
-        
+
         const [rows] = await pool.query(query, queryParams);
 
         return rows.map(room => ({

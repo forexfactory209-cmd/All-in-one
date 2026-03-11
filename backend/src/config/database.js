@@ -45,7 +45,7 @@ async function initDatabase() {
         database: process.env.DB_NAME,
         multipleStatements: true,
         waitForConnections: true,
-        connectionLimit: 10,
+        connectionLimit: 20,
         queueLimit: 0,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
@@ -62,17 +62,19 @@ async function initDatabase() {
         try {
             await connection.execute('SET profiling = 1;');
             console.log('✅ Profiling enabled.');
-            
+
             const indexes = [
                 "CREATE INDEX idx_rooms_hotel_id ON rooms(hotel_id)",
                 "CREATE INDEX idx_rooms_price ON rooms(price)",
-                "CREATE INDEX idx_rooms_created_at ON rooms(created_at)",
-                "CREATE INDEX idx_hotels_city ON hotels(location)",
-                "CREATE INDEX idx_wishlist_user_id ON wishlist(user_id)",
-                "CREATE INDEX idx_wishlist_entity_id ON wishlist(entity_id)",
-                "CREATE UNIQUE INDEX idx_wishlist_unique ON wishlist(user_id, entity_type, entity_id)",
-                "CREATE INDEX idx_bookings_user_id ON bookings(user_id)",
-                "CREATE INDEX idx_bookings_entity_id ON bookings(entity_id)"
+                "CREATE INDEX idx_rooms_availability ON rooms(id, status, deleted_at)",
+                "CREATE INDEX idx_hotels_location ON hotels(location)",
+                "CREATE INDEX idx_hotels_base_price ON hotels(base_price)",
+                "CREATE INDEX idx_wishlist_lookup ON wishlist(user_id, entity_type, entity_id)",
+                "CREATE INDEX idx_bookings_availability ON bookings(entity_id, entity_type, check_in, check_out, status, deleted_at)",
+                "CREATE INDEX idx_bookings_user ON bookings(user_id, status)",
+                "CREATE INDEX idx_property_images_room ON property_images(room_id)",
+                "CREATE INDEX idx_property_images_hotel ON property_images(hotel_id)",
+                "CREATE INDEX idx_property_images_car ON property_images(car_id)"
             ];
 
             let added = 0;
@@ -80,14 +82,14 @@ async function initDatabase() {
                 try {
                     await connection.execute(idx);
                     added++;
-                } catch(e) { /* ignore existing duplicate indexes */ }
+                } catch (e) { /* ignore existing duplicate indexes */ }
             }
             if (added > 0) console.log(`✅ Dynamically added ${added} new DB indexes for optimal speed.`);
             else console.log(`✅ All DB indexes already present.`);
-        } catch(e) {
+        } catch (e) {
             console.error('⚠️ Warning: DB Index optimization failed:', e.message);
         }
-        
+
         connection.release();
     } catch (err) {
         console.error('❌ MySQL connection failed:', err.message);

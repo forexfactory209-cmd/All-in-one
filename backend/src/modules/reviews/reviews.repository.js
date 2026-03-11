@@ -32,10 +32,10 @@ class ReviewsRepository {
      */
     async findByEntity(entity_type, entity_id, { limit = 10, offset = 0, sort = 'newest' } = {}) {
         const orderBy = sort === 'highest' ? 'r.rating DESC'
-                      : sort === 'lowest'  ? 'r.rating ASC'
-                      : 'r.created_at DESC';
+            : sort === 'lowest' ? 'r.rating ASC'
+                : 'r.created_at DESC';
 
-        const safeLimit  = Math.min(parseInt(limit) || 10, 50);
+        const safeLimit = Math.min(parseInt(limit) || 10, 50);
         const safeOffset = Math.max(parseInt(offset) || 0, 0);
 
         const [rows] = await pool.execute(`
@@ -119,9 +119,11 @@ class ReviewsRepository {
     /**
      * Get all reviews left by a specific user
      */
-    async findByUser(user_id, limit = 20, offset = 0) {
+    async findByUser(user_id, limit = 20, offset = 0, options = {}) {
+        const fields = options.simplified ? 'r.id, r.user_id, r.entity_type, r.entity_id, r.rating, r.created_at' : 'r.*';
+
         const [rows] = await pool.execute(`
-            SELECT r.*,
+            SELECT ${fields},
                 CASE r.entity_type
                     WHEN 'Hotel'    THEN h.name
                     WHEN 'Room'     THEN CONCAT(rm.type, ' Room - ', rh.name)
@@ -140,7 +142,7 @@ class ReviewsRepository {
             WHERE r.user_id = ? AND r.deleted_at IS NULL
             ORDER BY r.created_at DESC
             LIMIT ? OFFSET ?
-        `, [user_id, limit.toString(), offset.toString()]);
+        `, [user_id, limit, offset]);
         return rows;
     }
 
@@ -233,7 +235,7 @@ class ReviewsRepository {
                     JOIN   rooms   rm ON r.entity_type = 'Room' AND r.entity_id = rm.id
                     WHERE  rm.hotel_id = ? AND r.status = 'Approved' AND r.deleted_at IS NULL
                 `, [hotelId]);
-                
+
                 if (hotelStats[0]) {
                     await pool.execute(`UPDATE hotels SET rating = ?, review_count = ? WHERE id = ?`,
                         [hotelStats[0].avg || 0, hotelStats[0].cnt || 0, hotelId]);
