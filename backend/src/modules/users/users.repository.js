@@ -6,7 +6,7 @@ class UsersRepository {
         const safeOffset = Math.max(parseInt(offset) || 0, 0);
 
         const [rows] = await pool.execute(`
-            SELECT u.id, u.full_name, u.email, u.phone, u.role, u.status, u.city, u.district, u.address, u.national_id, u.created_at, u.updated_at,
+            SELECT u.id, u.full_name, u.email, u.phone, u.profile_image, u.status, u.city, u.district, u.address, u.national_id, u.created_at, u.updated_at,
             (SELECT COUNT(*) FROM bookings b WHERE b.user_id = u.id AND b.deleted_at IS NULL) as booking_count,
             (SELECT MAX(created_at) FROM bookings b WHERE b.user_id = u.id AND b.deleted_at IS NULL) as last_booking
             FROM users u
@@ -18,12 +18,17 @@ class UsersRepository {
     }
 
     async findById(id) {
-        const [rows] = await pool.execute('SELECT id, full_name, email, phone, role, gender, dob, city, district, address, national_id, status, created_at FROM users WHERE id = ? AND deleted_at IS NULL', [id]);
+        const [rows] = await pool.execute('SELECT id, full_name, email, phone, profile_image, gender, dob, city, district, address, national_id, status, created_at FROM users WHERE id = ? AND deleted_at IS NULL', [id]);
         return rows[0] || null;
     }
 
     async findByEmail(email) {
         const [rows] = await pool.execute('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL', [email]);
+        return rows[0] || null;
+    }
+
+    async findByPhone(phone) {
+        const [rows] = await pool.execute('SELECT * FROM users WHERE phone = ? AND deleted_at IS NULL', [phone]);
         return rows[0] || null;
     }
 
@@ -33,7 +38,7 @@ class UsersRepository {
             email = `guest_${Date.now()}@somstay.local`,
             password = 'ADMIN_CREATED_NO_LOGIN',
             phone,
-            role,
+            profile_image,
             gender,
             dob,
             city,
@@ -58,15 +63,15 @@ class UsersRepository {
         }
 
         const [result] = await pool.execute(
-            'INSERT INTO users (full_name, email, password, phone, role, gender, dob, city, district, address, national_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [full_name, email, password, phone || null, role || 'Guest', gender || null, formattedDob, city || null, district || null, address || null, national_id || null, status || 'Active']
+            'INSERT INTO users (full_name, email, password, phone, profile_image, gender, dob, city, district, address, national_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [full_name, email, password, phone || null, profile_image || null, gender || null, formattedDob, city || null, district || null, address || null, national_id || null, status || 'Active']
         );
         return result.insertId;
     }
 
     async update(id, userData) {
         const updateFields = {};
-        const allowedFields = ['full_name', 'email', 'phone', 'role', 'gender', 'dob', 'city', 'district', 'address', 'national_id', 'status'];
+        const allowedFields = ['full_name', 'email', 'phone', 'profile_image', 'gender', 'dob', 'city', 'district', 'address', 'national_id', 'status'];
 
         allowedFields.forEach(field => {
             if (userData[field] !== undefined) {

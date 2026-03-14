@@ -13,6 +13,10 @@ class UsersService {
         return await usersRepository.findByEmail(email);
     }
 
+    async getUserByPhone(phone) {
+        return await usersRepository.findByPhone(phone);
+    }
+
     async createUser(userData) {
         // Here we could add password hashing if it were a full auth implementation
         return await usersRepository.create(userData);

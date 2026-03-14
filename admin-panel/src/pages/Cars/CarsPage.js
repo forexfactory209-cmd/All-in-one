@@ -5,7 +5,7 @@ import PageHeader from '../../components/PageHeader';
 import ImageUploader from '../../components/ImageUploader/ImageUploader';
 import './CarsPage.css';
 
-const API_URL = 'http://localhost:5000/api/v1/cars';
+const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:9050/api'}/v1/cars`;
 
 const CarsPage = () => {
     const [cars, setCars] = useState([]);

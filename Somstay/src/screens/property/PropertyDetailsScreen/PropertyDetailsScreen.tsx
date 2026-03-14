@@ -313,7 +313,27 @@ export const PropertyDetailsScreen: React.FC = () => {
                 </View>
                 <TouchableOpacity
                     style={styles.bookButton}
-                    onPress={() => router.push({ pathname: '/confirm-pay', params: { id, type: entityType } })}
+                        onPress={() => {
+                            const roomPrice = room.price || room.price_per_night || 150;
+                            console.log('DEBUG: Booking from PropertyDetails:', {
+                                id, type: entityType, total_price: roomPrice
+                            });
+
+                            router.push({ 
+                                pathname: '/confirm-pay', 
+                                params: { 
+                                    id: id?.toString() || '', 
+                                    type: entityType,
+                                    title: room.name || `${room.type} Room`,
+                                    image: images[0] || '',
+                                    total_price: roomPrice.toString(),
+                                    checkIn: '2026-03-28',
+                                    checkOut: '2026-03-29',
+                                    adults: '2',
+                                    children: '0'
+                                } 
+                            });
+                        }}
                 >
                     <Text style={styles.bookButtonText}>Book Now</Text>
                 </TouchableOpacity>

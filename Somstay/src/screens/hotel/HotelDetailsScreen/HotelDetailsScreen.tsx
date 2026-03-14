@@ -230,7 +230,29 @@ export const HotelDetailsScreen: React.FC = () => {
                                                 padding: 12,
                                                 ...shadows.medium
                                             }}
-                                            onPress={() => router.push({ pathname: '/property/[id]', params: { id: innerRoom.id } })}
+                        onPress={() => {
+                            const roomPrice = innerRoom.price || 150;
+                            console.log('DEBUG: Booking Room from Horizontal List:', {
+                                id: innerRoom.id,
+                                type: innerRoom.type,
+                                total_price: roomPrice
+                            });
+                            
+                            router.push({ 
+                                pathname: '/confirm-pay', 
+                                params: { 
+                                    id: innerRoom.id.toString(), 
+                                    type: 'room',
+                                    title: `${innerRoom.type} Room`,
+                                    image: innerRoom.image_url || '',
+                                    total_price: roomPrice.toString(),
+                                    checkIn: '2026-03-28',
+                                    checkOut: '2026-03-29',
+                                    adults: '2',
+                                    children: '0'
+                                } 
+                            });
+                        }}
                                         >
                                             <Image
                                                 source={{ uri: (innerRoom.image_url && typeof innerRoom.image_url === 'string' && innerRoom.image_url.startsWith('http')) ? innerRoom.image_url : (innerRoom.image_url ? `http://206.183.129.220:5000/uploads/${innerRoom.image_url}` : 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304') }}
@@ -420,7 +442,27 @@ export const HotelDetailsScreen: React.FC = () => {
                                             style={{ backgroundColor: colors.primary, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 10 }}
                                             onPress={() => {
                                                 setRoomsModalVisible(false);
-                                                router.push({ pathname: '/confirm-pay', params: { id: item.id, type: 'room' } });
+                                                const roomPrice = item.price || 150;
+                                                console.log('DEBUG: Booking Room from Modal:', {
+                                                    id: item.id,
+                                                    type: item.type,
+                                                    total_price: roomPrice
+                                                });
+
+                                                router.push({ 
+                                                    pathname: '/confirm-pay', 
+                                                    params: { 
+                                                        id: item.id.toString(), 
+                                                        type: 'room',
+                                                        title: `${item.type} Room`,
+                                                        image: item.image_url || '',
+                                                        total_price: roomPrice.toString(),
+                                                        checkIn: '2026-03-28',
+                                                        checkOut: '2026-03-29',
+                                                        adults: '2',
+                                                        children: '0'
+                                                    } 
+                                                });
                                             }}
                                         >
                                             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>Book Room</Text>

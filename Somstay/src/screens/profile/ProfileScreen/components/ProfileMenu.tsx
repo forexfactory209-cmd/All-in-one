@@ -49,7 +49,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, label, sublabel, onPress, isL
 
 export const ProfileMenu: React.FC = () => {
     const router = useRouter();
-    const { t, settings } = useApp();
+    const { t, settings, setUser, user } = useApp();
     const theme = useTheme();
     const [unreadCount, setUnreadCount] = useState<number>(0);
 
@@ -57,18 +57,25 @@ export const ProfileMenu: React.FC = () => {
         useCallback(() => {
             let isActive = true;
             const fetchUnread = async () => {
+                // Only fetch if user is logged in to avoid timeout/errors
+                if (!user || !user.id || user.id === 'guest') {
+                    setUnreadCount(0);
+                    return;
+                }
+
                 try {
-                    const data = await notificationService.getUnreadCount('1');
+                    const data = await notificationService.getUnreadCount(user.id);
                     if (isActive && data && data.success) {
                         setUnreadCount(data.data.unreadCount);
                     }
                 } catch (err) {
-                    console.error('Failed to fetch unread count:', err);
+                    // Log error but don't crash or hang
+                    console.warn('Failed to fetch unread count:', err);
                 }
             };
             fetchUnread();
             return () => { isActive = false; };
-        }, [])
+        }, [user])
     );
 
     const handleLogout = () => {
@@ -81,8 +88,8 @@ export const ProfileMenu: React.FC = () => {
                     text: t('logout'),
                     style: 'destructive',
                     onPress: () => {
-                        router.dismissAll();
-                        router.replace('/login');
+                        setUser(null); // Clear user state
+                        router.replace('/(tabs)'); // Go to home tab
                     },
                 },
             ]

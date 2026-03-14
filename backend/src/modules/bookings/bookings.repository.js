@@ -40,6 +40,21 @@ class BookingsRepository {
 
     async create(bookingData) {
         const { user_id, entity_type, entity_id, check_in, check_out, total_price, status, payment_status } = bookingData;
+        console.log('DEBUG: BookingsRepository.create - Received bookingData:', JSON.stringify(bookingData, null, 2));
+
+        // Ensure entity_type is valid ENUM ('Property', 'Room', 'Car', 'Tour')
+        let normalizedEntityType = entity_type;
+        if (entity_type && typeof entity_type === 'string') {
+            // Capitalize first letter, lowercase the rest (e.g. 'property' -> 'Property')
+            normalizedEntityType = entity_type.charAt(0).toUpperCase() + entity_type.slice(1).toLowerCase();
+        }
+
+        // Validate entity_type against ENUM values
+        const validEntityTypes = ['Property', 'Room', 'Car', 'Tour'];
+        if (!validEntityTypes.includes(normalizedEntityType)) {
+            console.error(`DEBUG: Invalid entity_type: ${entity_type}`);
+            throw new Error(`Invalid entity_type: ${entity_type}. Must be one of ${validEntityTypes.join(', ')}`);
+        }
 
         // Normalize payment_status for ENUM ('Unpaid', 'Paid', 'Refunded')
         let normalizedPaymentStatus = 'Unpaid';
@@ -47,14 +62,23 @@ class BookingsRepository {
         if (payment_status && payment_status.toUpperCase() === 'REFUNDED') normalizedPaymentStatus = 'Refunded';
 
         // 1. Inventory Locking via Redis Lock
-        const lockKey = `lock:booking:${entity_type}:${entity_id}`;
+        const lockKey = `lock:booking:${normalizedEntityType}:${entity_id}`;
         const lockValue = `${user_id}-${Date.now()}`;
         const lockTtlSeconds = 15; // Lock the entity for 15 seconds max
 
+        console.log(`DEBUG: Attempting Redis lock for ${lockKey}`);
+
         // Try to acquire lock
-        const lockAcquired = await redis.set(lockKey, lockValue, 'NX', 'EX', lockTtlSeconds);
+        let lockAcquired = false;
+        try {
+            lockAcquired = await redis.set(lockKey, lockValue, 'NX', 'EX', lockTtlSeconds);
+        } catch (redisErr) {
+            console.warn('⚠️ Redis lock failed (Redis might be down), proceeding without lock:', redisErr.message);
+            lockAcquired = true; // Fallback to DB-only locking if Redis is down
+        }
+
         if (!lockAcquired) {
-            // Someone else is currently in the process of booking this exact room
+            console.error(`DEBUG: Redis lock failed for ${lockKey}`);
             throw new Error('This accommodation is currently being booked by someone else. Please try again in a few moments.');
         }
 
@@ -62,7 +86,9 @@ class BookingsRepository {
         try {
             await connection.beginTransaction();
 
-            // 2. Check Availability (with lock to prevent double bookings if Redis lock wasn't enough or expired)
+            console.log(`DEBUG: Checking overlapping bookings for ${normalizedEntityType} ID ${entity_id}`);
+
+            // 2. Check Availability (with lock to prevent double bookings)
             const [overlapping] = await connection.execute(`
                 SELECT id FROM bookings 
                 WHERE entity_type = ? AND entity_id = ? 
@@ -70,21 +96,27 @@ class BookingsRepository {
                 AND deleted_at IS NULL
                 AND check_in < ? AND check_out > ?
                 FOR UPDATE
-            `, [entity_type, entity_id, check_out, check_in]);
+            `, [normalizedEntityType, entity_id, check_out, check_in]);
 
             if (overlapping.length > 0) {
+                console.error(`DEBUG: Overlapping bookings found: ${overlapping.length}`);
                 throw new Error('These dates are no longer available.');
             }
+
+            console.log('DEBUG: Inserting booking into database...');
 
             // 3. Insert Booking
             const [result] = await connection.execute(
                 'INSERT INTO bookings (user_id, entity_type, entity_id, check_in, check_out, total_price, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                [user_id, entity_type, entity_id, check_in, check_out, total_price, status || 'Pending', normalizedPaymentStatus]
+                [user_id, normalizedEntityType, entity_id, check_in, check_out, total_price, status || 'Pending', normalizedPaymentStatus]
             );
+
+            console.log(`DEBUG: Booking inserted successfully with ID: ${result.insertId}`);
 
             await connection.commit();
             return result.insertId;
         } catch (error) {
+            console.error('DEBUG: Database transaction error:', error.message);
             await connection.rollback();
             throw error;
         } finally {
@@ -92,36 +124,47 @@ class BookingsRepository {
             connection.release();
             
             // Release the Redis lock if we still own it
-            const currentLockValue = await redis.get(lockKey);
-            if (currentLockValue === lockValue) {
-                await redis.del(lockKey);
+            try {
+                const currentLockValue = await redis.get(lockKey);
+                if (currentLockValue === lockValue) {
+                    await redis.del(lockKey);
+                    console.log(`DEBUG: Redis lock released for ${lockKey}`);
+                }
+            } catch (redisErr) {
+                // Ignore redis cleanup errors
             }
         }
     }
 
     async findByUserId(userId) {
+        console.log('DEBUG: BookingsRepository.findByUserId - Querying for userId:', userId);
         // We might want to join with properties/rooms to get details
         const [rows] = await pool.execute(`
             SELECT b.*, 
             CASE 
                 WHEN b.entity_type = 'Property' THEN p.name 
                 WHEN b.entity_type = 'Room' THEN h.name 
+                WHEN b.entity_type = 'Car' THEN CONCAT(c.make, ' ', c.model)
             END as title,
             CASE 
                 WHEN b.entity_type = 'Property' THEN p.location 
                 WHEN b.entity_type = 'Room' THEN h.location 
+                WHEN b.entity_type = 'Car' THEN 'Local Rental'
             END as location,
             CASE 
                 WHEN b.entity_type = 'Property' THEN p.main_image 
                 WHEN b.entity_type = 'Room' THEN r.image_url 
+                WHEN b.entity_type = 'Car' THEN (SELECT image_url FROM property_images WHERE car_id = c.id LIMIT 1)
             END as main_image
             FROM bookings b
             LEFT JOIN properties p ON b.entity_type = 'Property' AND b.entity_id = p.id
             LEFT JOIN rooms r ON b.entity_type = 'Room' AND b.entity_id = r.id
             LEFT JOIN hotels h ON r.hotel_id = h.id
+            LEFT JOIN rental_cars c ON b.entity_type = 'Car' AND b.entity_id = c.id
             WHERE b.user_id = ? AND b.deleted_at IS NULL
             ORDER BY b.created_at DESC
         `, [userId]);
+        console.log(`DEBUG: BookingsRepository.findByUserId - Found ${rows.length} rows`);
         return rows;
     }
 

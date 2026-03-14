@@ -31,7 +31,7 @@ export const usePopularLocations = () => {
                 if (apiLoc && apiLoc.image) {
                     imageUrl = (apiLoc.image && typeof apiLoc.image === 'string' && apiLoc.image.startsWith('http'))
                         ? apiLoc.image
-                        : `http://206.183.129.220:5000/uploads/${apiLoc.image || 'placeholder.jpg'}`;
+                        : `http://192.168.100.17:5000/uploads/${apiLoc.image || 'placeholder.jpg'}`;
                 }
 
                 return {

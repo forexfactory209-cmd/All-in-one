@@ -7,22 +7,34 @@ class HotelsService {
     mapHotel(hotel) {
         if (!hotel) return null;
 
-        // Optimized mapping for production performance
+        const baseUrl = process.env.IMAGE_BASE_URL || `http://localhost:5000/uploads/`;
+
+        // Helper to format image URLs
+        const formatImg = (url) => {
+            if (!url) return null;
+            if (url.startsWith('http')) return url;
+            return `${baseUrl}${url}`;
+        };
+
+        const mainImg = formatImg(hotel.main_image);
+        const allImages = (hotel.images || []).map(url => formatImg(url)).filter(Boolean);
+
         return {
             ...hotel,
             id: hotel.id.toString(),
             title: hotel.name,
+            main_image: mainImg,
             price_per_night: parseFloat(hotel.base_price) || 0,
             average_rating: parseFloat(hotel.rating) || 0,
             review_count: parseInt(hotel.review_count) || 0,
             city: hotel.location || 'Hargeisa',
             country: 'Somalia',
             photos: [
-                ...(hotel.main_image ? [{ id: 'main', photo_url: hotel.main_image }] : []),
-                ...(hotel.images ? hotel.images.map((url, i) => ({ id: `img-${i}`, photo_url: url })) : [])
+                ...(mainImg ? [{ id: 'main', photo_url: mainImg }] : []),
+                ...allImages.map((url, i) => ({ id: `img-${i}`, photo_url: url }))
             ],
             isVerified: hotel.status === 'Active',
-            isFeatured: hotel.rating >= 4.0,
+            isFeatured: (parseFloat(hotel.rating) || 0) >= 4.0,
             type: hotel.type || 'Hotel'
         };
     }

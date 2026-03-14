@@ -36,7 +36,8 @@ if (process.env.NODE_ENV === 'development') {
 
 // 5. Response Time Tracking & Logging
 app.use(responseTime((req, res, time) => {
-    logger.info(`${req.method} ${req.originalUrl} - ${time.toFixed(2)}ms`);
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    logger.info(`${req.method} ${req.originalUrl} from ${ip} - ${time.toFixed(2)}ms`);
 }));
 
 // 6. Rate Limiting
@@ -68,7 +69,13 @@ app.get('/api/health', (req, res) => {
     return sendResponse(res, 200, true, 'Backend Service is Healthy 🚀', healthData);
 });
 
+// 7.5 Base Welcome Route (For VPS testing)
+app.get('/', (req, res) => {
+    res.send('Welcome to Somstay Backend. It works both when on my local and vps.');
+});
+
 // 8. API Routes
+app.use('/api/v1/auth', require('./modules/users/users.routes')); // Map /auth to users routes for login
 app.use('/api/v1/search', require('./modules/search/search.routes'));
 app.use('/api/v1/availability', require('./modules/search/availability.routes'));
 app.use('/api/v1/properties', require('./modules/properties/properties.routes'));

@@ -4,7 +4,7 @@ import './ImageUploader.css';
 
 const API_BASE = process.env.REACT_APP_API_URL
     ? process.env.REACT_APP_API_URL.replace('/api', '')
-    : 'http://localhost:5000';
+    : 'http://localhost:9050';
 
 const ImageUploader = ({ value, onChange, label = 'Upload Image', multiple = false }) => {
     const [uploading, setUploading] = useState(false);

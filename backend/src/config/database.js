@@ -5,9 +5,32 @@ require('dotenv').config();
 let pool = null;
 
 async function initDatabase() {
-    const localPort = parseInt(process.env.DB_LOCAL_PORT) || 3307;
+    const localPort = parseInt(process.env.DB_LOCAL_PORT) || 3310;
 
-    const tunnelOptions = { autoClose: false }; // CRITICAL: Stop tunnel from closing itself when idle
+    if (process.env.USE_SSH_TUNNEL === 'false') {
+        console.log('🌐 USE_SSH_TUNNEL=false: Connecting to MySQL directly...');
+        pool = mysql.createPool({
+            host: process.env.DB_HOST || '127.0.0.1',
+            port: parseInt(process.env.DB_PORT) || 3306,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+        
+        try {
+            const connection = await pool.getConnection();
+            console.log('✅ MySQL connected directly!');
+            connection.release();
+        } catch (err) {
+            console.error('❌ Direct MySQL connection failed:', err.message);
+            throw err;
+        }
+        return pool;
+    }
+
     const sshOptions = {
         host: process.env.SSH_HOST,
         port: parseInt(process.env.SSH_PORT) || 22,
@@ -25,16 +48,73 @@ async function initDatabase() {
     const serverOptions = { port: localPort };
 
     try {
-        console.log(`🔑 Opening SSH tunnel → ${process.env.SSH_HOST}:22 ...`);
-        await createTunnel(tunnelOptions, serverOptions, sshOptions, forwardOptions);
-        console.log(`✅ SSH tunnel open on local port ${localPort}`);
+        console.log(`🔑 Opening SSH tunnels → ${process.env.SSH_HOST}:22 ...`);
 
-        // Wait a small bit for the tunnel to stabilize before MySQL connects
+        const tunnelOptions = { autoClose: false };
+        const sshOptionsWithAuth = { ...sshOptions };
+
+        // Wrap createTunnel in a Promise and handle events correctly
+        const startTunnel = (serverOptions, sshOptions, forwardOptions) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    // In some versions of tunnel-ssh, createTunnel returns the server instance immediately.
+                    // If it's a callback-based API, it might behave differently.
+                    // We'll wrap it carefully to catch the 'listening' event.
+                    const server = createTunnel(tunnelOptions, serverOptions, sshOptions, forwardOptions);
+                    
+                    if (server && typeof server.on === 'function') {
+                        server.on('listening', () => resolve(server));
+                        server.on('error', (err) => {
+                            if (err.code === 'EADDRINUSE') {
+                                resolve(server);
+                            } else {
+                                reject(err);
+                            }
+                        });
+                    } else if (server && typeof server.then === 'function') {
+                        // If it returns a promise, await it
+                        server.then(resolve).catch(reject);
+                    } else {
+                        // If it returns something else or doesn't have .on, it might be a newer/different API
+                        // Let's fallback to assuming it's already working or use the callback if provided.
+                        console.log('⚠️ Tunnel object has no .on() method, attempting to continue...');
+                        resolve(server);
+                    }
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        };
+
+        const [mysqlTunnel, redisTunnel] = await Promise.all([
+            startTunnel(serverOptions, sshOptionsWithAuth, forwardOptions),
+            startTunnel(
+                { port: 6379 },
+                sshOptionsWithAuth,
+                { srcAddr: '127.0.0.1', srcPort: 6379, dstAddr: '127.0.0.1', dstPort: 6379 }
+            )
+        ]);
+
+        // Only attach error listeners if the objects support it
+        if (mysqlTunnel && typeof mysqlTunnel.on === 'function') {
+            mysqlTunnel.on('error', (err) => console.error('⚠️ MySQL Tunnel Error:', err.message));
+        }
+        if (redisTunnel && typeof redisTunnel.on === 'function') {
+            redisTunnel.on('error', (err) => console.error('⚠️ Redis Tunnel Error:', err.message));
+        }
+
+        console.log(`✅ SSH tunnels open: MySQL (${localPort}) and Redis (6379)`);
+
+        // Wait a small bit for the tunnels to stabilize
         await new Promise(resolve => setTimeout(resolve, 2000));
 
     } catch (err) {
-        console.error('❌ SSH tunnel failed:', err.message);
-        throw err;
+        if (err.code === 'EADDRINUSE') {
+            console.log(`⚠️ SSH tunnel port ${localPort} (or 6379) already in use. Assuming tunnel is already up.`);
+        } else {
+            console.error('❌ SSH tunnel failed:', err.message);
+            throw err;
+        }
     }
 
     pool = mysql.createPool({

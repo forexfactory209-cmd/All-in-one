@@ -13,6 +13,7 @@ export interface Booking {
     image: string;
     entity_type: string;
     entity_id: number;
+    user_id?: string | number;
 }
 
 interface BookingCardProps {

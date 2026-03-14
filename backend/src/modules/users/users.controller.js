@@ -52,6 +52,34 @@ class UsersController {
         }
     }
 
+    async login(req, res) {
+        try {
+            const { email, phone, password } = req.body;
+            
+            let user;
+            if (email) {
+                user = await usersService.getUserByEmail(email);
+            } else if (phone) {
+                user = await usersService.getUserByPhone(phone);
+            }
+
+            if (!user) {
+                return sendError(res, 404, 'User not found');
+            }
+
+            if (user.password !== password) {
+                return sendError(res, 401, 'Invalid credentials');
+            }
+
+            delete user.password;
+            
+            return sendResponse(res, 200, true, `Welcome back, ${user.full_name}!`, user);
+        } catch (error) {
+            console.error('Login error:', error);
+            return sendError(res, 500, 'Internal Server Error');
+        }
+    }
+
     async delete(req, res) {
         try {
             const id = req.params.id;

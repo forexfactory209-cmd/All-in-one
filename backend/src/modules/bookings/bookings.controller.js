@@ -15,26 +15,32 @@ class BookingsController {
 
     async create(req, res) {
         try {
+            console.log('DEBUG: BookingsController.create - Request Body:', JSON.stringify(req.body, null, 2));
             const bookingId = await bookingsService.createBooking(req.body);
             return sendResponse(res, 201, true, 'Booking created successfully', { id: bookingId });
         } catch (error) {
             console.error('Error creating booking:', error);
-            return sendError(res, 500, 'Internal Server Error');
+            if (error.message && (error.message.includes('no longer available') || error.message.includes('currently being booked'))) {
+                return sendError(res, 400, error.message);
+            }
+            return sendError(res, 500, error.message || 'Internal Server Error');
         }
     }
 
     async getMyBookings(req, res) {
         try {
             // userId can come from URL param (/user/:userId) or query string (/my-bookings?userId=1)
-            const userId = req.params.userId || req.query.userId;
+            const userId = req.params.userId || req.query.userId || req.query.user_id;
+            console.log('DEBUG: BookingsController.getMyBookings - Received userId:', userId, 'Params:', req.params, 'Query:', req.query);
             if (!userId) {
                 return sendError(res, 400, 'userId is required');
             }
             const bookings = await bookingsService.getUserBookings(userId);
+            console.log(`DEBUG: BookingsController.getMyBookings - Found ${bookings?.length || 0} bookings for user ${userId}`);
             return sendResponse(res, 200, true, 'Bookings retrieved successfully', bookings);
         } catch (error) {
             console.error('Error fetching bookings:', error);
-            return sendError(res, 500, 'Internal Server Error');
+            return sendError(res, 500, error.message || 'Internal Server Error');
         }
     }
 

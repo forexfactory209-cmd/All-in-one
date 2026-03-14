@@ -1,0 +1,1 @@
+{"success":false,"message":"Table 'hotel_app.cars' doesn't exist","errors":null,"data":null,"timestamp":"2026-03-13T18:01:51.542Z"}

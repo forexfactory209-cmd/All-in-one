@@ -18,12 +18,12 @@ const getHostUrl = () => {
 
 // Base URL - Update this with your actual API URL
 export const API_BASE_URL = __DEV__
-    ? `http://${getHostUrl()}:5000/api/v1`  // Development - points to host machine
-    : 'https://api.vacationrental.com/api/v1';  // Production
+    ? 'http://206.183.129.220:9050/api/v1'
+    : 'http://206.183.129.220:9050/api/v1';
 
 export const NOTIFICATION_BASE_URL = __DEV__
     ? `http://${getHostUrl()}:5001/api/v1`
-    : 'https://notifications.vacationrental.com/api/v1';
+    : 'http://206.183.129.220:9071/api/v1';
 
 // API Timeout
 export const API_TIMEOUT = 30000; // 30 seconds

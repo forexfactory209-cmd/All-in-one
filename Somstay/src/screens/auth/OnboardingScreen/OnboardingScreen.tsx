@@ -66,7 +66,7 @@ export const OnboardingScreen: React.FC = () => {
     };
 
     const handleSkip = () => {
-        router.replace('/login');
+        router.replace('/(tabs)');
     };
 
     const onScroll = (event: any) => {

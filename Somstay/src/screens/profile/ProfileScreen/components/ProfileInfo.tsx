@@ -3,16 +3,26 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '@/src/theme';
 
-import { useTheme } from '@/src/context/AppContext';
+import { useTheme, useApp } from '@/src/context/AppContext';
+
+import { useRouter } from 'expo-router';
 
 export const ProfileInfo: React.FC = () => {
+    const { user } = useApp();
     const theme = useTheme();
+    const router = useRouter();
+
+    if (!user) {
+        return null; // Don't render anything if no user, overlay handles it
+    }
+
+    const avatarUri = user?.profile_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?bg=white&auto=format&fit=crop&w=200&q=80';
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.avatarContainer}>
                 <Image
-                    source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?bg=white&auto=format&fit=crop&w=200&q=80' }}
+                    source={{ uri: avatarUri }}
                     style={[styles.avatar, { borderColor: theme.border }]}
                 />
                 <View style={[styles.verifiedBadge, { backgroundColor: theme.success, borderColor: theme.card }]}>
@@ -20,11 +30,15 @@ export const ProfileInfo: React.FC = () => {
                 </View>
             </View>
 
-            <Text style={[styles.name, { color: theme.text }]}>Hassan Ali</Text>
+            <Text style={[styles.name, { color: theme.text }]}>{user.full_name}</Text>
 
             <View style={styles.verifiedRow}>
-                <Ionicons name="shield-checkmark-outline" size={14} color={theme.primary} />
-                <Text style={[styles.verifiedText, { color: theme.primary }]}>Verified Guest</Text>
+                <Ionicons name="mail-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.verifiedText, { color: theme.textSecondary, fontWeight: 'normal' }]}>{user.email}</Text>
+            </View>
+            <View style={styles.verifiedRow}>
+                <Ionicons name="call-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.verifiedText, { color: theme.textSecondary, fontWeight: 'normal' }]}>{user.phone}</Text>
             </View>
 
             <TouchableOpacity style={[styles.editButton, { borderColor: theme.primary, backgroundColor: theme.primary + '10' }]}>
@@ -84,5 +98,35 @@ const styles = StyleSheet.create({
     editButtonText: {
         fontSize: 16,
         fontWeight: '700',
+    },
+    avatarPlaceholder: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    subtext: {
+        fontSize: 14,
+        marginTop: 4,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 8,
+    },
+    authButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 24,
+        borderRadius: borderRadius.full,
+    },
+    authButtonText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#FFFFFF',
+        textAlign: 'center',
     },
 });

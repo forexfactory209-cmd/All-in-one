@@ -1,26 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { spacing, borderRadius } from '@/src/theme';
-
-import { useTheme } from '@/src/context/AppContext';
+import { useTheme, useApp } from '@/src/context/AppContext';
 
 export const ProfileStats: React.FC = () => {
+    const { user } = useApp();
     const theme = useTheme();
+
+    if (!user) return null;
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
-                <Text style={[styles.statValue, { color: theme.primary }]}>12</Text>
+                <Text style={[styles.statValue, { color: theme.primary }]}>0</Text>
                 <Text style={[styles.statLabel, { color: theme.textSecondary }]}>REVIEWS</Text>
             </View>
 
             <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
-                <Text style={[styles.statValue, { color: theme.primary }]}>45</Text>
+                <Text style={[styles.statValue, { color: theme.primary }]}>0</Text>
                 <Text style={[styles.statLabel, { color: theme.textSecondary }]}>FAVORITES</Text>
             </View>
 
             <View style={[styles.statCard, { backgroundColor: theme.surfaceSecondary }]}>
-                <Text style={[styles.statValue, { color: theme.primary }]}>8</Text>
+                <Text style={[styles.statValue, { color: theme.primary }]}>0</Text>
                 <Text style={[styles.statLabel, { color: theme.textSecondary }]}>BOOKINGS</Text>
             </View>
         </View>

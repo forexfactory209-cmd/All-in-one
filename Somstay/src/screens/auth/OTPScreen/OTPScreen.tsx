@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './OTPScreen.styles';
 import { colors } from '@/src/theme';
+import { useApp } from '@/src/context/AppContext';
 
 export const OTPScreen: React.FC = () => {
     const router = useRouter();
@@ -27,8 +28,27 @@ export const OTPScreen: React.FC = () => {
         }
     };
 
+    const { setUser, returnUrl, setReturnUrl } = useApp();
+
     const handleVerify = () => {
-        router.replace('/complete-profile');
+        // Mock successful verification
+        const mockUser = {
+            id: '1',
+            full_name: 'Test User',
+            email: 'test@example.com',
+            phone: '+252630000000',
+            profile_image: null
+        };
+        
+        setUser(mockUser);
+
+        if (returnUrl) {
+            const url = returnUrl;
+            setReturnUrl(null); // Clear after use
+            router.replace(url as any);
+        } else {
+            router.replace('/complete-profile');
+        }
     };
 
     return (

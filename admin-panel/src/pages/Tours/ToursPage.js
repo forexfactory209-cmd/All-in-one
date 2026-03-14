@@ -4,7 +4,7 @@ import { Map, Search, Plus, Edit, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import './ToursPage.css';
 
-const API_URL = 'http://localhost:5000/api/v1/tours';
+const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:9050/api'}/v1/tours`;
 
 const ToursPage = () => {
     const [tours, setTours] = useState([]);

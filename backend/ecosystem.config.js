@@ -6,10 +6,18 @@ module.exports = {
             instances: 'max',
             exec_mode: 'cluster',
             env: {
-                NODE_ENV: 'development',
-            },
-            env_production: {
                 NODE_ENV: 'production',
+                PORT: 9050,
+                USE_SSH_TUNNEL: 'false',
+                DB_HOST: '127.0.0.1',
+                DB_PORT: 3306,
+                DB_USER: 'duc_user',
+                DB_PASS: 'Ducaysane@2026!System',
+                DB_NAME: 'hotel_app',
+                REDIS_HOST: '127.0.0.1',
+                REDIS_PORT: 6379,
+                JWT_SECRET: 'somstay_super_secret_key_2026',
+                JWT_EXPIRES_IN: '7d'
             },
             watch: false,
             max_memory_restart: '1G',

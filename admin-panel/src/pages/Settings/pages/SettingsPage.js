@@ -170,7 +170,7 @@ const SystemInfoPanel = () => {
         const check = async () => {
             try {
                 const res = await fetch(
-                    (process.env.REACT_APP_API_URL || 'http://localhost:5000/api') + '/health'
+                    (process.env.REACT_APP_API_URL || 'http://localhost:9050/api') + '/health'
                 );
                 const data = await res.json();
                 if (data.success) {

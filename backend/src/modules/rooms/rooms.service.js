@@ -4,18 +4,31 @@ const cache = require('../../utils/cache');
 class RoomsService {
     mapRoom(room) {
         if (!room) return null;
+
+        const baseUrl = process.env.IMAGE_BASE_URL || `http://localhost:5000/uploads/`;
+
+        // Helper to format image URLs
+        const formatImg = (url) => {
+            if (!url) return null;
+            if (url.startsWith('http')) return url;
+            return `${baseUrl}${url}`;
+        };
+
+        const photos = room.images && room.images.length > 0
+            ? room.images.map((url, i) => ({ id: `img-${i}`, photo_url: formatImg(url) }))
+            : [{ id: 'main', photo_url: formatImg(room.image_url) || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811' }];
+
         return {
             ...room,
             id: (room.id || '').toString(),
             hotel_id: (room.hotel_id || '').toString(),
             title: room.title || `${room.type || 'Standard'} Room`,
             hotel_name: room.hotel_name || '',
+            image_url: formatImg(room.image_url),
             price_per_night: parseFloat(room.price) || 0,
             city: room.hotel_location || '',
             country: 'Somalia',
-            photos: room.images && room.images.length > 0
-                ? room.images.map((url, i) => ({ id: `img-${i}`, photo_url: url }))
-                : [{ id: 'main', photo_url: room.image_url || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811' }],
+            photos,
             average_rating: 4.5,
             isVerified: true,
             type: 'room'

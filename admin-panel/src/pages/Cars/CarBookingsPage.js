@@ -4,7 +4,7 @@ import { Calendar, Search, Car, Eye, User, CreditCard } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import './CarBookingsPage.css';
 
-const API_URL = 'http://localhost:5000/api/v1/car-bookings';
+const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:9050/api'}/v1/car-bookings`;
 
 const CarBookingsPage = () => {
     const [bookings, setBookings] = useState([]);

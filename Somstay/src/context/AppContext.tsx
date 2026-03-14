@@ -18,13 +18,25 @@ export interface UserLocation {
     city?: string;
 }
 
+export interface User {
+    id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+    profile_image: string | null;
+}
+
 interface AppContextValue {
     settings: AppSettings;
     setDarkMode: (v: boolean) => void;
     setLanguage: (v: Language) => void;
     setLocationEnabled: (v: boolean) => Promise<void>;
     userLocation: UserLocation | null;
+    user: User | null;
+    setUser: (u: User | null) => void;
     t: (key: string) => string;
+    returnUrl: string | null;
+    setReturnUrl: (url: string | null) => void;
 }
 
 // ─── Translations ─────────────────────────────────────────────────────────────
@@ -419,7 +431,11 @@ const AppContext = createContext<AppContextValue>({
     setLanguage: () => { },
     setLocationEnabled: async () => { },
     userLocation: null,
+    user: null,
+    setUser: () => { },
     t: (key) => key,
+    returnUrl: null,
+    setReturnUrl: () => { },
 });
 
 const STORAGE_KEY = '@somstay_app_settings';
@@ -432,6 +448,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         locationEnabled: false,
     });
     const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [returnUrl, setReturnUrl] = useState<string | null>(null);
 
     // Load persisted settings on mount
     useEffect(() => {
@@ -505,7 +523,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [settings.language]);
 
     return (
-        <AppContext.Provider value={{ settings, setDarkMode, setLanguage, setLocationEnabled, userLocation, t }}>
+        <AppContext.Provider value={{ settings, setDarkMode, setLanguage, setLocationEnabled, userLocation, user, setUser, t, returnUrl, setReturnUrl }}>
             {children}
         </AppContext.Provider>
     );

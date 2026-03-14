@@ -29,7 +29,7 @@ async function bootstrap() {
         // Routes
         app.use('/api/v1/notifications', require('./routes/notificationRoutes'));
 
-        app.listen(PORT, () => {
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`🔔 Notification Service is running on port ${PORT}`);
         });
     } catch (err) {

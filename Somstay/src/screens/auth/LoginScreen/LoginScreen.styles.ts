@@ -89,20 +89,12 @@ export const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#FFFFFF',
     },
-    passwordLoginLink: {
-        alignSelf: 'center',
-    },
-    passwordLoginText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.primary,
-    },
     footer: {
-        position: 'absolute',
         bottom: 30,
         left: 0,
         right: 0,
         paddingHorizontal: spacing.xl,
+        marginTop: 20,
     },
     footerText: {
         fontSize: 12,
@@ -114,5 +106,45 @@ export const styles = StyleSheet.create({
         color: '#6B7280',
         textDecorationLine: 'underline',
         fontWeight: '600',
+    },
+    tabsContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#F0F4F5',
+        borderRadius: 12,
+        padding: 4,
+        marginBottom: 24,
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 8,
+    },
+    activeTab: {
+        backgroundColor: colors.white,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    activeTabText: {
+        color: colors.dark,
+    },
+    emailInputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 58,
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
+        borderRadius: 16,
+        overflow: 'hidden',
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
     },
 });
